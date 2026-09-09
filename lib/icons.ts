@@ -21,6 +21,7 @@ export {
   HeartPulse,
   Home,
   Landmark,
+  Lightbulb,
   LineChart,
   Minus,
   Plane,
