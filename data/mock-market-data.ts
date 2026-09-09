@@ -38,7 +38,7 @@ export interface ActivityItem {
 }
 
 const DAY_SECONDS = 86_400
-const today = Math.floor(new Date("2026-09-09T00:00:00Z").getTime() / 1000)
+export const today = Math.floor(new Date("2026-09-09T00:00:00Z").getTime() / 1000)
 
 /** Deterministic seeded PRNG (mulberry32) so prototype data is stable across renders. */
 function seededRandom(seed: number) {

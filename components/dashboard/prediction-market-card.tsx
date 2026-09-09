@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { BannerCard } from "@/components/dashboard/banner-card"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 
 /**
@@ -16,11 +17,9 @@ export function PredictionMarketCard() {
   const yesPercent = 52
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+    <BannerCard accent="blue">
       <div className="flex items-center justify-between">
-        <span className="type-label uppercase tracking-wide text-muted-foreground">
-          Prediction market
-        </span>
+        <span className="type-label uppercase tracking-wide text-focus">Prediction market</span>
         <Badge variant="outline" className="border-positive/30 text-positive">
           Live
         </Badge>
@@ -38,17 +37,19 @@ export function PredictionMarketCard() {
       </div>
 
       {predictionsEnabled ? (
-        <Button size="sm">Trade this market</Button>
+        <Button size="lg" className="h-11! w-full">
+          Trade this market
+        </Button>
       ) : (
         <div className="flex flex-col gap-2 rounded-md bg-muted p-3">
           <p className="type-label text-muted-foreground">
             We noticed you were curious about prediction markets.
           </p>
-          <Button size="sm" onClick={enablePredictions}>
+          <Button size="lg" className="h-11! w-full" onClick={enablePredictions}>
             Enable prediction markets
           </Button>
         </div>
       )}
-    </div>
+    </BannerCard>
   )
 }

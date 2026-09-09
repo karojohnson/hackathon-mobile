@@ -13,9 +13,18 @@ export interface OrderSuccessProps {
   quantity: number
   estimatedCost: number
   onDone: () => void
+  /** Singular unit noun for the quantity — "share" (default) or "contract". */
+  unitLabel?: string
 }
 
-export function OrderSuccess({ symbol, name, quantity, estimatedCost, onDone }: OrderSuccessProps) {
+export function OrderSuccess({
+  symbol,
+  name,
+  quantity,
+  estimatedCost,
+  onDone,
+  unitLabel = "share",
+}: OrderSuccessProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
       <motion.div
@@ -29,8 +38,8 @@ export function OrderSuccess({ symbol, name, quantity, estimatedCost, onDone }: 
       <div className="flex flex-col gap-1.5">
         <h1 className="type-title text-foreground">Order placed</h1>
         <p className="type-body text-muted-foreground">
-          You bought {quantity} {quantity === 1 ? "share" : "shares"} of {symbol} · {name} for{" "}
-          {formatCurrency(estimatedCost)}.
+          You bought {quantity} {quantity === 1 ? unitLabel : `${unitLabel}s`} of {symbol} ·{" "}
+          {name} for {formatCurrency(estimatedCost)}.
         </p>
         <p className="type-label text-muted-foreground">That&apos;s your first trade. Nicely done.</p>
       </div>
