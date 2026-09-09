@@ -38,6 +38,14 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    /* tastytrade-mapped semantic extensions — see docs/token-map.md */
+    --color-surface: var(--surface);
+    --color-elevated-surface: var(--elevated-surface);
+    --color-positive: var(--positive);
+    --color-negative: var(--negative);
+    --color-warning: var(--warning);
+    --color-focus: var(--focus);
+    --color-text-secondary: var(--text-secondary);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -47,73 +55,127 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Token bridge — values below are copied from the built output of
+ * tastyworks-ui-design-tokens (build/*-theme-colors.css, corner-radius.css,
+ * border-width.css). Each var cites its source token so it can be re-synced
+ * later. See docs/token-map.md for the full mapping table and rationale.
+ *
+ * :root = light theme, .dark = dark theme (tastytrade "body.dark" convention
+ * adapted to next-themes' .dark class convention).
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    /* color-background-general-primary-background */
+    --background: #f7f5f3;
+    /* color-text-general-primary-text */
+    --foreground: #1e120b;
+    /* color-background-general-primary-surface */
+    --surface: #ffffff;
+    --card: #ffffff;
+    --card-foreground: #1e120b;
+    --popover: #ffffff;
+    --popover-foreground: #1e120b;
+    /* color-background-general-secondary-surface */
+    --elevated-surface: #eeeae7;
+    --secondary: #eeeae7;
+    --secondary-foreground: #1e120b;
+    --muted: #eeeae7;
+    /* color-text-general-secondary-text */
+    --muted-foreground: #6e645e;
+    --text-secondary: #6e645e;
+    /* color-border-general-focused-state (used sparingly, per "limited accent") */
+    --accent: #eeeae7;
+    --accent-foreground: #1e120b;
+    /* No official "brand primary button" token exists (see design-foundation.md) —
+       primary action uses foreground-as-fill, background-as-text (ink button). */
+    --primary: #1e120b;
+    --primary-foreground: #f7f5f3;
+    /* color-text-general-negative-tick */
+    --destructive: #d10a2c;
+    /* color-border-general-default */
+    --border: #b5aba4;
+    /* color-border-input-field-text-input-border */
+    --input: #e9e4e1;
+    /* color-border-general-focused-state */
+    --ring: #0070b0;
+    --focus: #0070b0;
+    /* color-text-general-positive-tick */
+    --positive: #008060;
+    /* color-text-general-negative-tick */
+    --negative: #d10a2c;
+    /* color-text-alerts-warning */
+    --warning: #946a00;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    /* large-border-radius */
+    --radius: 8px;
+    --sidebar: #eeeae7;
+    --sidebar-foreground: #1e120b;
+    --sidebar-primary: #1e120b;
+    --sidebar-primary-foreground: #f7f5f3;
+    --sidebar-accent: #eeeae7;
+    --sidebar-accent-foreground: #1e120b;
+    --sidebar-border: #b5aba4;
+    --sidebar-ring: #0070b0;
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    /* color-background-general-primary-background */
+    --background: #000000;
+    /* color-text-general-primary-text */
+    --foreground: #ffffff;
+    /* color-background-general-primary-surface */
+    --surface: #141414;
+    --card: #141414;
+    --card-foreground: #ffffff;
+    /* color-background-general-secondary-surface */
+    --popover: #1f1f1f;
+    --popover-foreground: #ffffff;
+    --elevated-surface: #1f1f1f;
+    --secondary: #1f1f1f;
+    --secondary-foreground: #ffffff;
+    /* color-background-general-tertiary-surface */
+    --muted: #262626;
+    /* color-text-general-secondary-text */
+    --muted-foreground: #afafaa;
+    --text-secondary: #afafaa;
+    --accent: #262626;
+    --accent-foreground: #ffffff;
+    /* No official "brand primary button" token exists (see design-foundation.md) —
+       primary action uses foreground-as-fill, background-as-text (ink button). */
+    --primary: #ffffff;
+    --primary-foreground: #000000;
+    /* color-text-general-negative-tick */
+    --destructive: #fc4138;
+    /* color-border-general-default */
+    --border: #444444;
+    /* color-border-input-field-text-input-border */
+    --input: #444444;
+    /* color-border-general-focused-state */
+    --ring: #34a5eb;
+    --focus: #34a5eb;
+    /* color-text-general-positive-tick */
+    --positive: #2db26a;
+    /* color-text-general-negative-tick */
+    --negative: #fc4138;
+    /* color-text-alerts-warning */
+    --warning: #ffc800;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --sidebar: #141414;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ffffff;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #262626;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #444444;
+    --sidebar-ring: #34a5eb;
 }
 
 @layer base {
@@ -126,4 +188,80 @@
   html {
     @apply font-sans;
     }
+}
+
+/*
+ * Typography scale — mapped from build/typography.css
+ * (typography-v2-{size}-{weight}, Inter, weights 400/525/650).
+ * Use for hierarchy before reaching for containers (visual principle #10).
+ */
+@layer utilities {
+  .type-label {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 525;
+    letter-spacing: 0;
+  }
+  .type-body {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .type-body-strong {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 650;
+  }
+  .type-title {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 650;
+  }
+  .type-hero {
+    font-size: 40px;
+    line-height: 44px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .type-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/*
+ * Glass / elevated material layer (section 11) — restrained translucency for
+ * functional layers only: nav, sheets, floating controls, overlays. Primary
+ * financial content stays readable directly on the canvas — do not apply
+ * these to ordinary cards.
+ */
+/*
+ * Built from Tailwind's own backdrop-blur/backdrop-saturate utilities via
+ * @apply rather than hand-written `backdrop-filter` — a plain custom
+ * `backdrop-filter` declaration here was silently dropped by the build,
+ * while Tailwind's generated utility classes render correctly.
+ */
+@layer utilities {
+  .glass-nav {
+    @apply backdrop-blur-xl backdrop-saturate-150;
+    background: color-mix(in oklch, var(--surface) 72%, transparent);
+    border-top: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+  }
+  .glass-sheet {
+    @apply backdrop-blur-2xl backdrop-saturate-150;
+    background: color-mix(in oklch, var(--elevated-surface) 82%, transparent);
+    border: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
+  }
+  .glass-control {
+    @apply backdrop-blur-lg backdrop-saturate-150;
+    background: color-mix(in oklch, var(--elevated-surface) 65%, transparent);
+    border: 1px solid color-mix(in oklch, var(--border) 55%, transparent);
+  }
+  .glass-floating {
+    @apply backdrop-blur-xl backdrop-saturate-150;
+    background: color-mix(in oklch, var(--elevated-surface) 78%, transparent);
+    border: 1px solid color-mix(in oklch, var(--border) 45%, transparent);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
 }
