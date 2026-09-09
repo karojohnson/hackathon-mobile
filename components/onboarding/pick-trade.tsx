@@ -4,6 +4,7 @@ import { cn } from "cn"
 
 import { Badge } from "@/components/ui/badge"
 import { FinancialChart } from "@/components/finance/financial-chart"
+import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { formatCurrency, formatPercent } from "@/lib/format"
 import { ChevronRight, Wallet } from "@/lib/icons"
 import { portfolio, watchlist as allQuotes } from "@/data/mock-market-data"
@@ -74,6 +75,7 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                   <div className="flex items-center gap-3">
+                    <TickerAvatar symbol={quote.symbol} size={36} />
                     <div className="flex min-w-0 flex-1 flex-col">
                       <span className="type-body-strong text-foreground">{quote.symbol}</span>
                       <span className="type-label truncate text-muted-foreground">{quote.name}</span>
