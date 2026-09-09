@@ -2,6 +2,8 @@ import localFont from "next/font/local"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { OnboardingProvider } from "@/components/providers/onboarding-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils";
 
 // tastytrade brand typeface (see docs/token-map.md) — variable weight, one file.
@@ -30,7 +32,11 @@ export default function RootLayout({
       className={cn("antialiased", robotoMono.variable, "font-sans", inter.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <OnboardingProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </OnboardingProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

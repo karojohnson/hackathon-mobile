@@ -6,6 +6,7 @@
  * and swap for an official one later: `grep -r "from \"@/lib/icons\""`.
  */
 export {
+  AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
   Bell,
