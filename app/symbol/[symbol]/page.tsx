@@ -219,9 +219,9 @@ export default function SymbolPage() {
         >
           {orderSide === "buy" ? "Buy" : "Sell"}{" "}
           {inputMode === "dollars"
-            ? formatCurrency(dollarAmt)
-            : `${shareQty} ${shareQty === 1 ? "share" : "shares"}`}{" "}
-          of {quote.symbol}
+            ? `${formatCurrency(dollarAmt)} worth of`
+            : `${shareQty} ${shareQty === 1 ? "share" : "shares"} of`}{" "}
+          {quote.symbol}
         </Button>
         <p className="type-label text-center text-muted-foreground">
           This is a prototype — no real money moves.
