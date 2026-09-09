@@ -31,17 +31,16 @@ function InterestChip({
       type="button"
       onClick={onToggle}
       className={cn(
-        "flex flex-col gap-2 rounded-xl border px-4 py-3.5 text-left transition-colors",
+        "flex items-center gap-2.5 rounded-xl border px-4 py-3 text-left transition-colors",
         isSelected
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-surface text-foreground hover:bg-muted"
       )}
     >
-      <Icon className={cn("size-5", isSelected ? "text-primary-foreground" : "text-muted-foreground")} />
+      <Icon
+        className={cn("size-5 shrink-0", isSelected ? "text-primary-foreground" : "text-muted-foreground")}
+      />
       <span className="type-body-strong">{interest.label}</span>
-      <span className={cn("type-label", isSelected ? "text-primary-foreground/70" : "text-muted-foreground")}>
-        {interest.blurb}
-      </span>
     </button>
   )
 }
