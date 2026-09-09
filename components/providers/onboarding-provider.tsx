@@ -4,12 +4,31 @@ import * as React from "react"
 
 import { watchlist as allQuotes, type Position } from "@/data/mock-market-data"
 
+export type ProductPreference = "stocks" | "options" | "etfs" | "predictions"
+
+export interface PreferenceWeights {
+  stocks: number
+  options: number
+  etfs: number
+  predictions: number
+}
+
+export interface TodoFlags {
+  fundedNeverTraded: boolean
+  futuresNotEnabled: boolean
+  twoFactorNotEnabled: boolean
+  watchlistSkipped: boolean
+}
+
 export interface OnboardingState {
   interests: string[]
   watchlist: string[]
   positions: Position[]
   lastTradedSymbol: string | null
   quizDismissed: boolean
+  preferenceWeights: PreferenceWeights
+  todos: TodoFlags
+  predictionsEnabled: boolean
 }
 
 interface OnboardingContextValue extends OnboardingState {
@@ -17,9 +36,15 @@ interface OnboardingContextValue extends OnboardingState {
   addToWatchlist: (symbols: string[]) => void
   dismissQuiz: () => void
   placeTrade: (symbol: string, quantity: number) => void
+  setPreferenceWeights: (weights: PreferenceWeights) => void
+  setTodoFlag: (key: keyof TodoFlags, value: boolean) => void
+  enablePredictions: () => void
+  dominantPreference: ProductPreference
 }
 
 const OnboardingContext = React.createContext<OnboardingContextValue | null>(null)
+
+const STORAGE_KEY = "hackathon-onboarding-state-v1"
 
 const initialState: OnboardingState = {
   interests: [],
@@ -27,10 +52,60 @@ const initialState: OnboardingState = {
   positions: [],
   lastTradedSymbol: null,
   quizDismissed: false,
+  preferenceWeights: { stocks: 70, options: 15, etfs: 10, predictions: 5 },
+  todos: {
+    fundedNeverTraded: false,
+    futuresNotEnabled: false,
+    twoFactorNotEnabled: false,
+    watchlistSkipped: false,
+  },
+  predictionsEnabled: false,
+}
+
+function dominantOf(weights: PreferenceWeights): ProductPreference {
+  let best: ProductPreference = "stocks"
+  let bestValue = -Infinity
+  for (const key of Object.keys(weights) as ProductPreference[]) {
+    if (weights[key] > bestValue) {
+      bestValue = weights[key]
+      best = key
+    }
+  }
+  return best
 }
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<OnboardingState>(initialState)
+
+  // Demo mechanic requires state to survive a real browser reload (the
+  // "change the numbers, reload the app" walkthrough) — read once on mount
+  // (client-only, after hydration, to avoid an SSR mismatch), then keep
+  // every change synced back to localStorage.
+  React.useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync read of localStorage on mount, not a derived-state loop
+      if (raw) setState((prev) => ({ ...prev, ...JSON.parse(raw) }))
+    } catch {
+      // ignore malformed/unavailable storage — falls back to defaults
+    }
+  }, [])
+
+  // Skip the very first write: on mount this effect would otherwise fire
+  // with the still-default `state` (the read-effect's merge above hasn't
+  // caused a re-render yet) and clobber whatever was actually saved.
+  const skippedFirstWrite = React.useRef(false)
+  React.useEffect(() => {
+    if (!skippedFirstWrite.current) {
+      skippedFirstWrite.current = true
+      return
+    }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    } catch {
+      // ignore write failures (e.g. private browsing)
+    }
+  }, [state])
 
   const setInterests = React.useCallback((ids: string[]) => {
     setState((prev) => ({ ...prev, interests: ids }))
@@ -67,9 +142,31 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }))
   }, [])
 
+  const setPreferenceWeights = React.useCallback((weights: PreferenceWeights) => {
+    setState((prev) => ({ ...prev, preferenceWeights: weights }))
+  }, [])
+
+  const setTodoFlag = React.useCallback((key: keyof TodoFlags, value: boolean) => {
+    setState((prev) => ({ ...prev, todos: { ...prev.todos, [key]: value } }))
+  }, [])
+
+  const enablePredictions = React.useCallback(() => {
+    setState((prev) => ({ ...prev, predictionsEnabled: true }))
+  }, [])
+
   const value = React.useMemo<OnboardingContextValue>(
-    () => ({ ...state, setInterests, addToWatchlist, dismissQuiz, placeTrade }),
-    [state, setInterests, addToWatchlist, dismissQuiz, placeTrade]
+    () => ({
+      ...state,
+      setInterests,
+      addToWatchlist,
+      dismissQuiz,
+      placeTrade,
+      setPreferenceWeights,
+      setTodoFlag,
+      enablePredictions,
+      dominantPreference: dominantOf(state.preferenceWeights),
+    }),
+    [state, setInterests, addToWatchlist, dismissQuiz, placeTrade, setPreferenceWeights, setTodoFlag, enablePredictions]
   )
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>

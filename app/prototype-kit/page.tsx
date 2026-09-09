@@ -32,9 +32,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function PrototypeKitPage() {
   return (
-    <div className="flex min-h-dvh w-full justify-center bg-muted py-10">
-      {/* Neutral 390px mobile viewport frame */}
-      <div className="relative flex h-[844px] w-[390px] flex-col overflow-hidden rounded-[2.5rem] border border-border bg-background shadow-2xl">
+    <>
         <div className="flex-1 space-y-8 overflow-y-auto px-4 pt-8 pb-28">
           <header className="flex flex-col gap-1">
             <h1 className="type-title text-foreground">prototype-kit</h1>
@@ -211,7 +209,6 @@ export default function PrototypeKitPage() {
         </button>
 
         <BottomNav className="absolute inset-x-0 bottom-0" />
-      </div>
-    </div>
+    </>
   )
 }

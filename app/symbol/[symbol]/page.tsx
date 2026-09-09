@@ -33,7 +33,7 @@ export default function SymbolPage() {
 
   if (!quote) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="flex min-h-full flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="type-body text-muted-foreground">We couldn&apos;t find {symbol}.</p>
         <Link href="/" className="type-body-strong text-foreground underline">
           Back to dashboard
@@ -47,7 +47,7 @@ export default function SymbolPage() {
 
   if (step === "success") {
     return (
-      <div className="flex min-h-dvh flex-col">
+      <div className="flex min-h-full flex-col">
         <OrderSuccess
           symbol={quote.symbol}
           name={quote.name}
@@ -60,7 +60,7 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-8 pb-8">
+    <div className="flex min-h-full flex-col gap-6 px-4 pt-8 pb-8">
       <Link href="/" className="type-label flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-3.5 rotate-180" />
         Dashboard

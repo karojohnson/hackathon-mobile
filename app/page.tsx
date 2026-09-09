@@ -7,6 +7,8 @@ import { BottomNav } from "@/components/mobile/bottom-nav"
 import { EmptyState } from "@/components/mobile/empty-state"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
+import { TodoList } from "@/components/dashboard/todo-list"
+import { PreferenceSpotlight } from "@/components/dashboard/preference-spotlight"
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 import { watchlist as allQuotes, portfolio } from "@/data/mock-market-data"
@@ -14,14 +16,14 @@ import { formatCurrency, formatPercent } from "@/lib/format"
 import { LineChart } from "@/lib/icons"
 
 export default function Page() {
-  const { watchlist, positions, lastTradedSymbol, quizDismissed } = useOnboarding()
+  const { watchlist, positions, lastTradedSymbol, quizDismissed, todos, dominantPreference } = useOnboarding()
 
   const watchedQuotes = allQuotes.filter((q) => watchlist.includes(q.symbol))
   const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0)
   const netWorth = portfolio.buyingPower + positionsValue
 
   return (
-    <div className="relative flex min-h-dvh flex-col">
+    <div className="relative flex min-h-full flex-col">
       {!quizDismissed && <OnboardingOverlay />}
 
       <div
@@ -42,6 +44,10 @@ export default function Page() {
             {formatCurrency(portfolio.buyingPower)} cash · {formatCurrency(positionsValue)} invested
           </span>
         </section>
+
+        <TodoList todos={todos} />
+
+        <PreferenceSpotlight preference={dominantPreference} />
 
         {/*
           Watchlist before positions, deliberately — a watchlist can grow to
@@ -105,12 +111,20 @@ export default function Page() {
 
         {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
 
-        <Link
-          href="/concepts"
-          className="type-label self-center text-muted-foreground underline-offset-2 hover:underline"
-        >
-          View dashboard concepts (exploratory)
-        </Link>
+        <div className="flex justify-center gap-4">
+          <Link
+            href="/concepts"
+            className="type-label text-muted-foreground underline-offset-2 hover:underline"
+          >
+            Dashboard concepts
+          </Link>
+          <Link
+            href="/demo"
+            className="type-label text-muted-foreground underline-offset-2 hover:underline"
+          >
+            Demo controls
+          </Link>
+        </div>
       </div>
 
       <BottomNav className="fixed inset-x-0 bottom-0" />

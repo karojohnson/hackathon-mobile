@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { InterestQuiz } from "@/components/onboarding/interest-quiz"
 import { CuratedList } from "@/components/onboarding/curated-list"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
-import { symbolsForInterests } from "@/data/interests"
+import { curateWatchlist, symbolsForInterests } from "@/data/interests"
 import { transitions } from "@/lib/motion"
 
 type Step = "quiz" | "list"
@@ -18,7 +18,7 @@ export function OnboardingOverlay() {
 
   if (quizDismissed) return null
 
-  const candidateSymbols = symbolsForInterests(pickedInterests)
+  const candidateSymbols = curateWatchlist(symbolsForInterests(pickedInterests))
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
