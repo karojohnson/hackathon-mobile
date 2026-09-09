@@ -6,6 +6,7 @@ import { cn } from "cn"
 import { BottomNav } from "@/components/mobile/bottom-nav"
 import { EmptyState } from "@/components/mobile/empty-state"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
+import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { AccountBar } from "@/components/dashboard/account-bar"
 import { QuoteChipRow } from "@/components/dashboard/quote-chip-row"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
@@ -30,7 +31,7 @@ export default function Page() {
 
       <div
         className={cn(
-          "flex flex-1 flex-col gap-8 px-4 pt-12 pb-28 transition-all duration-500",
+          "flex flex-1 flex-col gap-8 px-4 pt-8 pb-28 transition-all duration-500",
           !quizDismissed && "pointer-events-none scale-[0.98] opacity-60 blur-md"
         )}
       >
@@ -90,6 +91,7 @@ export default function Page() {
                   key={position.symbol}
                   className="flex items-center gap-3 border-b border-border py-3 last:border-b-0"
                 >
+                  <TickerAvatar symbol={position.symbol} size={32} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="type-body-strong text-foreground">{position.symbol}</span>
                     <span className="type-label truncate text-muted-foreground">

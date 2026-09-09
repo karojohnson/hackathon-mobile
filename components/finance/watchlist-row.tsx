@@ -1,6 +1,7 @@
 import { cn } from "cn"
 
 import { FinancialChart } from "@/components/finance/financial-chart"
+import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { formatPercent } from "@/lib/format"
 import type { Quote } from "@/data/mock-market-data"
 
@@ -18,6 +19,7 @@ export function WatchlistRow({ quote, className }: WatchlistRowProps) {
 
   return (
     <div className={cn("flex items-center gap-3 border-b border-border py-3 last:border-b-0", className)}>
+      <TickerAvatar symbol={quote.symbol} size={32} />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="type-body-strong text-foreground">{quote.symbol}</span>
         <span className="type-label truncate text-muted-foreground">{quote.name}</span>

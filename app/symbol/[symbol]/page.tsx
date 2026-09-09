@@ -8,6 +8,7 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FinancialChart } from "@/components/finance/financial-chart"
+import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { QuoteStatsGrid } from "@/components/trade/quote-stats-grid"
 import { OrderSuccess } from "@/components/trade/order-success"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
@@ -84,19 +85,22 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-5 px-4 pt-12 pb-8">
+    <div className="flex min-h-full flex-col gap-5 px-4 pt-8 pb-8">
       <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-4 rotate-180" />
         Back
       </Link>
 
-      <div className="flex flex-col gap-1">
-        <span className="type-label text-muted-foreground">{quote.name}</span>
-        <div className="flex items-baseline gap-2">
-          <h1 className="type-hero text-foreground">${quote.price.toFixed(2)}</h1>
-          <span className={cn("type-body-strong", trend === "positive" ? "text-positive" : "text-negative")}>
-            {formatPercent(quote.changePercent)}
-          </span>
+      <div className="flex items-center gap-3">
+        <TickerAvatar symbol={quote.symbol} size={56} />
+        <div className="flex flex-col gap-1">
+          <span className="type-label text-muted-foreground">{quote.name}</span>
+          <div className="flex items-baseline gap-2">
+            <h1 className="type-hero text-foreground">${quote.price.toFixed(2)}</h1>
+            <span className={cn("type-body-strong", trend === "positive" ? "text-positive" : "text-negative")}>
+              {formatPercent(quote.changePercent)}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -106,10 +110,16 @@ export default function SymbolPage() {
 
       <Tabs value={orderSide} onValueChange={(v) => setOrderSide(v as OrderSide)}>
         <TabsList className="w-full">
-          <TabsTrigger value="buy" className="flex-1">
+          <TabsTrigger
+            value="buy"
+            className="flex-1 data-active:bg-positive/15! data-active:text-positive!"
+          >
             Buy
           </TabsTrigger>
-          <TabsTrigger value="sell" className="flex-1">
+          <TabsTrigger
+            value="sell"
+            className="flex-1 data-active:bg-destructive/15! data-active:text-destructive!"
+          >
             Sell
           </TabsTrigger>
         </TabsList>
@@ -121,7 +131,7 @@ export default function SymbolPage() {
           <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as InputMode)}>
             <TabsList>
               <TabsTrigger value="shares">Shares</TabsTrigger>
-              <TabsTrigger value="dollars">$</TabsTrigger>
+              <TabsTrigger value="dollars">Dollar $</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

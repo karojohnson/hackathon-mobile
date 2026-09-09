@@ -1,5 +1,7 @@
 "use client"
 
+import { cn } from "cn"
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatCurrency } from "@/lib/format"
 import { formatVolume, type QuoteStats } from "@/lib/quote-stats"
@@ -29,9 +31,16 @@ const fields: StatField[] = [
 
 export function QuoteStatsGrid({ stats }: { stats: QuoteStats }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {fields.map((field) => (
-        <div key={field.key} className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-3">
+    <div className="grid grid-cols-2 rounded-lg border border-border bg-surface">
+      {fields.map((field, i) => (
+        <div
+          key={field.key}
+          className={cn(
+            "flex flex-col gap-0.5 px-3 py-2",
+            i % 2 === 0 && "border-r border-border",
+            i < fields.length - 2 && "border-b border-border"
+          )}
+        >
           <Tooltip>
             <TooltipTrigger className="type-label w-fit text-muted-foreground underline decoration-dotted underline-offset-4">
               {field.label}

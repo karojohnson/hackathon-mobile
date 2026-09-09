@@ -15,7 +15,15 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative rounded-[64px] bg-neutral-900 p-3 shadow-2xl">
       <div className="relative h-[852px] w-[393px] overflow-hidden rounded-[52px] bg-background">
-        <div className="h-full w-full overflow-x-hidden overflow-y-auto [contain:layout]">
+        {/*
+          pt-6 (24px) pushes every page's content down below the status
+          bar/Dynamic Island uniformly — a single shift here instead of
+          per-page padding tweaks. Safe against the splash screen's own
+          `absolute inset-0` overlay: that resolves against this
+          container's padding box, so the space above it during the
+          splash is just more of the same bg-background, not a visible gap.
+        */}
+        <div className="h-full w-full overflow-x-hidden overflow-y-auto pt-6 [contain:layout]">
           <AppSplashGate>{children}</AppSplashGate>
         </div>
 

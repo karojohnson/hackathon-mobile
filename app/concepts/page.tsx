@@ -14,7 +14,7 @@ import { ChevronRight } from "@/lib/icons"
 export default function ConceptsPage() {
   return (
     <div className="flex min-h-full flex-col">
-      <div className="flex flex-col gap-3 px-4 pt-12">
+      <div className="flex flex-col gap-3 px-4 pt-8">
         <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
           <ChevronRight className="size-4 rotate-180" />
           Dashboard
