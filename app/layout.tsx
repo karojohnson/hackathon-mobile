@@ -4,7 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { OnboardingProvider } from "@/components/providers/onboarding-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { PhoneFrame } from "@/components/mobile/phone-frame"
+import { DemoStage } from "@/components/demo/demo-stage"
 import { cn } from "@/lib/utils";
 
 // tastytrade brand typeface (see docs/token-map.md) — variable weight, one file.
@@ -36,7 +36,7 @@ export default function RootLayout({
         <ThemeProvider>
           <OnboardingProvider>
             <TooltipProvider>
-              <PhoneFrame>{children}</PhoneFrame>
+              <DemoStage>{children}</DemoStage>
             </TooltipProvider>
           </OnboardingProvider>
         </ThemeProvider>

@@ -3,7 +3,7 @@ import type { ProductPreference } from "@/components/providers/onboarding-provid
 
 /**
  * Switches the dashboard's featured "flavor" module based on whichever
- * product type currently weighs highest (see /demo). Stocks has no extra
+ * product type currently weighs highest (see the control sidebar). Stocks has no extra
  * spotlight — the watchlist/positions sections already are the stocks
  * experience — the other three get a dedicated card.
  */

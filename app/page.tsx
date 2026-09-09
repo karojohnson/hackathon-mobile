@@ -110,24 +110,9 @@ export default function Page() {
         )}
 
         {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
-
-        <div className="flex justify-center gap-4">
-          <Link
-            href="/concepts"
-            className="type-label text-muted-foreground underline-offset-2 hover:underline"
-          >
-            Dashboard concepts
-          </Link>
-          <Link
-            href="/demo"
-            className="type-label text-muted-foreground underline-offset-2 hover:underline"
-          >
-            Demo controls
-          </Link>
-        </div>
       </div>
 
-      <BottomNav className="fixed inset-x-0 bottom-0" />
+      <BottomNav className="sticky inset-x-0 bottom-0 z-10" />
     </div>
   )
 }

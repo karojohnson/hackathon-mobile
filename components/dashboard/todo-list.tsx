@@ -8,8 +8,8 @@ export interface TodoListProps {
 
 /**
  * Demo stand-in for account-signal nudges (see the "dynamic dashboard"
- * north-star memory) — flags are toggled manually from /demo, not derived
- * from real backend state.
+ * north-star memory) — flags are toggled manually from the presenter's
+ * control sidebar, not derived from real backend state.
  */
 export function TodoList({ todos }: TodoListProps) {
   const active = todoDefs.filter((def) => todos[def.key])
