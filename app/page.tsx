@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/mobile/empty-state"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
 import { AccountBar } from "@/components/dashboard/account-bar"
 import { QuoteChipRow } from "@/components/dashboard/quote-chip-row"
-import { NewsSection } from "@/components/dashboard/news-section"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
 import { TodoList } from "@/components/dashboard/todo-list"
 import { PreferenceSpotlight } from "@/components/dashboard/preference-spotlight"
@@ -53,8 +52,6 @@ export default function Page() {
         <TodoList todos={todos} />
 
         <PreferenceSpotlight preference={dominantPreference} />
-
-        <NewsSection />
 
         {/*
           Watchlist before positions, deliberately — a watchlist can grow to
