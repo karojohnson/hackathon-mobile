@@ -48,8 +48,12 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
 
         <div className="mt-1 flex items-center gap-1.5">
           <Wallet className="size-3.5 text-muted-foreground" />
-          <span className="type-label text-muted-foreground">
-            Available to invest: <span className="type-body-strong text-foreground">{formatCurrency(portfolio.buyingPower)}</span>
+          <span className="type-label text-muted-foreground">Available to invest</span>
+          <span
+            className="type-body-strong text-positive"
+            style={{ textShadow: "0 0 14px color-mix(in oklch, var(--positive) 65%, transparent)" }}
+          >
+            {formatCurrency(portfolio.buyingPower)}
           </span>
         </div>
       </div>
@@ -66,42 +70,41 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
                 key={quote.symbol}
                 type="button"
                 onClick={() => onPick(quote.symbol)}
-                className="flex flex-col gap-2.5 rounded-lg border border-border bg-surface p-4 text-left transition-colors hover:bg-muted"
+                className="flex items-center gap-3 rounded-lg border border-border bg-surface p-4 text-left transition-colors hover:bg-muted"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="type-body-strong text-foreground">{quote.symbol}</span>
-                    <span className="type-label truncate text-muted-foreground">{quote.name}</span>
+                <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="type-body-strong text-foreground">{quote.symbol}</span>
+                      <span className="type-label truncate text-muted-foreground">{quote.name}</span>
+                    </div>
+                    <div className="h-8 w-14 shrink-0">
+                      <FinancialChart data={quote.history} variant="line" trend={trend} height={32} />
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end">
+                      <span className="type-body-strong tabular-nums text-foreground">
+                        ${quote.price.toFixed(2)}
+                      </span>
+                      <span
+                        className={cn(
+                          "type-label tabular-nums",
+                          trend === "positive" ? "text-positive" : "text-negative"
+                        )}
+                      >
+                        {formatPercent(quote.changePercent)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="h-8 w-14 shrink-0">
-                    <FinancialChart data={quote.history} variant="line" trend={trend} height={32} />
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end">
-                    <span className="type-body-strong tabular-nums text-foreground">
-                      ${quote.price.toFixed(2)}
+
+                  <div className="flex items-center gap-2 border-t border-border pt-2.5">
+                    {sentiment && <Badge variant="outline">{sentiment}</Badge>}
+                    <span className={cn("type-label font-medium", ratingColor)}>
+                      Analysts: {rating}
                     </span>
-                    <span
-                      className={cn(
-                        "type-label tabular-nums",
-                        trend === "positive" ? "text-positive" : "text-negative"
-                      )}
-                    >
-                      {formatPercent(quote.changePercent)}
-                    </span>
                   </div>
-                  <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                 </div>
 
-                <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">
-                  {sentiment ? (
-                    <Badge variant="outline">{sentiment}</Badge>
-                  ) : (
-                    <span />
-                  )}
-                  <span className={cn("type-label font-medium", ratingColor)}>
-                    Analysts: {rating}
-                  </span>
-                </div>
+                <ChevronRight className="size-6 shrink-0 text-muted-foreground" />
               </button>
             )
           })}
