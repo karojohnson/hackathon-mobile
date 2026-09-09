@@ -50,38 +50,18 @@ export default function Page() {
           </span>
         </section>
 
-        <QuoteChipRow quotes={watchedQuotes} />
+        {positions.length === 0 && <QuoteChipRow quotes={watchedQuotes} />}
 
         <TodoList todos={todos} />
 
         <PreferenceSpotlight preference={dominantPreference} />
 
         {/*
-          Watchlist before positions, deliberately — a watchlist can grow to
-          ~20 symbols and would otherwise bury a single new position if
-          positions were shown first (per follow-up stakeholder note).
+          Positions (plus its "more ways to trade" nudge) before watchlist —
+          once a customer actually holds something, that's the more
+          important thing to lead with (reversed from the earlier
+          watchlist-first ordering, which only made sense pre-first-trade).
         */}
-        <section className="flex flex-col gap-3">
-          <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
-          {watchedQuotes.length === 0 ? (
-            <div className="rounded-lg border border-border bg-surface">
-              <EmptyState
-                icon={LineChart}
-                title="No watchlist yet"
-                description="Tell us what you're into to get a personalized watchlist."
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
-              {watchedQuotes.map((quote) => (
-                <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
-                  <WatchlistRow quote={quote} />
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
         {positions.length > 0 && (
           <section className="flex flex-col gap-3">
             <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
@@ -114,10 +94,30 @@ export default function Page() {
                 </div>
               ))}
             </div>
+            {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
           </section>
         )}
 
-        {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
+        <section className="flex flex-col gap-3">
+          <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
+          {watchedQuotes.length === 0 ? (
+            <div className="rounded-lg border border-border bg-surface">
+              <EmptyState
+                icon={LineChart}
+                title="No watchlist yet"
+                description="Tell us what you're into to get a personalized watchlist."
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+              {watchedQuotes.map((quote) => (
+                <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
+                  <WatchlistRow quote={quote} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
 
       <BottomNav className="sticky inset-x-0 bottom-0 z-10" />

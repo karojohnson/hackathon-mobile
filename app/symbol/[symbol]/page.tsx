@@ -34,10 +34,11 @@ export default function SymbolPage() {
   const router = useRouter()
   const { placeTrade, dismissQuiz } = useOnboarding()
   const [orderSide, setOrderSide] = React.useState<OrderSide>("buy")
-  const [inputMode, setInputMode] = React.useState<InputMode>("shares")
+  const [inputMode, setInputMode] = React.useState<InputMode>("dollars")
   const [shareQty, setShareQty] = React.useState(1)
   const [dollarAmt, setDollarAmt] = React.useState(DOLLAR_STEP)
   const [step, setStep] = React.useState<"buy" | "success">("buy")
+  const [scrubbedPrice, setScrubbedPrice] = React.useState<number | null>(null)
 
   const symbol = params.symbol
   const quote = allQuotes.find((q) => q.symbol === symbol)
@@ -53,7 +54,18 @@ export default function SymbolPage() {
     )
   }
 
-  const trend = quote.changePercent >= 0 ? "positive" : "negative"
+  // The chart's own line color stays pinned to today's real trend even
+  // while scrubbing — only the price/change text below should track the
+  // crosshair, recomputed against the start of the loaded history (rather
+  // than freezing on today's change while looking at a different point).
+  const chartTrend = quote.changePercent >= 0 ? "positive" : "negative"
+  const chartStartValue = quote.history[0]?.value ?? quote.price
+  const displayPrice = scrubbedPrice ?? quote.price
+  const displayChangePercent =
+    scrubbedPrice === null
+      ? quote.changePercent
+      : ((scrubbedPrice - chartStartValue) / chartStartValue) * 100
+  const displayTrend = displayChangePercent >= 0 ? "positive" : "negative"
   const stats = deriveQuoteStats(quote)
 
   const shares = inputMode === "shares" ? shareQty : dollarAmt / quote.price
@@ -96,16 +108,27 @@ export default function SymbolPage() {
         <div className="flex flex-col gap-1">
           <span className="type-label text-muted-foreground">{quote.name}</span>
           <div className="flex items-baseline gap-2">
-            <h1 className="type-hero text-foreground">${quote.price.toFixed(2)}</h1>
-            <span className={cn("type-body-strong", trend === "positive" ? "text-positive" : "text-negative")}>
-              {formatPercent(quote.changePercent)}
+            <h1 className="type-hero text-foreground">${displayPrice.toFixed(2)}</h1>
+            <span
+              className={cn(
+                "type-body-strong",
+                displayTrend === "positive" ? "text-positive" : "text-negative"
+              )}
+            >
+              {formatPercent(displayChangePercent)}
             </span>
           </div>
         </div>
       </div>
 
       <div className="rounded-lg border border-border bg-surface p-4">
-        <FinancialChart data={quote.history} variant="area" trend={trend} height={160} />
+        <FinancialChart
+          data={quote.history}
+          variant="area"
+          trend={chartTrend}
+          height={160}
+          onCrosshairMove={(point) => setScrubbedPrice(point ? point.value : null)}
+        />
       </div>
 
       <Tabs value={orderSide} onValueChange={(v) => setOrderSide(v as OrderSide)}>

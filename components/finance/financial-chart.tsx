@@ -42,6 +42,13 @@ export interface FinancialChartProps {
   trend?: "positive" | "negative" | "neutral"
   height?: number
   className?: string
+  /**
+   * Fires as the user scrubs the chart (mouse move / touch drag over it),
+   * with the value at the crosshair's position — `null` once the crosshair
+   * leaves the chart. Lets a consumer (e.g. the trading screen's price
+   * header) track the pointer instead of always showing the latest price.
+   */
+  onCrosshairMove?: (point: { time: number; value: number } | null) => void
 }
 
 function readVar(name: string) {
@@ -61,11 +68,19 @@ export function FinancialChart({
   trend,
   height = 220,
   className,
+  onCrosshairMove,
 }: FinancialChartProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const chartRef = React.useRef<IChartApi | null>(null)
   const seriesRef = React.useRef<ISeriesApi<"Line" | "Area" | "Candlestick"> | null>(null)
   const { resolvedTheme } = useTheme()
+
+  // Ref, not a dependency of the setup effect below — an inline callback
+  // prop shouldn't tear down and recreate the whole chart every render.
+  const onCrosshairMoveRef = React.useRef(onCrosshairMove)
+  React.useEffect(() => {
+    onCrosshairMoveRef.current = onCrosshairMove
+  }, [onCrosshairMove])
 
   const resolvedTrend: "positive" | "negative" | "neutral" =
     trend ??
@@ -150,6 +165,26 @@ export function FinancialChart({
     }
 
     chart.timeScale().fitContent()
+
+    chart.subscribeCrosshairMove((param) => {
+      const callback = onCrosshairMoveRef.current
+      if (!callback) return
+
+      const series = seriesRef.current
+      if (!param.time || !series) {
+        callback(null)
+        return
+      }
+      const point = param.seriesData.get(series) as
+        | { value?: number; close?: number }
+        | undefined
+      const value = point?.value ?? point?.close
+      if (value === undefined) {
+        callback(null)
+        return
+      }
+      callback({ time: param.time as number, value })
+    })
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0]
