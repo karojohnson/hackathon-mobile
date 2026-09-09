@@ -115,7 +115,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setState((prev) => ({
       ...prev,
       watchlist: Array.from(new Set([...prev.watchlist, ...symbols])),
-      quizDismissed: true,
     }))
   }, [])
 

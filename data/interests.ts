@@ -5,6 +5,9 @@
  * varied; the curated watchlist is then capped to a fixed size (see
  * curateWatchlist) regardless of how many categories were picked.
  */
+import type { LucideIcon } from "lucide-react"
+import { Coffee, Cpu, Flame, HeartPulse, Plane, Shield, ShoppingBag, Zap } from "@/lib/icons"
+
 export type InterestTier = "vibe" | "sector"
 
 export interface Interest {
@@ -14,6 +17,7 @@ export interface Interest {
   symbols: string[]
   /** "vibe" = broad, risk/style-based; "sector" = a specific industry. Mix and match. */
   tier: InterestTier
+  icon: LucideIcon
 }
 
 export const WATCHLIST_SIZE = 6
@@ -25,6 +29,7 @@ export const interests: Interest[] = [
     blurb: "Everyday names you already know.",
     symbols: ["AAPL", "AMZN"],
     tier: "vibe",
+    icon: ShoppingBag,
   },
   {
     id: "bold",
@@ -32,6 +37,7 @@ export const interests: Interest[] = [
     blurb: "Higher risk, higher swings.",
     symbols: ["TSLA"],
     tier: "vibe",
+    icon: Flame,
   },
   {
     id: "steady",
@@ -39,6 +45,7 @@ export const interests: Interest[] = [
     blurb: "Broad and diversified, less drama.",
     symbols: ["SPY"],
     tier: "vibe",
+    icon: Shield,
   },
   {
     id: "tech",
@@ -46,6 +53,7 @@ export const interests: Interest[] = [
     blurb: "The names building what's next.",
     symbols: ["NVDA", "MSFT"],
     tier: "sector",
+    icon: Cpu,
   },
   {
     id: "healthcare",
@@ -53,6 +61,7 @@ export const interests: Interest[] = [
     blurb: "Healthcare and pharma names.",
     symbols: ["JNJ", "UNH"],
     tier: "sector",
+    icon: HeartPulse,
   },
   {
     id: "energy",
@@ -60,6 +69,7 @@ export const interests: Interest[] = [
     blurb: "Oil, gas, and the power grid.",
     symbols: ["XOM", "CVX"],
     tier: "sector",
+    icon: Zap,
   },
   {
     id: "travel",
@@ -67,6 +77,7 @@ export const interests: Interest[] = [
     blurb: "Getting people where they're going.",
     symbols: ["ABNB", "DAL"],
     tier: "sector",
+    icon: Plane,
   },
   {
     id: "everyday",
@@ -74,6 +85,7 @@ export const interests: Interest[] = [
     blurb: "Where you shop and grab coffee.",
     symbols: ["COST", "SBUX"],
     tier: "sector",
+    icon: Coffee,
   },
 ]
 

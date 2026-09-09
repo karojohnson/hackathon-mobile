@@ -23,17 +23,20 @@ function InterestChip({
   isSelected: boolean
   onToggle: () => void
 }) {
+  const Icon = interest.icon
+
   return (
     <button
       type="button"
       onClick={onToggle}
       className={cn(
-        "flex flex-col gap-1 rounded-xl border px-4 py-3.5 text-left transition-colors",
+        "flex flex-col gap-2 rounded-xl border px-4 py-3.5 text-left transition-colors",
         isSelected
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-surface text-foreground hover:bg-muted"
       )}
     >
+      <Icon className={cn("size-5", isSelected ? "text-primary-foreground" : "text-muted-foreground")} />
       <span className="type-body-strong">{interest.label}</span>
       <span className={cn("type-label", isSelected ? "text-primary-foreground/70" : "text-muted-foreground")}>
         {interest.blurb}
@@ -50,7 +53,7 @@ export function InterestQuiz({ onContinue, onSkip }: InterestQuizProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden pt-10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
       <div className="flex flex-col gap-1.5 px-6">
         <span className="type-label text-muted-foreground">Quick one before we start</span>
         <h1 className="type-title text-foreground">What are you interested in?</h1>
@@ -60,7 +63,7 @@ export function InterestQuiz({ onContinue, onSkip }: InterestQuizProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2.5">
             <span className="type-label uppercase tracking-wide text-muted-foreground">

@@ -29,7 +29,7 @@ export function CuratedList({ symbols, onConfirm, onSkip }: CuratedListProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden pt-10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
       <div className="flex flex-col gap-1.5 px-6">
         <span className="type-label text-muted-foreground">Based on what you picked</span>
         <h1 className="type-title text-foreground">Build your watchlist</h1>
@@ -39,7 +39,7 @@ export function CuratedList({ symbols, onConfirm, onSkip }: CuratedListProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
         {quotes.map((quote) => {
           const isChecked = checked.has(quote.symbol)
