@@ -6,6 +6,9 @@ import { cn } from "cn"
 import { BottomNav } from "@/components/mobile/bottom-nav"
 import { EmptyState } from "@/components/mobile/empty-state"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
+import { AccountBar } from "@/components/dashboard/account-bar"
+import { QuoteChipRow } from "@/components/dashboard/quote-chip-row"
+import { NewsSection } from "@/components/dashboard/news-section"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
 import { TodoList } from "@/components/dashboard/todo-list"
 import { PreferenceSpotlight } from "@/components/dashboard/preference-spotlight"
@@ -13,7 +16,7 @@ import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 import { watchlist as allQuotes, portfolio } from "@/data/mock-market-data"
 import { formatCurrency, formatPercent } from "@/lib/format"
-import { LineChart } from "@/lib/icons"
+import { LineChart, Wallet } from "@/lib/icons"
 
 export default function Page() {
   const { watchlist, positions, lastTradedSymbol, quizDismissed, todos, dominantPreference } = useOnboarding()
@@ -32,22 +35,26 @@ export default function Page() {
           !quizDismissed && "pointer-events-none scale-[0.98] opacity-60 blur-md"
         )}
       >
-        <header className="flex flex-col gap-1">
-          <span className="type-label text-muted-foreground">Welcome</span>
-          <h1 className="type-title text-foreground">Your account</h1>
-        </header>
+        <AccountBar />
 
-        <section className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
-          <span className="type-label text-muted-foreground">Net worth</span>
+        <section className="flex flex-col gap-1">
+          <span className="type-label flex items-center gap-1.5 text-muted-foreground">
+            <Wallet className="size-3.5" />
+            Net worth
+          </span>
           <span className="type-hero text-foreground">{formatCurrency(netWorth)}</span>
           <span className="type-label text-muted-foreground">
             {formatCurrency(portfolio.buyingPower)} cash · {formatCurrency(positionsValue)} invested
           </span>
         </section>
 
+        <QuoteChipRow quotes={watchedQuotes} />
+
         <TodoList todos={todos} />
 
         <PreferenceSpotlight preference={dominantPreference} />
+
+        <NewsSection />
 
         {/*
           Watchlist before positions, deliberately — a watchlist can grow to
