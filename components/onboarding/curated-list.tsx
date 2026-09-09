@@ -32,14 +32,14 @@ export function CuratedList({ symbols, defaultChecked, onConfirm, onSkip, onBack
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-14">
       <div className="flex flex-col gap-1.5 px-6">
         <button
           type="button"
           onClick={onBack}
-          className="type-label mb-1 flex w-fit items-center gap-1 text-muted-foreground"
+          className="type-body mb-1 flex w-fit items-center gap-1 text-muted-foreground"
         >
-          <ChevronRight className="size-3.5 rotate-180" />
+          <ChevronRight className="size-4 rotate-180" />
           Back
         </button>
         <span className="type-label text-muted-foreground">Based on what you picked</span>

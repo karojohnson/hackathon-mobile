@@ -30,7 +30,7 @@ export default function Page() {
 
       <div
         className={cn(
-          "flex flex-1 flex-col gap-8 px-4 pt-8 pb-28 transition-all duration-500",
+          "flex flex-1 flex-col gap-8 px-4 pt-12 pb-28 transition-all duration-500",
           !quizDismissed && "pointer-events-none scale-[0.98] opacity-60 blur-md"
         )}
       >

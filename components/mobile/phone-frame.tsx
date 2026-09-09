@@ -1,4 +1,5 @@
 import { AppSplashGate } from "@/components/splash/app-splash-gate"
+import { StatusBar } from "@/components/mobile/status-bar"
 
 /**
  * The bare iPhone Pro-style device bezel (393x852 — the iPhone 15/16 Pro
@@ -17,6 +18,8 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
         <div className="h-full w-full overflow-x-hidden overflow-y-auto [contain:layout]">
           <AppSplashGate>{children}</AppSplashGate>
         </div>
+
+        <StatusBar />
 
         {/* Dynamic Island */}
         <div className="pointer-events-none absolute top-2.5 left-1/2 z-50 h-[30px] w-[100px] -translate-x-1/2 rounded-full bg-black" />

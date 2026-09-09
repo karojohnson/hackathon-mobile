@@ -84,9 +84,9 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-5 px-4 pt-8 pb-8">
-      <Link href="/" className="type-label flex w-fit items-center gap-1 text-muted-foreground">
-        <ChevronRight className="size-3.5 rotate-180" />
+    <div className="flex min-h-full flex-col gap-5 px-4 pt-12 pb-8">
+      <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
+        <ChevronRight className="size-4 rotate-180" />
         Back
       </Link>
 
