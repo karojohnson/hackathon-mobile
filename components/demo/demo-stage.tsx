@@ -15,7 +15,7 @@ import { Eye, EyeOff } from "@/lib/icons"
  * moments in a live demo where it shouldn't be visible at all.
  */
 export function DemoStage({ children }: { children: React.ReactNode }) {
-  const [showControls, setShowControls] = React.useState(true)
+  const [showControls, setShowControls] = React.useState(false)
 
   return (
     <div className="relative flex min-h-dvh w-full items-center justify-center gap-8 bg-muted p-6">
