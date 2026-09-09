@@ -37,7 +37,7 @@ export const WATCHLIST_SIZE = 6
 export const interests: Interest[] = [
   {
     id: "brands",
-    label: "Brands you use",
+    label: "Top brands",
     blurb: "Everyday names you already know.",
     symbols: ["AAPL", "AMZN"],
     tier: "vibe",
