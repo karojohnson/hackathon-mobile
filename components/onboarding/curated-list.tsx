@@ -6,7 +6,6 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FinancialChart } from "@/components/finance/financial-chart"
-import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { formatPercent } from "@/lib/format"
 import { ChevronRight } from "@/lib/icons"
 import { watchlist as allQuotes } from "@/data/mock-market-data"
@@ -62,7 +61,6 @@ export function CuratedList({ symbols, defaultChecked, onConfirm, onSkip, onBack
                 className="flex items-center gap-3 border-b border-border py-3 last:border-b-0"
               >
                 <Checkbox checked={isChecked} onCheckedChange={() => toggle(quote.symbol)} />
-                <TickerAvatar symbol={quote.symbol} size={32} />
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="type-body-strong text-foreground">{quote.symbol}</span>
                   <span className="type-label truncate text-muted-foreground">{quote.name}</span>

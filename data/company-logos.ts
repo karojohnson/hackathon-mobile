@@ -2,12 +2,14 @@
  * Maps our mock tickers to TradingView's public per-company logo CDN
  * (same ecosystem as the Lightweight Charts we already use). Clearbit's
  * logo API — the more commonly reached-for option — is DNS-blocked on
- * this network, so this is the verified-working alternative. ETFs like
- * SPY have no single-company logo; leave them out and let TickerAvatar
- * fall back to a monogram.
+ * this network, so this is the verified-working alternative. Most ETFs
+ * have no single-company logo of their own; SPY uses its issuer's mark
+ * (State Street Global Advisors) since one exists on this CDN, but that
+ * won't hold for every ETF — fall back to a monogram for the rest.
  */
 const logoSlugBySymbol: Record<string, string> = {
   AAPL: "apple",
+  SPY: "state-street",
   TSLA: "tesla",
   NVDA: "nvidia",
   MSFT: "microsoft",

@@ -209,6 +209,7 @@ export default function SymbolPage() {
       <div className="mt-auto flex flex-col gap-2">
         <Button
           size="lg"
+          className="h-11! w-full"
           variant={orderSide === "sell" ? "destructive" : "default"}
           onClick={() => {
             placeTrade(quote.symbol, Number(shares.toFixed(4)))
@@ -216,7 +217,11 @@ export default function SymbolPage() {
             setStep("success")
           }}
         >
-          {orderSide === "buy" ? "Place order" : "Place sell order"}
+          {orderSide === "buy" ? "Buy" : "Sell"}{" "}
+          {inputMode === "dollars"
+            ? formatCurrency(dollarAmt)
+            : `${shareQty} ${shareQty === 1 ? "share" : "shares"}`}{" "}
+          of {quote.symbol}
         </Button>
         <p className="type-label text-center text-muted-foreground">
           This is a prototype — no real money moves.
