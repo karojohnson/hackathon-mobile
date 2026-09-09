@@ -17,6 +17,8 @@ export {
   ChevronRight,
   Coffee,
   Cpu,
+  Eye,
+  EyeOff,
   Flame,
   HeartPulse,
   Home,
