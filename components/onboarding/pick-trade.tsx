@@ -11,6 +11,7 @@ export interface PickTradeProps {
   symbols: string[]
   onPick: (symbol: string) => void
   onSkip: () => void
+  onBack: () => void
 }
 
 /**
@@ -19,12 +20,20 @@ export interface PickTradeProps {
  * dropping the customer on the dashboard and hoping they notice a row to
  * tap. Picking a symbol here goes straight into its buy screen.
  */
-export function PickTrade({ symbols, onPick, onSkip }: PickTradeProps) {
+export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
   const quotes = allQuotes.filter((q) => symbols.includes(q.symbol))
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
       <div className="flex flex-col gap-1.5 px-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="type-label mb-1 flex w-fit items-center gap-1 text-muted-foreground"
+        >
+          <ChevronRight className="size-3.5 rotate-180" />
+          Back
+        </button>
         <span className="type-label text-muted-foreground">Your watchlist is ready</span>
         <h1 className="type-title text-foreground">Place your first trade</h1>
         <p className="type-body text-muted-foreground">

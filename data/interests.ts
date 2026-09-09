@@ -6,7 +6,19 @@
  * curateWatchlist) regardless of how many categories were picked.
  */
 import type { LucideIcon } from "lucide-react"
-import { Coffee, Cpu, Flame, HeartPulse, Plane, Shield, ShoppingBag, Zap } from "@/lib/icons"
+import {
+  Bitcoin,
+  Coffee,
+  Cpu,
+  Flame,
+  HeartPulse,
+  Landmark,
+  Plane,
+  Shield,
+  ShoppingBag,
+  Tv,
+  Zap,
+} from "@/lib/icons"
 
 export type InterestTier = "vibe" | "sector"
 
@@ -51,9 +63,33 @@ export const interests: Interest[] = [
     id: "tech",
     label: "Tech companies",
     blurb: "The names building what's next.",
-    symbols: ["NVDA", "MSFT"],
+    symbols: ["NVDA", "MSFT", "AMD"],
     tier: "sector",
     icon: Cpu,
+  },
+  {
+    id: "finance",
+    label: "Finance & payments",
+    blurb: "Banks, cards, and how money moves.",
+    symbols: ["JPM", "V", "PYPL"],
+    tier: "sector",
+    icon: Landmark,
+  },
+  {
+    id: "media",
+    label: "Streaming & entertainment",
+    blurb: "What you watch and stream.",
+    symbols: ["NFLX", "DIS"],
+    tier: "sector",
+    icon: Tv,
+  },
+  {
+    id: "crypto",
+    label: "Crypto & fintech",
+    blurb: "Where digital assets meet the market.",
+    symbols: ["COIN"],
+    tier: "sector",
+    icon: Bitcoin,
   },
   {
     id: "healthcare",
@@ -75,7 +111,7 @@ export const interests: Interest[] = [
     id: "travel",
     label: "Travel & leisure",
     blurb: "Getting people where they're going.",
-    symbols: ["ABNB", "DAL"],
+    symbols: ["ABNB", "DAL", "UBER"],
     tier: "sector",
     icon: Plane,
   },
@@ -83,7 +119,7 @@ export const interests: Interest[] = [
     id: "everyday",
     label: "Everyday essentials",
     blurb: "Where you shop and grab coffee.",
-    symbols: ["COST", "SBUX"],
+    symbols: ["COST", "SBUX", "KO", "WMT"],
     tier: "sector",
     icon: Coffee,
   },
@@ -117,4 +153,18 @@ export function curateWatchlist(matchedSymbols: string[]): string[] {
     if (!result.includes(symbol)) result.push(symbol)
   }
   return result
+}
+
+/**
+ * More options for the curated-list screen beyond the default curated set —
+ * gives the customer a real, bigger pool to pick from rather than a
+ * take-it-or-leave-it list of exactly WATCHLIST_SIZE.
+ */
+export function additionalChoices(alreadyIncluded: string[], count: number): string[] {
+  const extra: string[] = []
+  for (const symbol of allSymbolsInDefinitionOrder) {
+    if (extra.length >= count) break
+    if (!alreadyIncluded.includes(symbol) && !extra.includes(symbol)) extra.push(symbol)
+  }
+  return extra
 }

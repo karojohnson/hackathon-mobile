@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { interests, type Interest } from "@/data/interests"
 
 export interface InterestQuizProps {
+  initialSelected?: string[]
   onContinue: (selectedIds: string[]) => void
   onSkip: () => void
 }
@@ -45,8 +46,8 @@ function InterestChip({
   )
 }
 
-export function InterestQuiz({ onContinue, onSkip }: InterestQuizProps) {
-  const [selected, setSelected] = React.useState<string[]>([])
+export function InterestQuiz({ initialSelected = [], onContinue, onSkip }: InterestQuizProps) {
+  const [selected, setSelected] = React.useState<string[]>(initialSelected)
 
   function toggle(id: string) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))

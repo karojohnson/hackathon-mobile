@@ -8,10 +8,12 @@ import { InterestQuiz } from "@/components/onboarding/interest-quiz"
 import { CuratedList } from "@/components/onboarding/curated-list"
 import { PickTrade } from "@/components/onboarding/pick-trade"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
-import { curateWatchlist, symbolsForInterests } from "@/data/interests"
+import { additionalChoices, curateWatchlist, symbolsForInterests } from "@/data/interests"
 import { transitions } from "@/lib/motion"
 
 type Step = "quiz" | "list" | "pickTrade"
+
+const EXTRA_CHOICES_COUNT = 10
 
 export function OnboardingOverlay() {
   const router = useRouter()
@@ -21,7 +23,9 @@ export function OnboardingOverlay() {
 
   if (quizDismissed) return null
 
-  const candidateSymbols = curateWatchlist(symbolsForInterests(pickedInterests))
+  const defaultWatchlist = curateWatchlist(symbolsForInterests(pickedInterests))
+  const extraChoices = additionalChoices(defaultWatchlist, EXTRA_CHOICES_COUNT)
+  const candidateSymbols = [...defaultWatchlist, ...extraChoices]
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
@@ -40,6 +44,7 @@ export function OnboardingOverlay() {
               transition={transitions.standard}
             >
               <InterestQuiz
+                initialSelected={pickedInterests}
                 onContinue={(ids) => {
                   setPickedInterests(ids)
                   setInterests(ids)
@@ -60,11 +65,13 @@ export function OnboardingOverlay() {
             >
               <CuratedList
                 symbols={candidateSymbols}
+                defaultChecked={defaultWatchlist}
                 onConfirm={(symbols) => {
                   addToWatchlist(symbols)
                   setStep("pickTrade")
                 }}
                 onSkip={dismissQuiz}
+                onBack={() => setStep("quiz")}
               />
             </motion.div>
           )}
@@ -84,6 +91,7 @@ export function OnboardingOverlay() {
                   router.push(`/symbol/${symbol}`)
                 }}
                 onSkip={dismissQuiz}
+                onBack={() => setStep("list")}
               />
             </motion.div>
           )}

@@ -1,3 +1,5 @@
+import { AppSplashGate } from "@/components/splash/app-splash-gate"
+
 /**
  * The bare iPhone Pro-style device bezel (393x852 — the iPhone 15/16 Pro
  * logical point size). Positioning/centering on the page is the caller's
@@ -13,7 +15,7 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
     <div className="relative rounded-[64px] bg-neutral-900 p-3 shadow-2xl">
       <div className="relative h-[852px] w-[393px] overflow-hidden rounded-[52px] bg-background">
         <div className="h-full w-full overflow-x-hidden overflow-y-auto [contain:layout]">
-          {children}
+          <AppSplashGate>{children}</AppSplashGate>
         </div>
 
         {/* Dynamic Island */}
