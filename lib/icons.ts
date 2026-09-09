@@ -8,6 +8,7 @@
 export {
   AlertTriangle,
   ArrowDownRight,
+  ArrowLeftRight,
   ArrowUpRight,
   BatteryFull,
   Bell,
@@ -16,6 +17,7 @@ export {
   ChevronDown,
   ChevronRight,
   Coffee,
+  Compass,
   Cpu,
   Eye,
   EyeOff,

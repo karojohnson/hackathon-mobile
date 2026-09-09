@@ -3,14 +3,14 @@
 import * as React from "react"
 import { cn } from "cn"
 
-import { Bell, Home, LineChart, User, Wallet } from "@/lib/icons"
+import { ArrowLeftRight, Compass, Home, LineChart, Wallet } from "@/lib/icons"
 
 const items = [
   { label: "Home", icon: Home },
-  { label: "Markets", icon: LineChart },
+  { label: "Discover", icon: Compass },
+  { label: "Trade", icon: ArrowLeftRight },
   { label: "Portfolio", icon: Wallet },
-  { label: "Alerts", icon: Bell },
-  { label: "Profile", icon: User },
+  { label: "Watchlist", icon: LineChart },
 ] as const
 
 export interface BottomNavProps {
