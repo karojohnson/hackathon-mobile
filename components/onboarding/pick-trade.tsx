@@ -54,8 +54,8 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-3">
-        <div className="flex flex-col gap-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+        <div className="flex flex-col gap-2.5">
           {quotes.map((quote) => {
             const trend = quote.changePercent >= 0 ? "positive" : "negative"
             const { rating, sentiment } = sentimentFor(quote.symbol)
@@ -66,15 +66,15 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
                 key={quote.symbol}
                 type="button"
                 onClick={() => onPick(quote.symbol)}
-                className="flex flex-col gap-1.5 rounded-lg border border-border bg-surface p-3 text-left transition-colors hover:bg-muted"
+                className="flex flex-col gap-2.5 rounded-lg border border-border bg-surface p-4 text-left transition-colors hover:bg-muted"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="type-body-strong text-foreground">{quote.symbol}</span>
                     <span className="type-label truncate text-muted-foreground">{quote.name}</span>
                   </div>
-                  <div className="h-7 w-12 shrink-0">
-                    <FinancialChart data={quote.history} variant="line" trend={trend} height={28} />
+                  <div className="h-8 w-14 shrink-0">
+                    <FinancialChart data={quote.history} variant="line" trend={trend} height={32} />
                   </div>
                   <div className="flex shrink-0 flex-col items-end">
                     <span className="type-body-strong tabular-nums text-foreground">
@@ -92,7 +92,7 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
                   <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                 </div>
 
-                <div className="flex items-center justify-between gap-2 border-t border-border pt-1.5">
+                <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">
                   {sentiment ? (
                     <Badge variant="outline">{sentiment}</Badge>
                   ) : (
