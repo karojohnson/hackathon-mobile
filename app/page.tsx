@@ -43,6 +43,32 @@ export default function Page() {
           </span>
         </section>
 
+        {/*
+          Watchlist before positions, deliberately — a watchlist can grow to
+          ~20 symbols and would otherwise bury a single new position if
+          positions were shown first (per follow-up stakeholder note).
+        */}
+        <section className="flex flex-col gap-3">
+          <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
+          {watchedQuotes.length === 0 ? (
+            <div className="rounded-lg border border-border bg-surface">
+              <EmptyState
+                icon={LineChart}
+                title="No watchlist yet"
+                description="Tell us what you're into to get a personalized watchlist."
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+              {watchedQuotes.map((quote) => (
+                <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
+                  <WatchlistRow quote={quote} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
         {positions.length > 0 && (
           <section className="flex flex-col gap-3">
             <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
@@ -78,27 +104,6 @@ export default function Page() {
         )}
 
         {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
-
-        <section className="flex flex-col gap-3">
-          <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
-          {watchedQuotes.length === 0 ? (
-            <div className="rounded-lg border border-border bg-surface">
-              <EmptyState
-                icon={LineChart}
-                title="No watchlist yet"
-                description="Tell us what you're into to get a personalized watchlist."
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
-              {watchedQuotes.map((quote) => (
-                <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
-                  <WatchlistRow quote={quote} />
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
 
         <Link
           href="/concepts"
