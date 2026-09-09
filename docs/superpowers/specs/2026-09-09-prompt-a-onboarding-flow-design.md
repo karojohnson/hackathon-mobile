@@ -1,7 +1,7 @@
 # Prompt A — Onboarding-to-First-Trade Flow
 
-Status: approved for implementation planning
-Date: 2026-09-09
+Status: approved for implementation, timeboxed to a 2.5-hour build session
+Date: 2026-09-09 (revised same day after a follow-up stakeholder note)
 
 ## Context
 
@@ -10,38 +10,81 @@ This spec covers **Prompt A — Product Evolution**: a beginner who has just fin
 account opening and needs a low-friction path into the product.
 
 This direction was shaped by a live planning call between Karolina Johnson and Jolie
-Lepselter (2026-09-09; see project memory `hackathon_prompt_a_direction`). Key decisions
-from that call, which override an earlier draft of this concept:
+Lepselter (2026-09-09; see project memory `hackathon_prompt_a_direction`, which also
+documents the timeline of decisions/reversals below). Key decisions, latest first:
 
+- The first-trade UI is a **deliberately simplified, stock-only** buy screen —
+  plain-language metric labels with small inline explainers (e.g. what "P&L" means) —
+  **not** the same UI a regular/veteran user would see. This reverses an earlier lean in
+  the same call toward reusing the regular trading UI; the simplified-UI direction is
+  explicitly flagged by the stakeholder as needing more design work/user research, so
+  this spec calls out open questions inline (see "Open design questions") rather than
+  presenting the simplified UI as fully resolved.
 - Account application is already submitted and auto-approved via an external WebView.
   Native account opening is out of scope. The prototype begins the instant the WebView
   closes and the user lands in the native app for the first time.
-- The first thing shown is **not** the bare dashboard, and **not** a single prescriptive
-  trade recommendation. It's a fun, lightweight, skippable interest quiz, followed by a
-  personalized watchlist-building moment. "I don't want to direct them, I want them to
-  direct us" (Karolina).
-- Scope explicitly continues past watchlist-building into an actual first trade, using
-  the same trading UI a regular user would see — no separate dumbed-down "first trade"
-  screen.
+- The first thing shown is **not** the bare dashboard. It's a fun, lightweight, skippable
+  interest quiz, followed by a personalized watchlist-building moment. "I don't want to
+  direct them, I want them to direct us" (Karolina) — this is why the quiz drives a
+  *watchlist* rather than a single prescriptive trade recommendation.
+- The user then picks **one** item from their own new watchlist (example used: Apple) to
+  carry through the simplified buy flow above. No 2FA on placing this trade (not a
+  sensitive-enough action for this prototype).
+- After the trade, the dashboard shows the new position plus a contextual "what's next"
+  prompt tied to *that specific instrument* (e.g. "more ways to trade Apple" → prediction
+  markets on Apple's price by a date, single-stock futures on the same name).
 
 ## Goal / user story
 
 A new user finishes account opening, and within seconds feels like the app already knows
 them: they tell it what they're interested in, get a personalized set of things to watch,
-build a watchlist from it, and — when ready — place their first trade on something they
-picked themselves.
+build a watchlist from it, pick one thing from that list, and place their first trade
+through a simplified, beginner-friendly buy screen — landing back on a dashboard that
+shows their new position and a next step tied to what they just did.
+
+## Two-part deliverable
+
+Given the 2.5-hour window, this spec covers two deliverables of very different fidelity:
+
+1. **Part 1 — fully clickable** (this spec's "Flow" section below): the complete path
+   from quiz through trade confirmation. This is the real, working build.
+2. **Part 2 — static/exploratory, not wired up**: 2 alternate "dynamic dashboard" concept
+   mockups for discussion, not part of the clickable path. Each should show: a
+   high-severity alert banner for an edge case (e.g. "we need a new photo ID" — manual
+   review kicked back after auto-approval, shown because it's the most critical thing a
+   user could see), a personalized next-steps section, a positions section (including
+   the trade placed in Part 1), and the watchlist. Purpose is visual/conceptual
+   comparison, not interactivity — static screens (or a simple side-by-side/toggle) are
+   sufficient; don't wire up the alert-banner trigger condition or next-steps logic.
+
+## Open design questions (flagged by stakeholder, not resolved here)
+
+The simplified trading UI needs real design/user-research work beyond what a hackathon
+prototype can settle. Build a best-guess version, but leave these visibly unresolved
+(e.g. as a `{/* design question: ... */}` comment at the relevant spot in code, or a
+small on-screen "designer note" callout) rather than presenting them as decided:
+
+- Exactly which metrics are simple enough to show (candidates mentioned: P&L, cost
+  basis; likely also current price, est. total cost — final set TBD).
+- Whether every metric gets an inline explainer (e.g. an info icon + tooltip/popover) or
+  only the less-obvious ones.
+- Exact wording of those explainers.
 
 ## Out of scope
 
 - Native account opening / KYC (WebView hands off already-approved).
 - Any trade type beyond a simple market buy (no options, no order types beyond market,
   no sell flow).
+- 2FA / step-up auth on placing the trade (explicitly waived for this prototype).
 - Persisting state across sessions (in-memory only; refresh resets to the start).
 - The "customize top-left icon" aside mentioned on the call — not enough signal to spec.
+- The account-tied ML/interest-scoring personalization backend described in the
+  follow-up call (inferring interest from behavior like clicking into "prediction
+  markets" and storing it server-side) — a future vision, not part of this build.
 
-## Flow
+## Flow (Part 1 — fully clickable)
 
-Six screens/states, in order:
+Seven screens/states, in order:
 
 1. **Quiz overlay (app launch)** — the dashboard route renders underneath, dimmed/blurred
    (`backdrop-blur` + reduced opacity), with a full-screen quiz sheet on top: "What are
@@ -56,16 +99,24 @@ Six screens/states, in order:
    empty watchlist.
 3. **Dashboard reveal** — blur/dim lifts (animated), revealing the real dashboard with
    the new watchlist populated in place of the empty state. If the user skipped both
-   prior steps, this is the existing empty-state dashboard.
-4. **Symbol detail** — tapping a watchlist row opens that symbol's detail screen: quote
-   header (price/change), `financial-chart`, key stats via `kpi-card`. This is the same
-   detail screen any user would land on — not a beginner-specific variant. Primary CTA:
-   "Buy."
-5. **Order ticket** — quantity input (default 1 share), live estimated cost, "Review
-   order" → "Place order" (single confirm step, no separate review/confirm split needed
-   for this scope).
-6. **Success** — confirmation state (checkmark, symbol/qty/cost recap), CTA "Done" →
-   returns to dashboard, which now shows the new position.
+   prior steps, this is the existing empty-state dashboard. Watchlist rows are tappable
+   with a prompt like "Ready to place your first trade? Pick one to start."
+4. **Pick one to trade** — tapping a watchlist row (e.g. Apple) proceeds directly to that
+   symbol's simplified buy screen (no separate "confirm your pick" screen — tapping the
+   row *is* the pick).
+5. **Simplified buy screen** — stock-only, beginner-oriented (see "Open design
+   questions" above for what's still unresolved): quote header (price/change),
+   `financial-chart`, a small set of plain-language metrics (e.g. estimated cost, cost
+   basis) each with an inline explainer (info icon → tooltip/popover with a one-line
+   definition), quantity input (default 1 share). This is intentionally **not** the same
+   screen a regular user sees. CTA: "Place order" (single step — no separate
+   review/confirm split, and no 2FA prompt).
+6. **Success** — confirmation state (checkmark, symbol/qty/cost recap), CTA "View
+   dashboard".
+7. **Dashboard, post-trade** — shows the new position (alongside the watchlist) plus a
+   contextual next-step card tied to the traded symbol, e.g. "More ways to trade Apple"
+   (prediction markets on Apple's price by a date; single-stock futures on the same
+   name). This card can be static copy — it doesn't need to link anywhere real.
 
 ## Data
 
@@ -93,6 +144,7 @@ interface OnboardingState {
   interests: InterestCategory[] // picked in step 1
   watchlist: string[]           // symbols, built in step 2, editable implicitly by re-visiting
   positions: Position[]         // starts empty; gains an entry on trade success (step 6)
+  lastTradedSymbol: string | null // set on trade success — drives the step 7 "more ways to trade X" nudge
   quizDismissed: boolean        // true once step 1 is skipped or completed — gates whether the overlay renders
 }
 ```
@@ -120,19 +172,26 @@ All built from existing/newly-added primitives (`Button`, `Card`, `Checkbox`,
   a leading checkbox).
 - `components/onboarding/onboarding-overlay.tsx` — orchestrates steps 1→2, mounted once
   in the dashboard route, gated by `quizDismissed`.
-- `app/symbol/[symbol]/page.tsx` — step 4 detail screen (new route, reuses
-  `financial-chart`, `kpi-card`).
-- `components/trade/order-ticket.tsx` — step 5.
+- `app/symbol/[symbol]/page.tsx` — steps 4–5, the simplified buy screen (new route,
+  reuses `financial-chart`, `kpi-card`; new `components/trade/simple-metric.tsx` for the
+  label + inline-explainer pattern).
 - `components/trade/order-success.tsx` — step 6.
+- `components/dashboard/next-step-card.tsx` — step 7's "more ways to trade X" nudge,
+  reads `lastTradedSymbol`.
+- `components/dashboard/dashboard-concept-a.tsx` /
+  `components/dashboard/dashboard-concept-b.tsx` — Part 2's two static/exploratory
+  dashboard mockups (not linked into the main clickable path; reachable via a couple of
+  temporary links, e.g. from a `/concepts` page, for review purposes only).
 
 Dashboard (`app/page.tsx`) is redesigned to: render the (blurred, when overlay active)
 real dashboard with watchlist section + existing empty-state fallback, plus positions
-section once non-empty. `BottomNav` unaffected.
+section and the next-step card once non-empty. `BottomNav` unaffected.
 
 ## Testing / verification
 
 - `npm run typecheck`, `npm run lint`.
 - Manual click-through at 390px viewport covering: quiz skip path (lands on existing
   empty-state dashboard), full path with 1 interest picked, full path with multiple
-  interests picked (verify union/de-dup), symbol detail → order ticket → success →
-  dashboard reflects new position alongside watchlist.
+  interests picked (verify union/de-dup), pick-one → simplified buy screen → success →
+  dashboard reflects new position, watchlist, and the traded-symbol next-step card.
+- Part 2 concepts reviewed visually at 390px; no interaction testing needed.
