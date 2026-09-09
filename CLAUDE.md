@@ -24,9 +24,16 @@ Do **not** optimize prematurely for:
 
 ## What's already set up
 
-- shadcn/ui on Base UI primitives (`components/ui/`) — button, input, textarea, tabs,
-  dialog, sheet, drawer, popover, dropdown-menu, select, slider, progress, badge,
-  separator, skeleton, switch, toggle, scroll-area, card, tooltip.
+- shadcn/ui on Base UI primitives (`components/ui/`) — the full default registry is
+  installed: button, input, textarea, tabs, dialog, sheet, drawer, popover,
+  dropdown-menu, select, slider, progress, badge, separator, skeleton, switch, toggle,
+  scroll-area, card, tooltip, checkbox, radio-group, label, table, alert, alert-dialog,
+  avatar, accordion, breadcrumb, calendar, carousel, chart, collapsible, combobox,
+  command, context-menu, hover-card, input-otp, menubar, navigation-menu, pagination,
+  resizable, sidebar, spinner, toast, toggle-group, aspect-ratio, and a few
+  chat/form-building primitives (attachment, bubble, message, field, item, kbd, marker,
+  input-group, button-group, direction, empty, native-select, questionnaire). Reach for
+  these before building a new component from scratch.
 - DashboardCN registered as a shadcn registry (`components.json` → `@dashboardcn`) —
   **currently unreachable from this network** (Zscaler TLS inspection redirects the
   registry request; see `docs/design-foundation.md`). `components/finance/kpi-card.tsx`
