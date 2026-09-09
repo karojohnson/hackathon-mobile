@@ -6,26 +6,36 @@ import { useParams, useRouter } from "next/navigation"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FinancialChart } from "@/components/finance/financial-chart"
-import { SimpleMetric } from "@/components/trade/simple-metric"
+import { QuoteStatsGrid } from "@/components/trade/quote-stats-grid"
 import { OrderSuccess } from "@/components/trade/order-success"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 import { watchlist as allQuotes } from "@/data/mock-market-data"
+import { deriveQuoteStats } from "@/lib/quote-stats"
 import { formatCurrency, formatPercent } from "@/lib/format"
-import { ChevronRight, Minus, Plus } from "@/lib/icons"
+import { ChevronDown, ChevronRight, Minus, Plus } from "@/lib/icons"
+
+type OrderSide = "buy" | "sell"
+type InputMode = "shares" | "dollars"
+
+const DOLLAR_STEP = 10
 
 /**
- * Simplified, stock-only buy screen — deliberately NOT the same UI a
- * regular/veteran user sees (see spec's "Open design questions": exactly
- * which metrics belong here, whether every metric needs an explainer, and
- * final explainer wording are all still open and need real design/user
- * research beyond this prototype).
+ * Simplified, stock-only buy/sell screen — deliberately NOT the same UI a
+ * regular/veteran user sees (see spec's "Open design questions"). Supports
+ * sizing an order by share count or by dollar amount, per stakeholder
+ * feedback; "Order type" is shown for composition but stays Market-only —
+ * no other order types are modeled in this prototype.
  */
 export default function SymbolPage() {
   const params = useParams<{ symbol: string }>()
   const router = useRouter()
-  const { placeTrade } = useOnboarding()
-  const [quantity, setQuantity] = React.useState(1)
+  const { placeTrade, dismissQuiz } = useOnboarding()
+  const [orderSide, setOrderSide] = React.useState<OrderSide>("buy")
+  const [inputMode, setInputMode] = React.useState<InputMode>("shares")
+  const [shareQty, setShareQty] = React.useState(1)
+  const [dollarAmt, setDollarAmt] = React.useState(DOLLAR_STEP)
   const [step, setStep] = React.useState<"buy" | "success">("buy")
 
   const symbol = params.symbol
@@ -43,7 +53,21 @@ export default function SymbolPage() {
   }
 
   const trend = quote.changePercent >= 0 ? "positive" : "negative"
-  const estimatedCost = Number((quote.price * quantity).toFixed(2))
+  const stats = deriveQuoteStats(quote)
+
+  const shares = inputMode === "shares" ? shareQty : dollarAmt / quote.price
+  const estimatedCost = inputMode === "shares" ? shareQty * quote.price : dollarAmt
+  const bigNumberDisplay = inputMode === "shares" ? String(shareQty) : formatCurrency(dollarAmt)
+
+  function increment() {
+    if (inputMode === "shares") setShareQty((q) => q + 1)
+    else setDollarAmt((a) => a + DOLLAR_STEP)
+  }
+
+  function decrement() {
+    if (inputMode === "shares") setShareQty((q) => Math.max(1, q - 1))
+    else setDollarAmt((a) => Math.max(DOLLAR_STEP, a - DOLLAR_STEP))
+  }
 
   if (step === "success") {
     return (
@@ -51,8 +75,8 @@ export default function SymbolPage() {
         <OrderSuccess
           symbol={quote.symbol}
           name={quote.name}
-          quantity={quantity}
-          estimatedCost={estimatedCost}
+          quantity={Number(shares.toFixed(4))}
+          estimatedCost={Number(estimatedCost.toFixed(2))}
           onDone={() => router.push("/")}
         />
       </div>
@@ -60,10 +84,10 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-6 px-4 pt-8 pb-8">
+    <div className="flex min-h-full flex-col gap-5 px-4 pt-8 pb-8">
       <Link href="/" className="type-label flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-3.5 rotate-180" />
-        Dashboard
+        Back
       </Link>
 
       <div className="flex flex-col gap-1">
@@ -80,55 +104,86 @@ export default function SymbolPage() {
         <FinancialChart data={quote.history} variant="area" trend={trend} height={160} />
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
-        <span className="type-label uppercase tracking-wide text-muted-foreground">Buy {quote.symbol}</span>
+      <Tabs value={orderSide} onValueChange={(v) => setOrderSide(v as OrderSide)}>
+        <TabsList className="w-full">
+          <TabsTrigger value="buy" className="flex-1">
+            Buy
+          </TabsTrigger>
+          <TabsTrigger value="sell" className="flex-1">
+            Sell
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        <div className="flex items-center justify-between py-3">
-          <span className="type-body text-muted-foreground">Shares</span>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="flex size-8 items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted"
-              aria-label="Decrease shares"
-            >
-              <Minus className="size-4" />
-            </button>
-            <span className="type-body-strong w-6 text-center tabular-nums text-foreground">{quantity}</span>
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => q + 1)}
-              className="flex size-8 items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted"
-              aria-label="Increase shares"
-            >
-              <Plus className="size-4" />
-            </button>
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <div className="flex items-center justify-between">
+          <span className="type-label uppercase tracking-wide text-muted-foreground">Quantity</span>
+          <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as InputMode)}>
+            <TabsList>
+              <TabsTrigger value="shares">Shares</TabsTrigger>
+              <TabsTrigger value="dollars">$</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg bg-muted px-2 py-2">
+          <button
+            type="button"
+            onClick={decrement}
+            className="flex size-11 shrink-0 items-center justify-center rounded-lg text-foreground hover:bg-background/60"
+            aria-label={inputMode === "shares" ? "Decrease shares" : "Decrease amount"}
+          >
+            <Minus className="size-5" />
+          </button>
+          <span className="type-hero text-foreground tabular-nums">{bigNumberDisplay}</span>
+          <button
+            type="button"
+            onClick={increment}
+            className="flex size-11 shrink-0 items-center justify-center rounded-lg text-foreground hover:bg-background/60"
+            aria-label={inputMode === "shares" ? "Increase shares" : "Increase amount"}
+          >
+            <Plus className="size-5" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between px-1">
+          <div className="flex flex-col">
+            <span className="type-label text-muted-foreground">Shares</span>
+            <span className="type-body-strong tabular-nums text-foreground">
+              {inputMode === "shares" ? shares : shares.toFixed(4)}
+            </span>
+          </div>
+          <span className="type-title text-muted-foreground/40">/</span>
+          <div className="flex flex-col items-end">
+            <span className="type-label text-muted-foreground">Est. cost</span>
+            <span className="type-body-strong tabular-nums text-foreground">
+              {formatCurrency(estimatedCost)}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-col divide-y divide-border border-t border-border">
-          <SimpleMetric
-            label="Price per share"
-            value={formatCurrency(quote.price)}
-            explainer="What one share of this stock costs right now."
-          />
-          <SimpleMetric
-            label="Estimated cost"
-            value={formatCurrency(estimatedCost)}
-            explainer="The total you'll pay for this trade, before any fees."
-          />
+        <div className="flex items-center justify-between border-t border-border pt-3">
+          <span className="type-body text-muted-foreground">Order type</span>
+          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5">
+            <span className="type-body-strong text-foreground">Market</span>
+            <ChevronDown className="size-4 text-muted-foreground" />
+          </div>
         </div>
       </div>
+
+      <QuoteStatsGrid stats={stats} />
 
       <div className="mt-auto flex flex-col gap-2">
         <Button
           size="lg"
+          variant={orderSide === "sell" ? "destructive" : "default"}
           onClick={() => {
-            placeTrade(quote.symbol, quantity)
+            placeTrade(quote.symbol, Number(shares.toFixed(4)))
+            dismissQuiz()
             setStep("success")
           }}
         >
-          Place order
+          {orderSide === "buy" ? "Place order" : "Place sell order"}
         </Button>
         <p className="type-label text-center text-muted-foreground">
           This is a prototype — no real money moves.

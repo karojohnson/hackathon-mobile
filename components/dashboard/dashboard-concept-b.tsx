@@ -15,6 +15,8 @@ import { formatCurrency, formatSignedCurrency, formatPercent } from "@/lib/forma
 export function DashboardConceptB() {
   return (
     <div className="flex flex-col gap-5 px-4 pt-8 pb-8">
+      <h1 className="type-title text-foreground">Hello, Pritam!</h1>
+
       <header className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <span className="type-label text-muted-foreground">Net worth</span>

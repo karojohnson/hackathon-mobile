@@ -20,8 +20,7 @@ export function DashboardConceptA() {
   return (
     <div className="flex flex-col gap-6 px-4 pt-8 pb-8">
       <header className="flex flex-col gap-1">
-        <span className="type-label text-muted-foreground">Good afternoon</span>
-        <h1 className="type-title text-foreground">Welcome back</h1>
+        <h1 className="type-title text-foreground">Hello, Pritam!</h1>
       </header>
 
       <Alert variant="destructive">

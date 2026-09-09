@@ -20,12 +20,22 @@ export interface TodoFlags {
   watchlistSkipped: boolean
 }
 
+export type OnboardingStep = "quiz" | "list" | "pickTrade"
+
 export interface OnboardingState {
   interests: string[]
   watchlist: string[]
   positions: Position[]
   lastTradedSymbol: string | null
   quizDismissed: boolean
+  /**
+   * Which onboarding step to resume at — lives here (not local component
+   * state) so it survives navigating away to a symbol page and back. The
+   * onboarding overlay only ever unmounts/remounts when the route changes
+   * away from "/" and back, which would otherwise reset a local step state
+   * to "quiz" every time, even if the customer had reached "pickTrade".
+   */
+  onboardingStep: OnboardingStep
   preferenceWeights: PreferenceWeights
   todos: TodoFlags
   predictionsEnabled: boolean
@@ -35,6 +45,7 @@ interface OnboardingContextValue extends OnboardingState {
   setInterests: (ids: string[]) => void
   addToWatchlist: (symbols: string[]) => void
   dismissQuiz: () => void
+  setOnboardingStep: (step: OnboardingStep) => void
   placeTrade: (symbol: string, quantity: number) => void
   setPreferenceWeights: (weights: PreferenceWeights) => void
   setTodoFlag: (key: keyof TodoFlags, value: boolean) => void
@@ -52,6 +63,7 @@ const initialState: OnboardingState = {
   positions: [],
   lastTradedSymbol: null,
   quizDismissed: false,
+  onboardingStep: "quiz",
   preferenceWeights: { stocks: 70, options: 15, etfs: 10, predictions: 5 },
   todos: {
     fundedNeverTraded: false,
@@ -122,6 +134,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setState((prev) => ({ ...prev, quizDismissed: true }))
   }, [])
 
+  const setOnboardingStep = React.useCallback((step: OnboardingStep) => {
+    setState((prev) => ({ ...prev, onboardingStep: step }))
+  }, [])
+
   const placeTrade = React.useCallback((symbol: string, quantity: number) => {
     const quote = allQuotes.find((q) => q.symbol === symbol)
     if (!quote) return
@@ -159,13 +175,24 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       setInterests,
       addToWatchlist,
       dismissQuiz,
+      setOnboardingStep,
       placeTrade,
       setPreferenceWeights,
       setTodoFlag,
       enablePredictions,
       dominantPreference: dominantOf(state.preferenceWeights),
     }),
-    [state, setInterests, addToWatchlist, dismissQuiz, placeTrade, setPreferenceWeights, setTodoFlag, enablePredictions]
+    [
+      state,
+      setInterests,
+      addToWatchlist,
+      dismissQuiz,
+      setOnboardingStep,
+      placeTrade,
+      setPreferenceWeights,
+      setTodoFlag,
+      enablePredictions,
+    ]
   )
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>

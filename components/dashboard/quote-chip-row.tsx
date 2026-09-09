@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { cn } from "cn"
 
+import { TickerAvatar } from "@/components/finance/ticker-avatar"
 import { formatPercent } from "@/lib/format"
 import type { Quote } from "@/data/mock-market-data"
 
@@ -26,9 +27,7 @@ export function QuoteChipRow({ quotes }: QuoteChipRowProps) {
             href={`/symbol/${quote.symbol}`}
             className="flex w-20 shrink-0 flex-col items-center gap-1.5 rounded-lg py-2 text-center"
           >
-            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <span className="type-label font-bold text-foreground">{quote.symbol.slice(0, 2)}</span>
-            </div>
+            <TickerAvatar symbol={quote.symbol} size={48} />
             <span className="type-label text-foreground">{quote.symbol}</span>
             <span
               className={cn("type-label", trend === "positive" ? "text-positive" : "text-negative")}

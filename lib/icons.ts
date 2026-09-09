@@ -12,6 +12,7 @@ export {
   Bell,
   Bitcoin,
   Check,
+  ChevronDown,
   ChevronRight,
   Coffee,
   Cpu,

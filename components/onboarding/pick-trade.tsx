@@ -41,19 +41,17 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
           Back
         </button>
 
-        <span className="type-label text-muted-foreground">Your watchlist is ready</span>
         <h1 className="type-title text-foreground">Place your first trade</h1>
         <p className="type-body text-muted-foreground">
           Tap one to get started — you can always trade something else later.
         </p>
 
-        <div className="mt-1 flex items-center gap-1.5">
-          <Wallet className="size-3.5 text-muted-foreground" />
-          <span className="type-label text-muted-foreground">Available to invest</span>
-          <span
-            className="type-body-strong text-positive"
-            style={{ textShadow: "0 0 14px color-mix(in oklch, var(--positive) 65%, transparent)" }}
-          >
+        <div className="mt-2 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <Wallet className="size-3.5 text-foreground" />
+            <span className="type-label text-foreground">Available to invest</span>
+          </div>
+          <span className="type-title text-left text-foreground">
             {formatCurrency(portfolio.buyingPower)}
           </span>
         </div>

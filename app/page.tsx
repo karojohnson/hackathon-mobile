@@ -36,6 +36,8 @@ export default function Page() {
       >
         <AccountBar />
 
+        <h1 className="type-title text-foreground">Hello, Pritam!</h1>
+
         <section className="flex flex-col gap-1">
           <span className="type-label flex items-center gap-1.5 text-muted-foreground">
             <Wallet className="size-3.5" />

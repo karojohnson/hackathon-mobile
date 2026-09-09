@@ -7,11 +7,9 @@ import { AnimatePresence, motion } from "motion/react"
 import { InterestQuiz } from "@/components/onboarding/interest-quiz"
 import { CuratedList } from "@/components/onboarding/curated-list"
 import { PickTrade } from "@/components/onboarding/pick-trade"
-import { useOnboarding } from "@/components/providers/onboarding-provider"
+import { useOnboarding, type OnboardingStep } from "@/components/providers/onboarding-provider"
 import { additionalChoices, curateWatchlist, symbolsForInterests } from "@/data/interests"
 import { transitions } from "@/lib/motion"
-
-type Step = "quiz" | "list" | "pickTrade"
 
 const EXTRA_CHOICES_COUNT = 10
 
@@ -30,14 +28,21 @@ const slideVariants = {
 
 export function OnboardingOverlay() {
   const router = useRouter()
-  const { quizDismissed, watchlist, setInterests, addToWatchlist, dismissQuiz } = useOnboarding()
-  const [step, setStep] = React.useState<Step>("quiz")
+  const {
+    quizDismissed,
+    watchlist,
+    onboardingStep: step,
+    setOnboardingStep,
+    setInterests,
+    addToWatchlist,
+    dismissQuiz,
+  } = useOnboarding()
   const [direction, setDirection] = React.useState(1)
   const [pickedInterests, setPickedInterests] = React.useState<string[]>([])
 
-  function goTo(nextStep: Step, dir: 1 | -1) {
+  function goTo(nextStep: OnboardingStep, dir: 1 | -1) {
     setDirection(dir)
-    setStep(nextStep)
+    setOnboardingStep(nextStep)
   }
 
   if (quizDismissed) return null
@@ -112,7 +117,11 @@ export function OnboardingOverlay() {
               <PickTrade
                 symbols={watchlist}
                 onPick={(symbol) => {
-                  dismissQuiz()
+                  // Don't dismiss the overlay here — the customer hasn't
+                  // actually traded yet, just navigated to look at a
+                  // symbol. Dismissal happens on a completed trade (see
+                  // app/symbol/[symbol]/page.tsx), so backing out of the
+                  // buy screen correctly resumes here, not the dashboard.
                   router.push(`/symbol/${symbol}`)
                 }}
                 onSkip={dismissQuiz}
