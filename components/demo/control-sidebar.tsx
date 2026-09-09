@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -57,52 +58,65 @@ export function ControlSidebar() {
         </p>
       </div>
 
-      <section className="flex flex-col gap-4 rounded-lg border border-border bg-background p-4">
-        <div className="flex items-center justify-between">
-          <span className="type-label uppercase tracking-wide text-muted-foreground">
+      <Accordion multiple defaultValue={["preferences", "todos"]} className="flex flex-col gap-3">
+        <AccordionItem
+          value="preferences"
+          className="rounded-lg border border-border bg-background px-4 not-last:border-b-0"
+        >
+          <AccordionTrigger className="type-label uppercase tracking-wide text-muted-foreground hover:no-underline">
             Customer preferences
-          </span>
-        </div>
-        <p className="type-label text-foreground">
-          Dominant: <span className="type-body-strong">{weightLabels[dominantPreference]}</span>
-        </p>
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <p className="type-label text-foreground">
+              Dominant:{" "}
+              <span className="type-body-strong">{weightLabels[dominantPreference]}</span>
+            </p>
 
-        {(Object.keys(weightLabels) as (keyof PreferenceWeights)[]).map((key) => (
-          <div key={key} className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="type-body text-foreground">{weightLabels[key]}</span>
-              <span className="type-body-strong tabular-nums text-foreground">
-                {preferenceWeights[key]}
-              </span>
-            </div>
-            <Slider
-              value={[preferenceWeights[key]]}
-              onValueChange={(value) => setWeight(key, Array.isArray(value) ? value[0] : value)}
-              min={0}
-              max={100}
-              step={5}
-            />
-          </div>
-        ))}
-      </section>
+            {(Object.keys(weightLabels) as (keyof PreferenceWeights)[]).map((key) => (
+              <div key={key} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="type-body text-foreground">{weightLabels[key]}</span>
+                  <span className="type-body-strong tabular-nums text-foreground">
+                    {preferenceWeights[key]}
+                  </span>
+                </div>
+                <Slider
+                  value={[preferenceWeights[key]]}
+                  onValueChange={(value) =>
+                    setWeight(key, Array.isArray(value) ? value[0] : value)
+                  }
+                  min={0}
+                  max={100}
+                  step={5}
+                />
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
 
-      <section className="flex flex-col gap-1 rounded-lg border border-border bg-background p-4">
-        <span className="type-label mb-2 uppercase tracking-wide text-muted-foreground">
-          Account signals (to-do nudges)
-        </span>
-        {todoDefs.map((def) => (
-          <div
-            key={def.key}
-            className="flex items-center justify-between gap-3 border-b border-border py-2.5 last:border-b-0"
-          >
-            <span className="type-body text-foreground">{def.title}</span>
-            <Switch
-              checked={todos[def.key as keyof TodoFlags]}
-              onCheckedChange={(checked) => setTodoFlag(def.key as keyof TodoFlags, checked)}
-            />
-          </div>
-        ))}
-      </section>
+        <AccordionItem
+          value="todos"
+          className="rounded-lg border border-border bg-background px-4 not-last:border-b-0"
+        >
+          <AccordionTrigger className="type-label uppercase tracking-wide text-muted-foreground hover:no-underline">
+            Account signals (to-do nudges)
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-1">
+            {todoDefs.map((def) => (
+              <div
+                key={def.key}
+                className="flex items-center justify-between gap-3 border-b border-border py-2.5 last:border-b-0"
+              >
+                <span className="type-body text-foreground">{def.title}</span>
+                <Switch
+                  checked={todos[def.key as keyof TodoFlags]}
+                  onCheckedChange={(checked) => setTodoFlag(def.key as keyof TodoFlags, checked)}
+                />
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <div className="mt-auto flex flex-col gap-2">
         <Link
