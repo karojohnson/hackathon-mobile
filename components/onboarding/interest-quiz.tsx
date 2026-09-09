@@ -5,6 +5,7 @@ import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
 import { interests, type Interest } from "@/data/interests"
+import { Check } from "@/lib/icons"
 
 export interface InterestQuizProps {
   initialSelected?: string[]
@@ -37,9 +38,11 @@ function InterestChip({
           : "border-border bg-surface text-foreground hover:bg-muted"
       )}
     >
-      <Icon
-        className={cn("size-5 shrink-0", isSelected ? "text-primary-foreground" : "text-muted-foreground")}
-      />
+      {isSelected ? (
+        <Check className="size-5 shrink-0 text-primary-foreground" />
+      ) : (
+        <Icon className="size-5 shrink-0 text-muted-foreground" />
+      )}
       <span className="type-body-strong">{interest.label}</span>
     </button>
   )
