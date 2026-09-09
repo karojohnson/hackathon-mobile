@@ -97,7 +97,7 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-5 px-4 pt-8 pb-8">
+    <div className="flex min-h-full flex-col gap-5 px-4 pt-8">
       <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-4 rotate-180" />
         Back
@@ -206,7 +206,7 @@ export default function SymbolPage() {
 
       <QuoteStatsGrid stats={stats} />
 
-      <div className="mt-auto flex flex-col gap-2">
+      <div className="glass-nav sticky bottom-0 -mx-4 mt-auto flex flex-col gap-2 px-4 pt-3 pb-6">
         <Button
           size="lg"
           className="h-11! w-full"
