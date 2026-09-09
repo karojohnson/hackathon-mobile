@@ -45,7 +45,7 @@ export const interests: Interest[] = [
   },
   {
     id: "bold",
-    label: "Bold bets",
+    label: "High risk, high reward",
     blurb: "Higher risk, higher swings.",
     symbols: ["TSLA"],
     tier: "vibe",
@@ -53,7 +53,7 @@ export const interests: Interest[] = [
   },
   {
     id: "steady",
-    label: "Steady & stable",
+    label: "Low risk, steady growth",
     blurb: "Broad and diversified, less drama.",
     symbols: ["SPY"],
     tier: "vibe",
