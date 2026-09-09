@@ -103,12 +103,17 @@ live).
 
 ## Components (new)
 
-No `Checkbox` primitive exists yet in `components/ui` — add it via
-`npx shadcn@latest add checkbox` (same Base UI approach as the rest of `components/ui`)
-rather than hand-rolling one, per the repo's stated reuse priority.
+Only ~20 of the shadcn/ui registry's components are installed so far (see `AGENTS.md`'s
+list). Rather than add just the one (`Checkbox`) this flow strictly needs, install
+**every remaining component from the default shadcn registry** during implementation
+(e.g. `npx shadcn@latest add --all`, or one-by-one if the CLI's bulk flag isn't
+available), so the full library — `Checkbox`, `RadioGroup`, `Label`, `Avatar`, `Alert`,
+`Table`, `Accordion`, etc. — is on hand for this flow and any later hackathon work, not
+re-fetched component-by-component. Update `AGENTS.md`'s "what's already set up" list once
+done.
 
-All built from existing primitives (`Button`, `Card`, the new `Checkbox`, `Separator`,
-`Badge`), existing `lib/motion.ts` presets, `lib/icons.ts`, `lib/format.ts`:
+All built from existing/newly-added primitives (`Button`, `Card`, `Checkbox`,
+`Separator`, `Badge`), existing `lib/motion.ts` presets, `lib/icons.ts`, `lib/format.ts`:
 
 - `components/onboarding/interest-quiz.tsx` — step 1 overlay.
 - `components/onboarding/curated-list.tsx` — step 2 tick-list (wraps `watchlist-row` with
