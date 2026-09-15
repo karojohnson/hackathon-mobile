@@ -1,141 +1,108 @@
 /**
- * Onboarding-quiz interest categories, each mapped to existing
- * mock-market-data.ts symbols — no fake tickers, real (mocked) quotes only.
- * Deliberately more sectors than symbols-per-category so the quiz feels
- * varied; the curated watchlist is then capped to a fixed size (see
- * curateWatchlist) regardless of how many categories were picked.
+ * Onboarding-quiz categories, each mapped to existing mock-market-data.ts
+ * symbols — no fake tickers, real (mocked) quotes only. Modeled on how real
+ * brokerages group symbols for discovery (GICS-style sectors, investing-style
+ * screeners, thematic collections, market-cap/popularity lists). Deliberately
+ * more subcategories than symbols-per-subcategory so the quiz feels varied,
+ * and symbols repeat across subcategories/categories the way they would on a
+ * real brokerage's browse page; the curated watchlist is then capped to a
+ * fixed size (see curateWatchlist) regardless of how many were picked.
  */
 import type { LucideIcon } from "lucide-react"
-import {
-  Bitcoin,
-  Coffee,
-  Cpu,
-  Flame,
-  HeartPulse,
-  Landmark,
-  Plane,
-  Shield,
-  ShoppingBag,
-  Tv,
-  Zap,
-} from "@/lib/icons"
+import { Landmark, ShoppingBag, Sparkles, TrendingUp, Zap } from "@/lib/icons"
 
-export type InterestTier = "vibe" | "sector"
-
-export interface Interest {
+export interface Subcategory {
   id: string
   label: string
-  blurb: string
   symbols: string[]
-  /** "vibe" = broad, risk/style-based; "sector" = a specific industry. Mix and match. */
-  tier: InterestTier
+}
+
+export interface Category {
+  id: string
+  label: string
   icon: LucideIcon
+  subcategories: Subcategory[]
 }
 
 export const WATCHLIST_SIZE = 6
 
-export const interests: Interest[] = [
+export const categories: Category[] = [
   {
-    id: "brands",
-    label: "Top brands",
-    blurb: "Everyday names you already know.",
-    symbols: ["AAPL", "AMZN"],
-    tier: "vibe",
-    icon: ShoppingBag,
-  },
-  {
-    id: "bold",
-    label: "High risk, high reward",
-    blurb: "Higher risk, higher swings.",
-    symbols: ["TSLA"],
-    tier: "vibe",
-    icon: Flame,
-  },
-  {
-    id: "steady",
-    label: "Low risk, steady growth",
-    blurb: "Broad and diversified, less drama.",
-    symbols: ["SPY"],
-    tier: "vibe",
-    icon: Shield,
-  },
-  {
-    id: "tech",
-    label: "Tech companies",
-    blurb: "The names building what's next.",
-    symbols: ["NVDA", "MSFT", "AMD"],
-    tier: "sector",
-    icon: Cpu,
-  },
-  {
-    id: "finance",
-    label: "Finance & payments",
-    blurb: "Banks, cards, and how money moves.",
-    symbols: ["JPM", "V", "PYPL"],
-    tier: "sector",
+    id: "sectors",
+    label: "Sectors & Industries",
     icon: Landmark,
+    subcategories: [
+      { id: "technology", label: "Technology", symbols: ["AAPL", "MSFT", "NVDA", "AMD"] },
+      { id: "financial-services", label: "Financial Services", symbols: ["JPM", "V", "PYPL"] },
+      { id: "health-care", label: "Health Care", symbols: ["JNJ", "UNH"] },
+      { id: "energy", label: "Energy", symbols: ["XOM", "CVX"] },
+      { id: "consumer-staples", label: "Consumer Staples", symbols: ["KO", "WMT", "COST"] },
+      { id: "communication-services", label: "Communication Services", symbols: ["DIS", "NFLX"] },
+    ],
   },
   {
-    id: "media",
-    label: "Streaming & entertainment",
-    blurb: "What you watch and stream.",
-    symbols: ["NFLX", "DIS"],
-    tier: "sector",
-    icon: Tv,
+    id: "investing-style",
+    label: "Investing Style",
+    icon: TrendingUp,
+    subcategories: [
+      { id: "growth", label: "Growth", symbols: ["TSLA", "NVDA", "AMZN"] },
+      { id: "value", label: "Value", symbols: ["JPM", "XOM", "WMT"] },
+      { id: "dividend-income", label: "Dividend & Income", symbols: ["JNJ", "KO", "XOM"] },
+      { id: "blue-chip", label: "Blue Chip & Stable", symbols: ["AAPL", "MSFT", "JNJ"] },
+      { id: "high-risk", label: "High Risk, High Reward", symbols: ["TSLA", "COIN", "AMD"] },
+      { id: "index-diversified", label: "Index & Diversified", symbols: ["SPY"] },
+    ],
   },
   {
-    id: "crypto",
-    label: "Crypto & fintech",
-    blurb: "Where digital assets meet the market.",
-    symbols: ["COIN"],
-    tier: "sector",
-    icon: Bitcoin,
+    id: "themes",
+    label: "Themes & Innovation",
+    icon: Sparkles,
+    subcategories: [
+      { id: "artificial-intelligence", label: "Artificial Intelligence", symbols: ["NVDA", "AMD", "MSFT"] },
+      { id: "ev-clean-energy", label: "Electric Vehicles & Clean Energy", symbols: ["TSLA"] },
+      { id: "crypto-digital-assets", label: "Crypto & Digital Assets", symbols: ["COIN"] },
+      { id: "fintech-payments", label: "Fintech & Payments", symbols: ["PYPL", "V", "COIN"] },
+      { id: "cloud-software", label: "Cloud & Software", symbols: ["MSFT", "AMZN"] },
+    ],
   },
   {
-    id: "healthcare",
-    label: "Health & wellness",
-    blurb: "Healthcare and pharma names.",
-    symbols: ["JNJ", "UNH"],
-    tier: "sector",
-    icon: HeartPulse,
+    id: "consumer-lifestyle",
+    label: "Consumer & Lifestyle",
+    icon: ShoppingBag,
+    subcategories: [
+      { id: "retail-ecommerce", label: "Retail & E-Commerce", symbols: ["AMZN", "WMT", "COST"] },
+      { id: "food-beverage", label: "Food & Beverage", symbols: ["KO", "SBUX"] },
+      { id: "travel-leisure", label: "Travel & Leisure", symbols: ["ABNB", "DAL", "UBER"] },
+      { id: "streaming-entertainment", label: "Streaming & Entertainment", symbols: ["NFLX", "DIS"] },
+    ],
   },
   {
-    id: "energy",
-    label: "Energy",
-    blurb: "Oil, gas, and the power grid.",
-    symbols: ["XOM", "CVX"],
-    tier: "sector",
+    id: "market-cap-popularity",
+    label: "Market Cap & Popularity",
     icon: Zap,
-  },
-  {
-    id: "travel",
-    label: "Travel & leisure",
-    blurb: "Getting people where they're going.",
-    symbols: ["ABNB", "DAL", "UBER"],
-    tier: "sector",
-    icon: Plane,
-  },
-  {
-    id: "everyday",
-    label: "Everyday essentials",
-    blurb: "Where you shop and grab coffee.",
-    symbols: ["COST", "SBUX", "KO", "WMT"],
-    tier: "sector",
-    icon: Coffee,
+    subcategories: [
+      { id: "mega-cap", label: "Mega Cap Leaders", symbols: ["AAPL", "MSFT", "AMZN", "NVDA"] },
+      { id: "large-cap", label: "Large Cap", symbols: ["JPM", "DIS", "NFLX", "V"] },
+      { id: "small-mid-cap", label: "Small & Mid Cap", symbols: ["ABNB", "COIN", "DAL", "UBER"] },
+      { id: "new-listings", label: "New Listings & IPOs", symbols: ["ABNB", "COIN", "UBER"] },
+      { id: "most-popular", label: "Most Popular", symbols: ["AAPL", "TSLA", "NVDA", "AMZN"] },
+    ],
   },
 ]
 
+const allSubcategories = categories.flatMap((category) => category.subcategories)
+
 export function symbolsForInterests(ids: string[]): string[] {
   const picked = new Set<string>()
-  for (const interest of interests) {
-    if (ids.includes(interest.id)) {
-      for (const symbol of interest.symbols) picked.add(symbol)
+  for (const subcategory of allSubcategories) {
+    if (ids.includes(subcategory.id)) {
+      for (const symbol of subcategory.symbols) picked.add(symbol)
     }
   }
   return Array.from(picked)
 }
 
-const allSymbolsInDefinitionOrder = interests.flatMap((i) => i.symbols)
+const allSymbolsInDefinitionOrder = allSubcategories.flatMap((s) => s.symbols)
 
 /**
  * Always returns exactly WATCHLIST_SIZE symbols: prioritizes what actually

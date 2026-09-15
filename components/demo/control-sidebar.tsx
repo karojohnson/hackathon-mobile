@@ -13,6 +13,7 @@ import {
   type TodoFlags,
 } from "@/components/providers/onboarding-provider"
 import { todoDefs } from "@/data/demo-todos"
+import { resetDemo } from "@/lib/reset-demo"
 
 const weightLabels: Record<keyof PreferenceWeights, string> = {
   stocks: "Stocks",
@@ -35,15 +36,6 @@ export function ControlSidebar() {
 
   function setWeight(key: keyof PreferenceWeights, value: number) {
     setPreferenceWeights({ ...preferenceWeights, [key]: value })
-  }
-
-  function resetDemo() {
-    try {
-      window.localStorage.removeItem("hackathon-onboarding-state-v1")
-    } catch {
-      // ignore
-    }
-    window.location.assign("/")
   }
 
   return (

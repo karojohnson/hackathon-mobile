@@ -13,7 +13,7 @@ export function BannerCard({ accent, className, children }: BannerCardProps) {
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface py-3 pr-3 pl-5",
+        "relative flex flex-col gap-3 overflow-hidden rounded-lg glass-card py-3 pr-3 pl-5",
         className
       )}
     >

@@ -1,11 +1,16 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 
 import { PhoneFrame } from "@/components/mobile/phone-frame"
 import { ControlSidebar } from "@/components/demo/control-sidebar"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff } from "@/lib/icons"
+import { Eye, EyeOff, RotateCcw } from "@/lib/icons"
+import { resetDemo } from "@/lib/reset-demo"
+
+/** Routes that manage their own full-page layout instead of the phone mockup. */
+const BARE_ROUTES = ["/banners"]
 
 /**
  * The whole-page stage: the phone mockup and the presenter's control deck
@@ -16,6 +21,11 @@ import { Eye, EyeOff } from "@/lib/icons"
  */
 export function DemoStage({ children }: { children: React.ReactNode }) {
   const [showControls, setShowControls] = React.useState(false)
+  const pathname = usePathname()
+
+  if (BARE_ROUTES.includes(pathname)) {
+    return <>{children}</>
+  }
 
   return (
     <div className="relative flex min-h-dvh w-full items-center justify-center gap-8 bg-muted p-6">
@@ -28,6 +38,17 @@ export function DemoStage({ children }: { children: React.ReactNode }) {
         {showControls ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         {showControls ? "Hide presenter view" : "Show presenter view"}
       </Button>
+      {!showControls && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="fixed top-4 left-4 z-50 gap-1.5"
+          onClick={resetDemo}
+        >
+          <RotateCcw className="size-4" />
+          Reset demo
+        </Button>
+      )}
       <PhoneFrame>{children}</PhoneFrame>
       {showControls && <ControlSidebar />}
     </div>

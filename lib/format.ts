@@ -22,3 +22,10 @@ export function formatPercent(value: number) {
   const formatted = `${Math.abs(value).toFixed(2)}%`
   return value < 0 ? `-${formatted}` : `+${formatted}`
 }
+
+const newsDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" })
+
+/** Formats a unix-seconds timestamp as e.g. "Sep 8", for news/activity feeds. */
+export function formatNewsDate(timestampSeconds: number) {
+  return newsDate.format(new Date(timestampSeconds * 1000))
+}

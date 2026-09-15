@@ -1,8 +1,5 @@
 import { cn } from "cn"
 
-import { FinancialChart } from "@/components/finance/financial-chart"
-import { TickerAvatar } from "@/components/finance/ticker-avatar"
-import { formatPercent } from "@/lib/format"
 import type { Quote } from "@/data/mock-market-data"
 
 export interface WatchlistRowProps {
@@ -11,26 +8,33 @@ export interface WatchlistRowProps {
 }
 
 /**
- * Optimized-for-mobile list row (not a desktop table) — see the brief's
- * guidance to prefer rows/lists over compressed tables on mobile.
+ * Dense, text-only row per the "Glass Card Treatments" spec — no
+ * avatar/sparkline, fixed-width right-aligned change% so decimals line up
+ * column-style, and a proper minus glyph (U+2212, not a hyphen).
  */
 export function WatchlistRow({ quote, className }: WatchlistRowProps) {
-  const trend = quote.changePercent >= 0 ? "positive" : "negative"
+  const isPositive = quote.changePercent >= 0
 
   return (
-    <div className={cn("flex items-center gap-3 border-b border-border py-3 last:border-b-0", className)}>
-      <TickerAvatar symbol={quote.symbol} size={32} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="type-body-strong text-foreground">{quote.symbol}</span>
-        <span className="type-label truncate text-muted-foreground">{quote.name}</span>
-      </div>
-      <div className="h-8 w-16 shrink-0">
-        <FinancialChart data={quote.history} variant="line" trend={trend} height={32} />
-      </div>
-      <div className="flex w-24 shrink-0 flex-col items-end">
-        <span className="type-body-strong tabular-nums text-foreground">${quote.price.toFixed(2)}</span>
-        <span className={cn("type-label tabular-nums", trend === "positive" ? "text-positive" : "text-negative")}>
-          {formatPercent(quote.changePercent)}
+    <div
+      className={cn(
+        "-mx-3 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 hover:bg-[rgba(255,255,255,0.03)]",
+        className
+      )}
+    >
+      <span className="type-body-strong text-foreground">{quote.symbol}</span>
+      <div className="flex items-center gap-3">
+        <span className="type-body-strong tabular-nums text-(--price)">
+          ${quote.price.toFixed(2)}
+        </span>
+        <span
+          className={cn(
+            "type-label w-14 shrink-0 text-right tabular-nums",
+            isPositive ? "text-(--gain)" : "text-(--loss)"
+          )}
+        >
+          {isPositive ? "+" : "−"}
+          {Math.abs(quote.changePercent).toFixed(2)}%
         </span>
       </div>
     </div>

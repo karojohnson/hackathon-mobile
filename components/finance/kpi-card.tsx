@@ -20,7 +20,7 @@ export function KpiCard({ label, value, changePercent, className }: KpiCardProps
   const trend = changePercent === undefined ? "neutral" : changePercent > 0 ? "positive" : changePercent < 0 ? "negative" : "neutral"
 
   return (
-    <div className={cn("flex flex-col gap-1 rounded-lg border border-border bg-surface px-4 py-3", className)}>
+    <div className={cn("flex flex-col gap-1 rounded-lg glass-card px-4 py-3", className)}>
       <span className="type-label text-muted-foreground">{label}</span>
       <span className="type-title text-foreground tabular-nums">{value}</span>
       {changePercent !== undefined && (

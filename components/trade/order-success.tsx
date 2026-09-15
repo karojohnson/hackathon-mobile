@@ -43,7 +43,7 @@ export function OrderSuccess({
         </p>
         <p className="type-label text-muted-foreground">That&apos;s your first trade. Nicely done.</p>
       </div>
-      <Button size="lg" className="w-full" onClick={onDone}>
+      <Button size="lg" className="h-11! w-full" onClick={onDone}>
         View dashboard
       </Button>
     </div>

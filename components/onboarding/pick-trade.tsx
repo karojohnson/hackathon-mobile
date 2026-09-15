@@ -9,6 +9,7 @@ import { formatCurrency, formatPercent } from "@/lib/format"
 import { ChevronRight, Wallet } from "@/lib/icons"
 import { portfolio, watchlist as allQuotes } from "@/data/mock-market-data"
 import { sentimentFor } from "@/data/mock-sentiment"
+import { StepProgress } from "@/components/onboarding/step-progress"
 
 export interface PickTradeProps {
   symbols: string[]
@@ -30,34 +31,49 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
   const quotes = allQuotes.filter((q) => symbols.includes(q.symbol))
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
-      <div className="flex flex-col gap-1.5 px-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="type-body mb-1 flex w-fit items-center gap-1 text-muted-foreground"
-        >
-          <ChevronRight className="size-4 rotate-180" />
-          Back
-        </button>
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden pt-16">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 quiz-top-glow" />
 
-        <h1 className="type-title text-foreground">Place your first trade</h1>
-        <p className="type-body text-muted-foreground">
-          Tap one to get started — you can always trade something else later.
-        </p>
+      <div className="flex flex-col px-6">
+        <StepProgress current={3} className="mb-6" />
 
-        <div className="mt-2 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <Wallet className="size-3.5 text-foreground" />
-            <span className="type-label text-foreground">Available to invest</span>
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={onBack}
+            className="type-body flex w-fit items-center gap-1 text-muted-foreground"
+          >
+            <ChevronRight className="size-4 rotate-180" />
+            Back
+          </button>
+
+          <h1 className="type-title text-foreground">Place your first trade</h1>
+          <p className="type-body text-muted-foreground">
+            Tap one to get started — you can always trade something else later.{" "}
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-foreground"
+            >
+              Skip
+            </button>
+          </p>
+
+          <div className="mt-2 mb-4 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <Wallet className="size-3.5 text-foreground" />
+              <span className="type-label text-foreground">Available to invest</span>
+            </div>
+            <span className="type-title text-left text-foreground">
+              {formatCurrency(portfolio.buyingPower)}
+            </span>
           </div>
-          <span className="type-title text-left text-foreground">
-            {formatCurrency(portfolio.buyingPower)}
-          </span>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+      <div className="mx-6 border-t border-(--divider)" />
+
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4">
         <div className="flex flex-col gap-2.5">
           {quotes.map((quote) => {
             const trend = quote.changePercent >= 0 ? "positive" : "negative"
@@ -69,7 +85,7 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
                 key={quote.symbol}
                 type="button"
                 onClick={() => onPick(quote.symbol)}
-                className="flex items-center gap-3 rounded-lg border border-border bg-surface p-4 text-left transition-colors hover:bg-muted"
+                className="flex items-center gap-3 rounded-lg glass-card p-4 text-left transition-colors hover:bg-muted"
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                   <div className="flex items-center gap-3">
@@ -109,16 +125,6 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
             )
           })}
         </div>
-      </div>
-
-      <div className="flex flex-col gap-3 px-6 pb-6">
-        <button
-          type="button"
-          onClick={onSkip}
-          className="type-label self-center text-muted-foreground underline-offset-2 hover:underline"
-        >
-          I&apos;ll do this later
-        </button>
       </div>
     </div>
   )

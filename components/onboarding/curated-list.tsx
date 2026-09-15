@@ -9,6 +9,7 @@ import { FinancialChart } from "@/components/finance/financial-chart"
 import { formatPercent } from "@/lib/format"
 import { ChevronRight } from "@/lib/icons"
 import { watchlist as allQuotes } from "@/data/mock-market-data"
+import { StepProgress } from "@/components/onboarding/step-progress"
 
 export interface CuratedListProps {
   symbols: string[]
@@ -32,26 +33,37 @@ export function CuratedList({ symbols, defaultChecked, onConfirm, onSkip, onBack
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-10">
-      <div className="flex flex-col gap-1.5 px-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="type-body mb-1 flex w-fit items-center gap-1 text-muted-foreground"
-        >
-          <ChevronRight className="size-4 rotate-180" />
-          Back
-        </button>
-        <span className="type-label text-muted-foreground">Based on what you picked</span>
-        <h1 className="type-title text-foreground">Build your watchlist</h1>
-        <p className="type-body text-muted-foreground">
-          A starter watchlist based on your picks, plus more to choose from. Check anything
-          you want to follow.
-        </p>
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden pt-16">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 quiz-top-glow" />
+
+      <div className="flex flex-col px-6">
+        <StepProgress current={2} className="mb-6" />
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={onBack}
+            className="type-body flex w-fit items-center gap-1 text-muted-foreground"
+          >
+            <ChevronRight className="size-4 rotate-180" />
+            Back
+          </button>
+          <h1 className="type-title text-foreground">Build your watchlist</h1>
+          <p className="type-body text-muted-foreground">
+            A starter watchlist based on your picks, plus more to choose from. Check anything
+            you want to follow.{" "}
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-foreground"
+            >
+              Skip
+            </button>
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4">
+        <div className="flex flex-col rounded-lg glass-card px-4">
           {quotes.map((quote) => {
             const isChecked = checked.has(quote.symbol)
             const trend = quote.changePercent >= 0 ? "positive" : "negative"
@@ -87,17 +99,17 @@ export function CuratedList({ symbols, defaultChecked, onConfirm, onSkip, onBack
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 px-6 pb-6">
-        <Button size="lg" disabled={checked.size === 0} onClick={() => onConfirm(Array.from(checked))}>
+      <div aria-hidden className="pointer-events-none -mt-32 h-32 shrink-0 glass-sheet-fade" />
+
+      <div className="flex flex-col gap-3 px-6 pb-10">
+        <Button
+          size="lg"
+          className="h-11! w-full"
+          disabled={checked.size === 0}
+          onClick={() => onConfirm(Array.from(checked))}
+        >
           Add {checked.size} to watchlist
         </Button>
-        <button
-          type="button"
-          onClick={onSkip}
-          className="type-label self-center text-muted-foreground underline-offset-2 hover:underline"
-        >
-          Skip for now
-        </button>
       </div>
     </div>
   )

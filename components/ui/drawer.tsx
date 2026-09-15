@@ -4,6 +4,8 @@ import * as React from "react"
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer"
 import { cn } from "cn"
 
+import { usePhoneViewport } from "@/components/mobile/phone-frame"
+
 type DrawerContextProps = {
   hasSnapPoints: boolean
   modal: DrawerPrimitive.Root.Props["modal"]
@@ -55,8 +57,19 @@ function DrawerTrigger({ ...props }: DrawerPrimitive.Trigger.Props) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />
 }
 
-function DrawerPortal({ ...props }: DrawerPrimitive.Portal.Props) {
-  return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />
+function DrawerPortal({ container, ...props }: DrawerPrimitive.Portal.Props) {
+  // Mounts inside the phone frame's own scroll viewport instead of Base
+  // UI's default of `document.body` — otherwise this popup's `fixed`
+  // positioning resolves against the real browser viewport and the sheet
+  // renders outside the mobile mockup instead of clipped to its screen.
+  const phoneViewport = usePhoneViewport()
+  return (
+    <DrawerPrimitive.Portal
+      data-slot="drawer-portal"
+      container={container ?? phoneViewport ?? undefined}
+      {...props}
+    />
+  )
 }
 
 function DrawerClose({ ...props }: DrawerPrimitive.Close.Props) {

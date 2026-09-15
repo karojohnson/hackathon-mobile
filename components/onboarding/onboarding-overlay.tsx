@@ -39,6 +39,37 @@ export function OnboardingOverlay() {
   } = useOnboarding()
   const [direction, setDirection] = React.useState(1)
   const [pickedInterests, setPickedInterests] = React.useState<string[]>([])
+  const rootRef = React.useRef<HTMLDivElement>(null)
+
+  // Lock every scrollable ancestor while the overlay is up — this "fixed"
+  // overlay doesn't add to any ancestor's scroll height, so a wheel/touch
+  // gesture over a non-scrolling part of a step (e.g. its header) still
+  // falls through to whatever real scroll container is underneath (the
+  // phone-frame's own scroll shell in this demo harness, possibly the demo
+  // stage page around that, `document.body` in a plain deployment). Locking
+  // only the first one found left the next layer up still scrollable —
+  // hence walking (and locking) the whole chain up to the true document
+  // root, plus unconditionally locking body/html as a blanket safety net.
+  React.useEffect(() => {
+    if (quizDismissed) return
+    const locked: { el: HTMLElement; original: string }[] = []
+    function lock(el: HTMLElement) {
+      if (locked.some((entry) => entry.el === el)) return
+      locked.push({ el, original: el.style.overflow })
+      el.style.overflow = "hidden"
+    }
+    let node: HTMLElement | null = rootRef.current?.parentElement ?? null
+    while (node && node !== document.body) {
+      const overflowY = getComputedStyle(node).overflowY
+      if (overflowY === "auto" || overflowY === "scroll") lock(node)
+      node = node.parentElement
+    }
+    lock(document.body)
+    lock(document.documentElement)
+    return () => {
+      for (const { el, original } of locked) el.style.overflow = original
+    }
+  }, [quizDismissed])
 
   function goTo(nextStep: OnboardingStep, dir: 1 | -1) {
     setDirection(dir)
@@ -52,7 +83,7 @@ export function OnboardingOverlay() {
   const candidateSymbols = [...defaultWatchlist, ...extraChoices]
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col">
+    <div ref={rootRef} className="fixed inset-0 z-50 flex flex-col">
       <div
         className="glass-sheet flex min-h-0 flex-1 flex-col"
         style={{ paddingTop: "env(safe-area-inset-top)" }}

@@ -108,7 +108,7 @@ export default function OptionsPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="rounded-lg glass-card p-4">
         <FinancialChart data={quote.history} variant="area" trend={chartTrend} height={140} />
       </div>
 
@@ -129,7 +129,7 @@ export default function OptionsPage() {
         </TabsList>
       </Tabs>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-lg glass-card p-4">
         <div className="flex items-center justify-between">
           <span className="type-label uppercase tracking-wide text-muted-foreground">Type</span>
           <Tabs
@@ -202,7 +202,7 @@ export default function OptionsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-lg glass-card p-4">
         <div className="flex items-center justify-between">
           <span className="type-label uppercase tracking-wide text-muted-foreground">
             Contracts
@@ -254,7 +254,8 @@ export default function OptionsPage() {
         </div>
       </div>
 
-      <div className="glass-nav sticky bottom-0 -mx-4 mt-auto flex flex-col gap-2 px-4 pt-3 pb-6">
+      <div className="glass-nav sticky bottom-0 -mx-4 mt-auto flex flex-col gap-2 px-4 pt-3 pb-10">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-full h-32 glass-nav-fade" />
         <Button
           size="lg"
           className="h-11! w-full"

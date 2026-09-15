@@ -55,7 +55,7 @@ interface OnboardingContextValue extends OnboardingState {
 
 const OnboardingContext = React.createContext<OnboardingContextValue | null>(null)
 
-const STORAGE_KEY = "hackathon-onboarding-state-v1"
+export const STORAGE_KEY = "hackathon-onboarding-state-v1"
 
 const initialState: OnboardingState = {
   interests: [],

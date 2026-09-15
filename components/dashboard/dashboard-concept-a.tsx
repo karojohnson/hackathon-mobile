@@ -37,7 +37,7 @@ export function DashboardConceptA() {
         </AlertAction>
       </Alert>
 
-      <section className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
+      <section className="flex flex-col gap-1 rounded-lg glass-card p-4">
         <span className="type-label text-muted-foreground">Net worth</span>
         <span className="type-hero text-foreground">{formatCurrency(portfolio.totalValue)}</span>
       </section>
@@ -47,7 +47,7 @@ export function DashboardConceptA() {
         <NextStepCard symbol={firstPosition.symbol} />
         <button
           type="button"
-          className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3.5 text-left transition-colors hover:bg-muted"
+          className="flex w-full items-center gap-3 rounded-lg glass-card px-4 py-3.5 text-left transition-colors hover:bg-muted"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="type-body-strong text-foreground">Curious about futures?</span>
@@ -63,7 +63,7 @@ export function DashboardConceptA() {
             Your first trade was {firstPosition.symbol}
           </Badge>
         </div>
-        <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+        <div className="flex flex-col rounded-lg glass-card px-4">
           {positions.map((position) => (
             <div key={position.symbol} className="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
               <div className="flex min-w-0 flex-1 flex-col">
@@ -85,7 +85,7 @@ export function DashboardConceptA() {
 
       <section className="flex flex-col gap-3">
         <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
-        <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+        <div className="flex flex-col rounded-lg glass-card px-4">
           {watchlist.slice(0, 3).map((quote) => (
             <WatchlistRow key={quote.symbol} quote={quote} />
           ))}

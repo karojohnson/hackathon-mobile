@@ -41,6 +41,11 @@
     /* tastytrade-mapped semantic extensions — see docs/token-map.md */
     --color-surface: var(--surface);
     --color-elevated-surface: var(--elevated-surface);
+    --color-surface-glass: var(--surface-glass);
+    --color-surface-glass-sunken: var(--surface-glass-sunken);
+    --color-blue-01: var(--blue-01);
+    --color-blue-03: var(--blue-03);
+    --color-accent-blue: var(--accent-blue);
     --color-positive: var(--positive);
     --color-negative: var(--negative);
     --color-warning: var(--warning);
@@ -80,6 +85,15 @@
     --secondary: #eeeae7;
     --secondary-foreground: #1e120b;
     --muted: #eeeae7;
+    /* color.alpha.functional.glass-surface-light */
+    --surface-glass: #ffffffa8;
+    /* color.alpha.functional.glass-body-light */
+    --surface-glass-sunken: #f4f4f480;
+    /* color.background.accent.blue-01 -> color.solid.blue.450 */
+    --blue-01: #428dc9;
+    /* color.background.accent.blue-03 -> color.solid.blue.050 */
+    --blue-03: #e7f1f9;
+    --glass-border-shade: color-mix(in oklch, var(--border) 35%, transparent);
     /* color-text-general-secondary-text */
     --muted-foreground: #6e645e;
     --text-secondary: #6e645e;
@@ -139,6 +153,15 @@
     --secondary-foreground: #ffffff;
     /* color-background-general-tertiary-surface */
     --muted: #262626;
+    /* color.alpha.functional.glass-surface-dark */
+    --surface-glass: #25252580;
+    /* color.alpha.functional.glass-body-dark */
+    --surface-glass-sunken: #12121299;
+    /* color.background.accent.blue-01 -> color.solid.blue.550 */
+    --blue-01: #2672a9;
+    /* color.background.accent.blue-03 -> color.solid.blue.950 */
+    --blue-03: #082035;
+    --glass-border-shade: color-mix(in oklch, var(--border) 30%, transparent);
     /* color-text-general-secondary-text */
     --muted-foreground: #afafaa;
     --text-secondary: #afafaa;
@@ -176,6 +199,29 @@
     --sidebar-accent-foreground: #ffffff;
     --sidebar-border: #444444;
     --sidebar-ring: #34a5eb;
+}
+
+/*
+ * Position-row / Watchlist card tokens — fixed, dark-theme-only values per
+ * the "Glass Card Treatments" design spec. Deliberately not part of the
+ * light/dark token bridge above (these cards render the same regardless of
+ * app theme), and distinct from the app-wide --positive/--negative tokens.
+ */
+:root {
+  --gain: #38e06b;
+  --loss: #ff6b61;
+  --gain-solid: #30d158;
+  --loss-solid: #ff453a;
+  --price: #f4f6fb;
+  --text-2: rgba(255, 255, 255, 0.45);
+  --divider: rgba(255, 255, 255, 0.06);
+  --accent-a: #2e7bff;
+  --accent-b: #35d6ff;
+  --accent-c: #7c5cff;
+  --watchlist-count-accent: #7fb0ff;
+  /* Interest-quiz blue accent — highlighted word, active progress, expanded
+     card border, icon circles, selected pills. Fixed value, not theme-gated. */
+  --accent-blue: #5e9fd3;
 }
 
 @layer base {
@@ -231,10 +277,11 @@
 }
 
 /*
- * Glass / elevated material layer (section 11) — restrained translucency for
- * functional layers only: nav, sheets, floating controls, overlays. Primary
- * financial content stays readable directly on the canvas — do not apply
- * these to ordinary cards.
+ * Glass / elevated material layer (section 11) — translucent, blurred
+ * surfaces using the tastytrade `surface-glass` token. Originally reserved
+ * for functional layers only (nav, sheets, floating controls); `.glass-card`
+ * extends the same treatment to ordinary content cards so the canvas reads
+ * as the darkest layer with lighter, alpha-blended cards lifted on top.
  */
 /*
  * Built from Tailwind's own backdrop-blur/backdrop-saturate utilities via
@@ -263,5 +310,76 @@
     background: color-mix(in oklch, var(--elevated-surface) 78%, transparent);
     border: 1px solid color-mix(in oklch, var(--border) 45%, transparent);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+  /*
+   * Scroll-fade overlays for bottom action bars — sit just above a pinned
+   * button so scrolled content dissolves gradually instead of cutting off
+   * hard at the button's edge. Tall with an eased multi-stop curve (not a
+   * flat 2-stop fade) so the effect actually reads at a glance. Each
+   * matches the background formula of the surface the button bar itself
+   * sits on, so the seam is invisible.
+   */
+  .glass-sheet-fade {
+    background: linear-gradient(
+      to top,
+      color-mix(in oklch, var(--background) 90%, transparent) 0%,
+      color-mix(in oklch, var(--background) 65%, transparent) 30%,
+      color-mix(in oklch, var(--background) 30%, transparent) 65%,
+      color-mix(in oklch, var(--background) 0%, transparent) 100%
+    );
+  }
+  .glass-nav-fade {
+    background: linear-gradient(
+      to top,
+      color-mix(in oklch, var(--surface) 72%, transparent) 0%,
+      color-mix(in oklch, var(--surface) 52%, transparent) 30%,
+      color-mix(in oklch, var(--surface) 24%, transparent) 65%,
+      color-mix(in oklch, var(--surface) 0%, transparent) 100%
+    );
+  }
+  /*
+   * Standard content-card treatment — alpha-blended `surface-glass` fill
+   * (backdrop-blurred, so it picks up ambient color from whatever scrolls
+   * behind it) with a flat, uniform 1px outline — same tone on all four
+   * sides, no corner variety.
+   */
+  .glass-card {
+    @apply backdrop-blur-md backdrop-saturate-150;
+    border: 1px solid var(--glass-border-shade);
+    background: var(--surface-glass);
+  }
+  /*
+   * Position-row / Watchlist glass shell — a denser, two-layer glass
+   * treatment distinct from `.glass-card` above, per the "Glass Card
+   * Treatments" spec: a 1px gradient-outline wrapper (bright top-left,
+   * fading) around a blurred glass surface with a top-light inset sheen.
+   * Dark-theme-only literal values (see token block above) — not
+   * theme-reactive like the rest of this file's glass utilities.
+   */
+  .glass-shell-outer {
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 60%);
+    box-shadow: 0 20px 44px -26px rgba(0, 0, 0, 0.85);
+  }
+  .glass-shell-inner {
+    @apply backdrop-blur-[20px];
+    border-radius: 19px;
+    background: linear-gradient(160deg, rgba(21, 25, 34, 0.78), rgba(10, 12, 18, 0.86));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
+  /*
+   * Onboarding quiz steps (1-3) only — a quiet accent-blue wash behind the
+   * header so the flow reads as one continuous moment rather than three
+   * flat screens. Wide, top-anchored ellipse fading out well before the
+   * scrollable list content, so it never competes with it.
+   */
+  .quiz-top-glow {
+    background: radial-gradient(
+      140% 100% at 50% 0%,
+      color-mix(in oklch, var(--accent-blue) 24%, transparent) 0%,
+      color-mix(in oklch, var(--accent-blue) 10%, transparent) 35%,
+      color-mix(in oklch, var(--accent-blue) 0%, transparent) 70%
+    );
   }
 }

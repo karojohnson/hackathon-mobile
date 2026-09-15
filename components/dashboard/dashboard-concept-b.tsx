@@ -38,7 +38,7 @@ export function DashboardConceptB() {
 
       <section className="flex flex-col gap-2">
         <h2 className="type-label uppercase tracking-wide text-muted-foreground">Allocation</h2>
-        <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="rounded-lg glass-card p-4">
           <AllocationBar
             slices={[
               { label: "Equities", percent: 58, colorClassName: "bg-positive" },
@@ -51,7 +51,7 @@ export function DashboardConceptB() {
 
       <section className="flex flex-col gap-2">
         <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
-        <div className="flex flex-col rounded-lg border border-border bg-surface px-3">
+        <div className="flex flex-col rounded-lg glass-card px-3">
           {positions.map((position) => (
             <div key={position.symbol} className="flex items-center gap-3 border-b border-border py-2 last:border-b-0">
               <span className="type-body-strong w-14 shrink-0 text-foreground">{position.symbol}</span>
@@ -73,7 +73,7 @@ export function DashboardConceptB() {
 
       <section className="flex flex-col gap-2">
         <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
-        <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
+        <div className="flex flex-col rounded-lg glass-card px-4">
           {watchlist.map((quote) => (
             <WatchlistRow key={quote.symbol} quote={quote} />
           ))}

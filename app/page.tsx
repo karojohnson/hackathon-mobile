@@ -1,12 +1,12 @@
 "use client"
 
+import { Fragment } from "react"
 import Link from "next/link"
 import { cn } from "cn"
 
 import { BottomNav } from "@/components/mobile/bottom-nav"
-import { EmptyState } from "@/components/mobile/empty-state"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
-import { TickerAvatar } from "@/components/finance/ticker-avatar"
+import { GlassShell } from "@/components/finance/glass-shell"
 import { AccountBar } from "@/components/dashboard/account-bar"
 import { QuoteChipRow } from "@/components/dashboard/quote-chip-row"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
@@ -16,7 +16,7 @@ import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 import { watchlist as allQuotes, portfolio } from "@/data/mock-market-data"
 import { formatCurrency, formatPercent } from "@/lib/format"
-import { LineChart, Wallet } from "@/lib/icons"
+import { Wallet } from "@/lib/icons"
 
 export default function Page() {
   const { watchlist, positions, lastTradedSymbol, quizDismissed, todos, dominantPreference } = useOnboarding()
@@ -65,57 +65,63 @@ export default function Page() {
         {positions.length > 0 && (
           <section className="flex flex-col gap-3">
             <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
-            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
-              {positions.map((position) => (
-                <div
-                  key={position.symbol}
-                  className="flex items-center gap-3 border-b border-border py-3 last:border-b-0"
-                >
-                  <TickerAvatar symbol={position.symbol} size={32} />
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="type-body-strong text-foreground">{position.symbol}</span>
-                    <span className="type-label truncate text-muted-foreground">
-                      {position.quantity} {position.quantity === 1 ? "share" : "shares"}
-                    </span>
+            <GlassShell contentClassName="p-2">
+              {positions.map((position, index) => (
+                <Fragment key={position.symbol}>
+                  {index > 0 && <div className="mx-3.5 h-px bg-(--divider)" />}
+                  <div className="flex items-center justify-between gap-3 rounded-[14px] p-3.5 transition-colors hover:bg-[rgba(255,255,255,0.04)] active:bg-[rgba(255,255,255,0.06)]">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="type-body-strong text-foreground">{position.symbol}</span>
+                      <span className="type-label truncate text-(--text-2)">
+                        {position.quantity} {position.quantity === 1 ? "share" : "shares"} · avg $
+                        {position.avgCost.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex w-24 shrink-0 flex-col items-end">
+                      <span className="type-body-strong tabular-nums text-(--price)">
+                        {formatCurrency(position.marketValue)}
+                      </span>
+                      <span
+                        className={cn(
+                          "type-label tabular-nums",
+                          position.changePercent >= 0 ? "text-(--gain)" : "text-(--loss)"
+                        )}
+                      >
+                        {formatPercent(position.changePercent)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex w-24 shrink-0 flex-col items-end">
-                    <span className="type-body-strong tabular-nums text-foreground">
-                      {formatCurrency(position.marketValue)}
-                    </span>
-                    <span
-                      className={cn(
-                        "type-label tabular-nums",
-                        position.changePercent >= 0 ? "text-positive" : "text-negative"
-                      )}
-                    >
-                      {formatPercent(position.changePercent)}
-                    </span>
-                  </div>
-                </div>
+                </Fragment>
               ))}
-            </div>
+            </GlassShell>
             {lastTradedSymbol && <NextStepCard symbol={lastTradedSymbol} />}
           </section>
         )}
 
         <section className="flex flex-col gap-3">
-          <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
           {watchedQuotes.length === 0 ? (
-            <div className="rounded-lg border border-border bg-surface">
-              <EmptyState
-                icon={LineChart}
-                title="No watchlist yet"
-                description="Tell us what you're into to get a personalized watchlist."
-              />
-            </div>
+            <>
+              <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
+              <GlassShell contentClassName="flex items-center justify-center px-6 py-10 text-center">
+                <span className="type-body text-(--text-2)">
+                  Tell us what you&apos;re into to get a personalized watchlist.
+                </span>
+              </GlassShell>
+            </>
           ) : (
-            <div className="flex flex-col rounded-lg border border-border bg-surface px-4">
-              {watchedQuotes.map((quote) => (
-                <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
-                  <WatchlistRow quote={quote} />
-                </Link>
-              ))}
-            </div>
+            <GlassShell contentClassName="flex flex-col p-5">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="type-label uppercase tracking-wide text-muted-foreground">Watchlist</h2>
+                <span className="type-label text-(--watchlist-count-accent)">{watchedQuotes.length}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                {watchedQuotes.map((quote) => (
+                  <Link key={quote.symbol} href={`/symbol/${quote.symbol}`} className="block">
+                    <WatchlistRow quote={quote} />
+                  </Link>
+                ))}
+              </div>
+            </GlassShell>
           )}
         </section>
       </div>
