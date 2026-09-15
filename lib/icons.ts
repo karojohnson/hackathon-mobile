@@ -30,6 +30,7 @@ export {
   MessageCircle,
   Minus,
   Newspaper,
+  Pencil,
   Plane,
   Plus,
   RotateCcw,

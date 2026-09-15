@@ -1,11 +1,9 @@
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { SignalBanner } from "@/components/dashboard/signal-banner"
 import { WatchlistRow } from "@/components/finance/watchlist-row"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
 import { Badge } from "@/components/ui/badge"
 import { portfolio, positions, watchlist } from "@/data/mock-market-data"
 import { formatCurrency, formatPercent } from "@/lib/format"
-import { AlertTriangle } from "@/lib/icons"
 
 /**
  * Concept A — "narrative" dashboard. Static/exploratory (Part 2 of the
@@ -23,19 +21,16 @@ export function DashboardConceptA() {
         <h1 className="type-title text-foreground">Hello, Pritam!</h1>
       </header>
 
-      <Alert variant="destructive">
-        <AlertTriangle className="size-4" />
-        <AlertTitle>Action needed: re-upload your photo ID</AlertTitle>
-        <AlertDescription>
-          Your application needs a quick manual review. This is the most important thing to do
-          right now.
-        </AlertDescription>
-        <AlertAction>
-          <Button size="sm" variant="destructive">
-            Upload
-          </Button>
-        </AlertAction>
-      </Alert>
+      <SignalBanner
+        variant="red"
+        emphasis
+        eyebrow="Action needed"
+        badge="Do this first"
+        title="Finish your ID check"
+        body="Your application needs a quick manual review. This is the most important thing to do right now."
+        cta="Re-upload photo ID"
+        ctaTone="neutral"
+      />
 
       <section className="flex flex-col gap-1 rounded-lg glass-card p-4">
         <span className="type-label text-muted-foreground">Net worth</span>

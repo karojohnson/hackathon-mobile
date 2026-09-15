@@ -132,41 +132,41 @@ export function OrderTypeSheet({
           </div>
         )}
 
-        <div className="flex flex-col gap-2 px-4 pt-4">
-          <span className="type-label uppercase tracking-wide text-muted-foreground">Time in force</span>
-          <div className="grid grid-cols-4 gap-1.5">
-            {TIME_IN_FORCE.map((option) => {
-              const selected = option.value === timeInForce
-              const disabled = isMarket && option.value !== "day"
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => onTimeInForceChange(option.value)}
-                  className={cn(
-                    "type-label rounded-md border px-1.5 py-2 text-center transition-colors disabled:pointer-events-none disabled:opacity-40",
-                    selected
-                      ? "border-foreground/20 bg-muted text-foreground"
-                      : "border-border text-muted-foreground"
-                  )}
-                >
-                  {option.label}
-                </button>
-              )
-            })}
+        {!isMarket && (
+          <div className="flex flex-col gap-2 px-4 pt-4">
+            <span className="type-label uppercase tracking-wide text-muted-foreground">Time in force</span>
+            <div className="grid grid-cols-4 gap-1.5">
+              {TIME_IN_FORCE.map((option) => {
+                const selected = option.value === timeInForce
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => onTimeInForceChange(option.value)}
+                    className={cn(
+                      "type-label rounded-md border px-1.5 py-2 text-center transition-colors",
+                      selected
+                        ? "border-foreground/20 bg-muted text-foreground"
+                        : "border-border text-muted-foreground"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            {timeInForce === "gtd" && (
+              <input
+                type="date"
+                value={gtdDate}
+                onChange={(event) => onGtdDateChange(event.target.value)}
+                className="type-body-strong rounded-lg border border-border bg-background px-3 py-2 text-foreground"
+              />
+            )}
           </div>
-          {!isMarket && timeInForce === "gtd" && (
-            <input
-              type="date"
-              value={gtdDate}
-              onChange={(event) => onGtdDateChange(event.target.value)}
-              className="type-body-strong rounded-lg border border-border bg-background px-3 py-2 text-foreground"
-            />
-          )}
-        </div>
+        )}
 
-        <DrawerFooter className="pb-10">
+        <DrawerFooter className="mt-6 pb-10">
           <DrawerClose className={buttonVariants({ className: "w-full" })}>Done</DrawerClose>
         </DrawerFooter>
       </DrawerContent>

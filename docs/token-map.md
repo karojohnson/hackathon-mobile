@@ -45,6 +45,32 @@ Primitive/core color ramps (`--color-solid-*` in `build/static-vars.css`) were *
 copied in — only semantic tokens were bridged. Reach for a primitive directly only if a
 new need arises that no semantic token covers.
 
+**SignalBanner priority accents** (added for `components/dashboard/signal-banner.tsx`) —
+these weren't in the original `*-theme-colors.css` curated copy, so they were resolved by
+hand from the fuller `build/dark-theme.css` / `build/light-theme.css` + `static-vars.css`
+ramps instead:
+
+| Prototype variable | tastytrade source token | Notes |
+|---|---|---|
+| `--priority-red` | `color-text-icon-general-red` | red accent bar / eyebrow |
+| `--priority-red-surface` | `color-background-accent-red-03` | red `emphasis` tint |
+| `--priority-gold` | `color-text-icon-general-gold` | gold accent bar / eyebrow |
+| `--priority-gold-surface` | `color-background-accent-gold-03` | gold `emphasis` tint |
+| `--priority-blue` | `color-text-icon-general-blue` | blue accent bar / eyebrow |
+| `--priority-blue-surface` | `color-background-accent-blue-03` | already bridged as `--blue-03` — reused, not duplicated |
+| `--button-neutral` | `color-background-button-primary` | `ctaTone="neutral"` fill |
+| `--shadow-bottom-100` | `--shadow-bottom-100` (`static-vars.css`) → `color-other-elevation` | resolved to a literal `rgba()` per theme |
+
+The gray variant/priority reuses the already-bridged `--muted-foreground` / `--muted`
+(`color-text-icon-general-secondary` and its surface are the same swatch family). The
+`secondary` link color reuses `--focus` — `color-text-general-hyperlink` resolves to the
+exact same hex as `color-border-general-focused-state` in both themes, so no new token was
+needed. `ctaTone="blue"` (the default primary action) intentionally reuses the existing
+ink-button `--primary`/`--primary-foreground` pair rather than introducing a brand-blue
+button fill — no `color-background-button-blue` token exists anywhere in the source
+tokens, which is the same "no official brand button color" finding as the `--primary`
+deviation above.
+
 ## Typography
 
 Font family: **Inter** (variable), loaded via `next/font/local` from

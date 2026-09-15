@@ -1,13 +1,11 @@
 import Link from "next/link"
 
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { BannerCard } from "@/components/dashboard/banner-card"
+import { SignalBanner } from "@/components/dashboard/signal-banner"
 import { TodoList } from "@/components/dashboard/todo-list"
 import { PreferenceSpotlight } from "@/components/dashboard/preference-spotlight"
 import { NextStepCard } from "@/components/dashboard/next-step-card"
-import { AlertTriangle, ChevronRight } from "@/lib/icons"
+import { ChevronRight } from "@/lib/icons"
 
 /**
  * Fixed-width tile — 393px matches the phone mockup's screen width
@@ -94,93 +92,50 @@ export default function BannersPage() {
 
         <Section title="Prediction market card" source="prediction-market-card.tsx">
           <Variant label="predictionsEnabled: false">
-            <BannerCard accent="blue">
-              <div className="flex items-center justify-between">
-                <span className="type-label uppercase tracking-wide text-focus">
-                  Prediction market
-                </span>
-                <Badge variant="outline" className="border-positive/30 text-positive">
-                  Live
-                </Badge>
-              </div>
-              <p className="type-body-strong text-foreground">
-                Will AAPL close above $245 by Friday?
-              </p>
-              <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-positive" style={{ width: "52%" }} />
-                <div className="h-full bg-negative" style={{ width: "48%" }} />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="type-label text-positive">52% Yes</span>
-                <span className="type-label text-negative">48% No</span>
-              </div>
-              <div className="flex flex-col gap-2 rounded-md bg-muted p-3">
-                <p className="type-label text-muted-foreground">
-                  We noticed you were curious about prediction markets.
-                </p>
-                <Button size="lg" className="h-11! w-full">
-                  Enable prediction markets
-                </Button>
-              </div>
-            </BannerCard>
+            <SignalBanner
+              variant="blue"
+              eyebrow="Prediction market"
+              badge="Live"
+              badgeTone="live"
+              title="Will AAPL close above $245 by Friday?"
+              meter={52}
+              cta="Enable prediction markets"
+            />
           </Variant>
           <Variant label="predictionsEnabled: true">
-            <BannerCard accent="blue">
-              <div className="flex items-center justify-between">
-                <span className="type-label uppercase tracking-wide text-focus">
-                  Prediction market
-                </span>
-                <Badge variant="outline" className="border-positive/30 text-positive">
-                  Live
-                </Badge>
-              </div>
-              <p className="type-body-strong text-foreground">
-                Will AAPL close above $245 by Friday?
-              </p>
-              <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-positive" style={{ width: "52%" }} />
-                <div className="h-full bg-negative" style={{ width: "48%" }} />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="type-label text-positive">52% Yes</span>
-                <span className="type-label text-negative">48% No</span>
-              </div>
-              <Button size="lg" className="h-11! w-full">
-                Trade this market
-              </Button>
-            </BannerCard>
+            <SignalBanner
+              variant="blue"
+              eyebrow="Prediction market"
+              badge="Live"
+              badgeTone="live"
+              title="Will AAPL close above $245 by Friday?"
+              meter={52}
+              cta="Trade this market"
+            />
           </Variant>
         </Section>
 
-        <Section title="Severity alert" source="ui/alert.tsx · used in dashboard-concept-a.tsx">
-          <Variant label="variant: destructive (in use — Concept A's manual-review nudge)">
-            <Alert variant="destructive">
-              <AlertTriangle className="size-4" />
-              <AlertTitle>Action needed: re-upload your photo ID</AlertTitle>
-              <AlertDescription>
-                Your application needs a quick manual review. This is the most important thing to
-                do right now.
-              </AlertDescription>
-              <AlertAction>
-                <Button size="sm" variant="destructive">
-                  Upload
-                </Button>
-              </AlertAction>
-            </Alert>
+        <Section title="Severity banner" source="dashboard-concept-a.tsx">
+          <Variant label="variant: red, emphasis (in use — Concept A's manual-review nudge)">
+            <SignalBanner
+              variant="red"
+              emphasis
+              eyebrow="Action needed"
+              badge="Do this first"
+              title="Finish your ID check"
+              body="Your application needs a quick manual review. This is the most important thing to do right now."
+              cta="Re-upload photo ID"
+              ctaTone="neutral"
+            />
           </Variant>
-          <Variant label="variant: default (defined, not currently used anywhere)">
-            <Alert variant="default">
-              <AlertTriangle className="size-4" />
-              <AlertTitle>Heads up</AlertTitle>
-              <AlertDescription>
-                Same alert shell, neutral styling — no dashboard uses this variant yet.
-              </AlertDescription>
-              <AlertAction>
-                <Button size="sm" variant="secondary">
-                  Review
-                </Button>
-              </AlertAction>
-            </Alert>
+          <Variant label="variant: gray (lower priority, not currently used anywhere)">
+            <SignalBanner
+              variant="gray"
+              eyebrow="Heads up"
+              title="Nothing urgent right now"
+              body="Same banner shell, quieter priority — no dashboard uses this combination yet."
+              cta="Review"
+            />
           </Variant>
         </Section>
 

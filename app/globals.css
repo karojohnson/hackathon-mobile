@@ -51,6 +51,14 @@
     --color-warning: var(--warning);
     --color-focus: var(--focus);
     --color-text-secondary: var(--text-secondary);
+    /* SignalBanner priority accents — see docs/token-map.md */
+    --color-priority-red: var(--priority-red);
+    --color-priority-red-surface: var(--priority-red-surface);
+    --color-priority-gold: var(--priority-gold);
+    --color-priority-gold-surface: var(--priority-gold-surface);
+    --color-priority-blue: var(--priority-blue);
+    --color-priority-blue-surface: var(--priority-blue-surface);
+    --color-button-neutral: var(--button-neutral);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -134,6 +142,22 @@
     --sidebar-accent-foreground: #1e120b;
     --sidebar-border: #b5aba4;
     --sidebar-ring: #0070b0;
+    /* color-text-icon-general-red -> color-solid-red-600 */
+    --priority-red: #b32836;
+    /* color-background-accent-red-03 -> color-solid-red-050 */
+    --priority-red-surface: #ffeae9;
+    /* color-text-icon-general-gold -> color-solid-gold-600 */
+    --priority-gold: #775a0a;
+    /* color-background-accent-gold-03 -> color-solid-gold-050 */
+    --priority-gold-surface: #fdefc9;
+    /* color-text-icon-general-blue -> color-solid-blue-600 */
+    --priority-blue: #206395;
+    /* color-background-accent-blue-03 — already bridged as --blue-03 */
+    --priority-blue-surface: var(--blue-03);
+    /* color-background-button-primary */
+    --button-neutral: #f7f5f3;
+    /* --shadow-bottom-100 -> color-other-elevation: color-alpha-neutral-200 */
+    --shadow-bottom-100: 0px 0px 2px 0px rgba(18, 18, 18, 0.13), 0px 4px 6px 0px rgba(18, 18, 18, 0.13);
 }
 
 .dark {
@@ -199,6 +223,22 @@
     --sidebar-accent-foreground: #ffffff;
     --sidebar-border: #444444;
     --sidebar-ring: #34a5eb;
+    /* color-text-icon-general-red -> color-solid-red-400 */
+    --priority-red: #fe676c;
+    /* color-background-accent-red-03 -> color-solid-red-950 */
+    --priority-red-surface: #3a1012;
+    /* color-text-icon-general-gold -> color-solid-gold-200 */
+    --priority-gold: #f3ca56;
+    /* color-background-accent-gold-03 -> color-solid-gold-950 */
+    --priority-gold-surface: #261e0c;
+    /* color-text-icon-general-blue -> color-solid-blue-400 */
+    --priority-blue: #5e9fd3;
+    /* color-background-accent-blue-03 — already bridged as --blue-03 */
+    --priority-blue-surface: var(--blue-03);
+    /* color-background-button-primary */
+    --button-neutral: #333333;
+    /* --shadow-bottom-100 -> color-other-elevation: color-alpha-neutral-400 */
+    --shadow-bottom-100: 0px 0px 2px 0px rgba(18, 18, 18, 0.44), 0px 4px 6px 0px rgba(18, 18, 18, 0.44);
 }
 
 /*
@@ -256,6 +296,12 @@
   .type-body-strong {
     font-size: 14px;
     line-height: 20px;
+    font-weight: 650;
+  }
+  /* Between body-strong and title — SignalBanner title size. */
+  .type-lead-strong {
+    font-size: 16px;
+    line-height: 22px;
     font-weight: 650;
   }
   .type-title {
@@ -369,6 +415,15 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
   }
   /*
+   * Same tone as `.glass-shell-inner`, but fully opaque (no alpha) — for a
+   * swipeable row's draggable front layer, so it actually occludes the
+   * reveal actions sitting behind it at rest, instead of letting them
+   * bleed through the shell's translucent glass fill.
+   */
+  .glass-row-surface {
+    background: linear-gradient(160deg, rgb(21, 25, 34), rgb(10, 12, 18));
+  }
+  /*
    * Onboarding quiz steps (1-3) only — a quiet accent-blue wash behind the
    * header so the flow reads as one continuous moment rather than three
    * flat screens. Wide, top-anchored ellipse fading out well before the
@@ -379,6 +434,19 @@
       140% 100% at 50% 0%,
       color-mix(in oklch, var(--accent-blue) 24%, transparent) 0%,
       color-mix(in oklch, var(--accent-blue) 10%, transparent) 35%,
+      color-mix(in oklch, var(--accent-blue) 0%, transparent) 70%
+    );
+  }
+  /*
+   * Dashboard-only variant of the glow above — same accent-blue wash
+   * formula, corner-anchored (top-right, not centered) and enlarged to
+   * suit the dashboard's larger, denser canvas.
+   */
+  .dashboard-top-glow {
+    background: radial-gradient(
+      220% 120% at 100% 0%,
+      color-mix(in oklch, var(--accent-blue) 31%, transparent) 0%,
+      color-mix(in oklch, var(--accent-blue) 13%, transparent) 35%,
       color-mix(in oklch, var(--accent-blue) 0%, transparent) 70%
     );
   }

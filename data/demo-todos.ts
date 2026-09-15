@@ -1,4 +1,5 @@
 import type { TodoFlags } from "@/components/providers/onboarding-provider"
+import type { SignalBannerVariant } from "@/components/dashboard/signal-banner"
 
 /**
  * Demo stand-ins for account-signal nudges a real backend would compute
@@ -8,44 +9,44 @@ import type { TodoFlags } from "@/components/providers/onboarding-provider"
  */
 export interface TodoDef {
   key: keyof TodoFlags
+  variant: SignalBannerVariant
+  eyebrow: string
   title: string
-  description: string
+  body?: string
   /** Full-width CTA button label. */
   cta: string
-  /**
-   * Banner accent — most nudges lean blue (informational, opportunity) or
-   * gray (informational, lower-priority); not severity-coded yet.
-   */
-  accent: "blue" | "gray"
+  dismissible?: boolean
 }
 
 export const todoDefs: TodoDef[] = [
   {
     key: "fundedNeverTraded",
-    title: "You've funded your account but haven't traded yet",
-    description: "Your watchlist is ready whenever you are.",
+    variant: "blue",
+    eyebrow: "Get started",
+    title: "You've funded your account",
+    body: "Your watchlist is ready whenever you are.",
     cta: "Place a trade",
-    accent: "blue",
   },
   {
     key: "futuresNotEnabled",
+    variant: "blue",
+    eyebrow: "Unlock",
     title: "Your account qualifies for futures",
-    description: "You have a high enough access level — want to turn it on?",
     cta: "Turn on futures",
-    accent: "blue",
   },
   {
     key: "twoFactorNotEnabled",
-    title: "Turn on two-factor authentication",
-    description: "Add an extra layer of security to your account.",
+    variant: "gray",
+    eyebrow: "Security",
+    title: "Turn on two-factor auth",
     cta: "Turn on 2FA",
-    accent: "gray",
+    dismissible: true,
   },
   {
     key: "watchlistSkipped",
-    title: "You skipped building a watchlist",
-    description: "Tell us what you're interested in to get personalized picks.",
+    variant: "gray",
+    eyebrow: "Personalize",
+    title: "Build your watchlist",
     cta: "Build your watchlist",
-    accent: "gray",
   },
 ]

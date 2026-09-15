@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { watchlist as allQuotes, type Position } from "@/data/mock-market-data"
+import { portfolio, watchlist as allQuotes, type Position } from "@/data/mock-market-data"
 
 export type ProductPreference = "stocks" | "options" | "etfs" | "predictions"
 
@@ -27,6 +27,7 @@ export interface OnboardingState {
   watchlist: string[]
   positions: Position[]
   lastTradedSymbol: string | null
+  cash: number
   quizDismissed: boolean
   /**
    * Which onboarding step to resume at — lives here (not local component
@@ -47,6 +48,9 @@ interface OnboardingContextValue extends OnboardingState {
   dismissQuiz: () => void
   setOnboardingStep: (step: OnboardingStep) => void
   placeTrade: (symbol: string, quantity: number) => void
+  editPositionQuantity: (symbol: string, quantity: number) => void
+  closePosition: (symbol: string) => void
+  adjustCash: (delta: number) => void
   setPreferenceWeights: (weights: PreferenceWeights) => void
   setTodoFlag: (key: keyof TodoFlags, value: boolean) => void
   enablePredictions: () => void
@@ -62,6 +66,7 @@ const initialState: OnboardingState = {
   watchlist: [],
   positions: [],
   lastTradedSymbol: null,
+  cash: portfolio.buyingPower,
   quizDismissed: false,
   onboardingStep: "quiz",
   preferenceWeights: { stocks: 70, options: 15, etfs: 10, predictions: 5 },
@@ -157,6 +162,28 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }))
   }, [])
 
+  const editPositionQuantity = React.useCallback((symbol: string, quantity: number) => {
+    setState((prev) => ({
+      ...prev,
+      positions: prev.positions.map((p) =>
+        p.symbol === symbol
+          ? { ...p, quantity, marketValue: Number((p.price * quantity).toFixed(2)) }
+          : p
+      ),
+    }))
+  }, [])
+
+  const closePosition = React.useCallback((symbol: string) => {
+    setState((prev) => ({
+      ...prev,
+      positions: prev.positions.filter((p) => p.symbol !== symbol),
+    }))
+  }, [])
+
+  const adjustCash = React.useCallback((delta: number) => {
+    setState((prev) => ({ ...prev, cash: Math.max(0, Number((prev.cash + delta).toFixed(2))) }))
+  }, [])
+
   const setPreferenceWeights = React.useCallback((weights: PreferenceWeights) => {
     setState((prev) => ({ ...prev, preferenceWeights: weights }))
   }, [])
@@ -177,6 +204,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       dismissQuiz,
       setOnboardingStep,
       placeTrade,
+      editPositionQuantity,
+      closePosition,
+      adjustCash,
       setPreferenceWeights,
       setTodoFlag,
       enablePredictions,
@@ -189,6 +219,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       dismissQuiz,
       setOnboardingStep,
       placeTrade,
+      editPositionQuantity,
+      closePosition,
+      adjustCash,
       setPreferenceWeights,
       setTodoFlag,
       enablePredictions,
