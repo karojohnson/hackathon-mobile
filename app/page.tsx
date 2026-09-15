@@ -46,12 +46,19 @@ export default function Page() {
     // bezel's plain black through, a visible seam against the lighter
     // glass-sheet tint everywhere else. Content position is unaffected
     // since the two cancel out; only the background box grows upward.
-    <div className="glass-sheet relative -mt-14 flex min-h-full flex-col pt-14">
+    // min-h-[calc(100%+3.5rem)] (not min-h-full) grows height by that same
+    // 56px the negative margin ate into — otherwise the box falls 56px
+    // short at the bottom of the screen too. That shortfall is invisible
+    // behind the dashboard's own bottom nav, but OnboardingOverlay's
+    // `fixed inset-0` (backdrop-filter here makes this div its containing
+    // block) inherits this exact box, so steps 1-3's CTA would float above
+    // a bare black gap instead of reaching the true bottom edge.
+    <div className="glass-sheet relative -mt-14 flex min-h-[calc(100%+3.5rem)] flex-col pt-14">
       {!quizDismissed && <OnboardingOverlay />}
 
       <div
         className={cn(
-          "relative flex flex-1 flex-col gap-8 px-4 pt-4 pb-28 transition-all duration-500",
+          "relative flex flex-1 flex-col gap-8 px-4 pt-4 pb-6 transition-all duration-500",
           !quizDismissed && "pointer-events-none scale-[0.98] opacity-60 blur-md"
         )}
       >
@@ -61,20 +68,22 @@ export default function Page() {
 
         <AccountBar />
 
-        <h1 className="type-title text-foreground">Hello, Pritam!</h1>
+        <div className="flex flex-col gap-4">
+          <h1 className="type-title text-foreground">Hello, Pritam!</h1>
 
-        <NetWorthSheet cash={cash} onAdjustCash={adjustCash}>
-          <div className="flex flex-col gap-1 px-3 py-2 -mx-3">
-            <span className="type-label flex items-center gap-1.5 text-muted-foreground">
-              <Wallet className="size-3.5" />
-              Net worth
-            </span>
-            <span className="type-hero text-foreground">{formatCurrency(netWorth)}</span>
-            <span className="type-label text-muted-foreground">
-              {formatCurrency(cash)} cash · {formatCurrency(positionsValue)} invested
-            </span>
-          </div>
-        </NetWorthSheet>
+          <NetWorthSheet cash={cash} onAdjustCash={adjustCash}>
+            <div className="flex flex-col gap-1 px-3 py-2 -mx-3">
+              <span className="type-label flex items-center gap-1.5 text-muted-foreground">
+                <Wallet className="size-3.5" />
+                Net worth
+              </span>
+              <span className="type-hero text-foreground">{formatCurrency(netWorth)}</span>
+              <span className="type-label text-muted-foreground">
+                {formatCurrency(cash)} cash · {formatCurrency(positionsValue)} invested
+              </span>
+            </div>
+          </NetWorthSheet>
+        </div>
 
         {positions.length === 0 && <QuoteChipRow quotes={watchedQuotes} />}
 
@@ -87,17 +96,17 @@ export default function Page() {
           once a customer actually holds something, that's the more
           important thing to lead with (reversed from the earlier
           watchlist-first ordering, which only made sense pre-first-trade).
-          Wrapped together in their own gap-6 (24px) flex column so that
+          Wrapped together in their own gap-3 (12px) flex column so that
           rhythm holds between Positions and Watchlist (and the "more ways
           to trade" nudge between them) regardless of which of these
           conditionally-rendered blocks are actually present — sizing it on
           the shared parent instead of per-sibling margins.
         */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           {positions.length > 0 && (
-            <section className="flex flex-col gap-6">
+            <section className="flex flex-col gap-3">
               <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
-              <div className="flex flex-col gap-2 rounded-lg glass-card p-2">
+              <div className="flex flex-col overflow-hidden rounded-lg glass-card pl-4">
                 {positions.map((position) => (
                   <SwipeablePositionRow
                     key={position.symbol}

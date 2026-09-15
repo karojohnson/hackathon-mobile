@@ -150,7 +150,7 @@ export function SignalBanner({
       )}
 
       {secondary && (
-        <button type="button" onClick={onSecondary} className="type-body w-full text-center text-focus">
+        <button type="button" onClick={onSecondary} className="type-body w-full text-left text-focus">
           {secondary}
         </button>
       )}

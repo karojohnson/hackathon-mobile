@@ -13,6 +13,7 @@ import { transitions } from "@/lib/motion"
 
 const ACTION_WIDTH = 72
 const REVEAL_WIDTH = ACTION_WIDTH * 2
+const PEEK_WIDTH = 16
 
 export interface SwipeablePositionRowProps {
   position: Position
@@ -30,11 +31,25 @@ export interface SwipeablePositionRowProps {
  */
 export function SwipeablePositionRow({ position, onEditQuantity, onClosePosition }: SwipeablePositionRowProps) {
   const x = useMotionValue(0)
+  const isOpen = React.useRef(false)
   const [editOpen, setEditOpen] = React.useState(false)
   const [quantity, setQuantity] = React.useState(position.quantity)
 
   function close() {
+    isOpen.current = false
     animate(x, 0, transitions.spring)
+  }
+
+  // Desktop-only hint that the row hides actions — a quick nudge toward the
+  // reveal, just enough to show a sliver of the close button, without fully
+  // exposing it the way an actual swipe does. No-ops once the row is already
+  // swiped open, so hovering never fights a deliberate drag.
+  function peekIn() {
+    if (!isOpen.current) animate(x, -PEEK_WIDTH, transitions.spring)
+  }
+
+  function peekOut() {
+    if (!isOpen.current) animate(x, 0, transitions.spring)
   }
 
   function handleEditOpen() {
@@ -49,7 +64,7 @@ export function SwipeablePositionRow({ position, onEditQuantity, onClosePosition
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[14px]">
+    <div className="relative overflow-hidden border-b border-border last:border-b-0">
       <div className="absolute inset-y-0 right-0 flex">
         <button
           type="button"
@@ -76,12 +91,15 @@ export function SwipeablePositionRow({ position, onEditQuantity, onClosePosition
         dragElastic={{ left: 0.15, right: 0 }}
         onDragEnd={(_, info) => {
           const shouldOpen = x.get() < -REVEAL_WIDTH / 2 || info.velocity.x < -400
+          isOpen.current = shouldOpen
           animate(x, shouldOpen ? -REVEAL_WIDTH : 0, transitions.spring)
         }}
         onTap={() => {
           if (x.get() < 0) close()
         }}
-        className="glass-row-surface relative flex items-center justify-between gap-3 rounded-[14px] p-3.5 transition-colors hover:bg-[rgba(255,255,255,0.04)] active:bg-[rgba(255,255,255,0.06)]"
+        onHoverStart={peekIn}
+        onHoverEnd={peekOut}
+        className="relative flex items-center justify-between gap-3 bg-elevated-surface py-3 pr-4 transition-colors active:bg-[rgba(255,255,255,0.06)]"
       >
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="type-body-strong text-foreground">{position.symbol}</span>
