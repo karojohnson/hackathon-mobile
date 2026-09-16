@@ -55,11 +55,14 @@ export const PRACTICE_FOOTER_CTAS: Record<ScreenId, PracticeFooterCta[]> = {
 export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id"> {
   const quote = watchlist.find((q) => q.symbol === state.symbol)
   const trendUp = (quote?.changePercent ?? 0) >= 0
+  // Mirrors direction.tsx's displayed default, and guards against a stale
+  // persisted null from an earlier session's localStorage.
+  const thesis = state.chosenDirection ?? "rallies"
   const directionCorrect =
-    state.chosenDirection === "flat" ||
-    state.chosenDirection === "outsized" ||
-    (state.chosenDirection === "rallies" && trendUp) ||
-    (state.chosenDirection === "sellsOff" && !trendUp)
+    thesis === "flat" ||
+    thesis === "outsized" ||
+    (thesis === "rallies" && trendUp) ||
+    (thesis === "sellsOff" && !trendUp)
 
   const axesCorrect: Axis[] = directionCorrect
     ? ["direction", "duration", "volatility"]

@@ -63,7 +63,7 @@ const XP_PER_LEVEL = 3000
 const initialState: PracticeState = {
   currentScreen: "cold-start",
   symbol: "AAPL",
-  chosenDirection: null,
+  chosenDirection: "rallies",
   dialStop: 70,
   unlockedAxes: ["direction"],
   xp: 2840,
