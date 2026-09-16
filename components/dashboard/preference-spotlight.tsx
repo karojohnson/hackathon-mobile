@@ -40,7 +40,7 @@ export function PreferenceSpotlight({ preference }: { preference: ProductPrefere
         variant="blue"
         eyebrow="ETF spotlight"
         title="SPY · SPDR S&P 500 ETF Trust"
-        body="One trade, broad exposure to the S&P 500 — a steady way to stay diversified."
+        body="One trade, broad exposure to the S&P 500. A steady way to stay diversified."
         cta="Trade SPY"
         onAction={() => router.push("/symbol/SPY")}
       />

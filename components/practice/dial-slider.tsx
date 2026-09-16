@@ -20,6 +20,11 @@ export function DialSlider({ value, onChange, className }: DialSliderProps) {
         min={50}
         max={90}
         step={20}
+        // Without these the only control in the chapter announces as an
+        // unnamed slider reading "70" — no clue it sets probability of
+        // profit. These route to the nested input; see slider.tsx.
+        thumbLabel="Chance this works"
+        thumbValueText={(v) => `${v}% chance this works`}
         onValueChange={(v) => onChange((Array.isArray(v) ? v[0] : v) as DialStop)}
       />
       <div className="flex justify-between px-0.5">

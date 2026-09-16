@@ -37,7 +37,7 @@ export default function PrototypeKitPage() {
           <header className="flex flex-col gap-1">
             <h1 className="type-title text-foreground">prototype-kit</h1>
             <p className="type-body text-muted-foreground">
-              Foundation check — not the hackathon solution.
+              Foundation check. Not the hackathon solution.
             </p>
           </header>
 

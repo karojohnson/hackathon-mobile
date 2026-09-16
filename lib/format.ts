@@ -9,6 +9,21 @@ const currencyCompact = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 })
 
+/**
+ * Whole dollars, no cents — for summary figures where the cents are noise
+ * (e.g. "most you can lose $320" on the open-trades card, matching Figma).
+ * Precise option P/L keeps `formatCurrency` and its cents.
+ */
+const currencyWhole = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+})
+
+export function formatCurrencyWhole(value: number) {
+  return currencyWhole.format(value)
+}
+
 export function formatCurrency(value: number) {
   return currency.format(value)
 }

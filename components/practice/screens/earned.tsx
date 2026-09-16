@@ -7,7 +7,7 @@ export function EarnedScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <h1 className="type-title text-foreground">What this earned</h1>
         <span className="type-label text-muted-foreground">
           {unlockedAxes.length} tiers complete · {resolvedTrades.length} resolved trades
@@ -28,6 +28,7 @@ export function EarnedScreen() {
 
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-muted-foreground">Fees</span>
+        <div className="flex flex-col rounded-lg glass-card px-4">
         {FEE_UNLOCKS.map((fee) => {
           const unlocked = unlockedAxes.includes(fee.axis)
           return (
@@ -45,6 +46,7 @@ export function EarnedScreen() {
             </div>
           )
         })}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -60,14 +62,14 @@ export function EarnedScreen() {
               <span className="type-label text-muted-foreground">{cert.earnedOn}</span>
             </div>
           ))}
-          <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-muted p-3 text-center">
+          <div className="flex flex-col items-center justify-center gap-1 rounded-lg glass-card p-4 text-center">
             <Lock className="size-4 text-muted-foreground" />
             <span className="type-label text-muted-foreground">{LOCKED_CERTIFICATE.label}</span>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg bg-muted p-4">
+      <div className="flex flex-col gap-1 rounded-lg glass-card p-4">
         <span className="type-label uppercase tracking-wide text-muted-foreground">What tiers do not unlock</span>
         <div className="flex items-center justify-between py-1">
           <span className="type-body text-muted-foreground">Futures options</span>

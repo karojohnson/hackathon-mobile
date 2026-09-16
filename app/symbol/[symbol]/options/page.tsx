@@ -267,7 +267,7 @@ export default function OptionsPage() {
           {activeStrike?.strike.toFixed(0)} {optionType === "call" ? "Call" : "Put"}
         </Button>
         <p className="type-label text-center text-muted-foreground">
-          This is a prototype — no real money moves.
+          This is a prototype. No real money moves.
         </p>
       </div>
     </div>

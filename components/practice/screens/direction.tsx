@@ -21,7 +21,7 @@ export function DirectionScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <h1 className="type-title text-foreground">Direction</h1>
         <p className="type-body text-muted-foreground">rally, sell off, flat, or an outsized move</p>
       </div>
@@ -38,8 +38,9 @@ export function DirectionScreen() {
               type="button"
               onClick={() => setDirection(option.id)}
               className={cn(
-                "flex items-center justify-between gap-3 rounded-lg border px-3.5 py-3 text-left",
-                isSelected ? "border-positive bg-positive/10" : "border-transparent bg-muted"
+                "flex items-center justify-between gap-3 rounded-lg border px-3.5 py-3 text-left transition-colors",
+                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+                isSelected ? "border-accent-blue bg-accent-blue/12" : "glass-card"
               )}
             >
               <Icon className="size-5 shrink-0 text-muted-foreground" />
@@ -47,7 +48,7 @@ export function DirectionScreen() {
                 <span className="type-body-strong text-foreground">{option.label}</span>
                 <span className="type-label text-muted-foreground">{option.sublabel}</span>
               </div>
-              {isSelected && <Check className="size-5 shrink-0 text-positive" />}
+              {isSelected && <Check className="size-5 shrink-0 text-accent-blue" />}
             </button>
           )
         })}

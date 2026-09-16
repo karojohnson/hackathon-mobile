@@ -1,17 +1,16 @@
 import { cn } from "cn"
 
 import { usePractice } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
-import { catalystsFor } from "@/data/mock-practice-data"
+import { catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
 
 export function BriefingScreen() {
   const { symbol, unlockedAxes } = usePractice()
-  const quote = watchlist.find((q) => q.symbol === symbol)
+  const quote = practiceQuoteFor(symbol)
   const catalyst = catalystsFor(symbol)
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <h1 className="type-title text-foreground">What&apos;s coming</h1>
         <p className="type-body text-muted-foreground">
           {symbol} · next 30 days · implied move ± {catalyst.impliedMovePercent}%
@@ -24,10 +23,10 @@ export function BriefingScreen() {
           <div
             key={event.label}
             className={cn(
-              "flex items-center justify-between rounded-lg px-3.5 py-3",
+              "flex items-center justify-between rounded-lg border px-3.5 py-3",
               event === catalyst.events[catalyst.events.length - 1]
-                ? "border border-priority-gold bg-priority-gold-surface"
-                : "bg-muted"
+                ? "border-accent-blue bg-accent-blue/12"
+                : "glass-card"
             )}
           >
             <div className="flex flex-col">
@@ -41,16 +40,20 @@ export function BriefingScreen() {
 
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-muted-foreground">Signals</span>
-        {(["direction", "duration", "distance", "volatility"] as const).map((axis) => (
-          <div key={axis} className="flex items-center justify-between border-b border-border py-2 last:border-b-0">
-            <span className={cn("type-body capitalize", unlockedAxes.includes(axis) ? "text-foreground" : "text-muted-foreground/60")}>
-              {axis}
-            </span>
-            <span className="type-label text-muted-foreground">
-              {unlockedAxes.includes(axis) ? "open" : "locked"}
-            </span>
-          </div>
-        ))}
+        {/* Grouped rows inside one glass card — the dashboard/watchlist list
+            pattern, rather than a bare divider stack on the canvas. */}
+        <div className="flex flex-col rounded-lg glass-card px-4">
+          {(["direction", "duration", "distance", "volatility"] as const).map((axis) => (
+            <div key={axis} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
+              <span className={cn("type-body capitalize", unlockedAxes.includes(axis) ? "text-foreground" : "text-muted-foreground/60")}>
+                {axis}
+              </span>
+              <span className="type-label text-muted-foreground">
+                {unlockedAxes.includes(axis) ? "open" : "locked"}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {quote && (

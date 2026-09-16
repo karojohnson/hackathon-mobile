@@ -20,7 +20,7 @@ export function AxisTag({ axis, unlocked, className }: AxisTagProps) {
   return (
     <span
       className={cn(
-        "type-label inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-1 uppercase tracking-wide",
+        "type-label inline-flex items-center gap-1 rounded-md bg-surface-glass-sunken px-1.5 py-1 uppercase tracking-wide",
         unlocked ? "text-foreground" : "text-muted-foreground/60",
         className
       )}

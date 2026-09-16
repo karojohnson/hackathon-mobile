@@ -48,7 +48,7 @@ export function ControlSidebar() {
         </span>
         <h1 className="type-title text-foreground">Demo controls</h1>
         <p className="type-body text-muted-foreground">
-          Not part of the product — reshapes the phone live as you demo it.
+          Not part of the product. Reshapes the phone live as you demo it.
         </p>
       </div>
 

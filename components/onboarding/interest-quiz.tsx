@@ -150,7 +150,7 @@ export function InterestQuiz({ initialSelected = [], onContinue, onSkip }: Inter
             What are you <span className="text-accent-blue">interested</span> in?
           </h1>
           <p className="type-body text-muted-foreground">
-            Pick a few — go broad, go specific, or mix and match. We&apos;ll use it to shape
+            Pick a few: go broad, go specific, or mix and match. We&apos;ll use it to shape
             what you see first, and you can always change it later.{" "}
             <button
               type="button"

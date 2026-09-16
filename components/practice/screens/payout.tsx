@@ -19,18 +19,20 @@ export function PayoutScreen() {
 
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-muted-foreground">Where it came from</span>
-        {lastTrade?.axesCorrect.map((axis) => (
-          <div key={axis} className="flex items-center justify-between border-b border-border py-2 last:border-b-0">
-            <span className="type-body capitalize text-foreground">{axis}</span>
-            <span className="type-body-strong tabular-nums text-priority-gold">+20</span>
-          </div>
-        ))}
-        {lastTrade?.axesMissed.map((axis) => (
-          <div key={axis} className="flex items-center justify-between border-b border-border py-2 last:border-b-0">
-            <span className="type-body capitalize text-muted-foreground">{axis}</span>
-            <span className="type-body-strong tabular-nums text-muted-foreground">0</span>
-          </div>
-        ))}
+        <div className="flex flex-col rounded-lg glass-card px-4">
+          {lastTrade?.axesCorrect.map((axis) => (
+            <div key={axis} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
+              <span className="type-body capitalize text-foreground">{axis}</span>
+              <span className="type-body-strong tabular-nums text-priority-gold">+20</span>
+            </div>
+          ))}
+          {lastTrade?.axesMissed.map((axis) => (
+            <div key={axis} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
+              <span className="type-body capitalize text-muted-foreground">{axis}</span>
+              <span className="type-body-strong tabular-nums text-muted-foreground">0</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -38,10 +40,14 @@ export function PayoutScreen() {
           <span className="type-body-strong text-foreground">Level {level}</span>
           <span className="type-label tabular-nums text-muted-foreground">{xpIntoLevel} / {XP_PER_LEVEL} XP</span>
         </div>
-        <Progress value={(xpIntoLevel / XP_PER_LEVEL) * 100} />
+        <Progress
+          value={(xpIntoLevel / XP_PER_LEVEL) * 100}
+          aria-label={`Level ${level} progress`}
+          aria-valuetext={`${xpIntoLevel} of ${XP_PER_LEVEL} XP toward level ${level + 1}`}
+        />
       </div>
 
-      <div className="flex items-center justify-between rounded-lg bg-priority-gold-surface px-4 py-3">
+      <div className="flex items-center justify-between rounded-lg border border-priority-gold/30 bg-priority-gold-surface px-4 py-3">
         <div className="flex flex-col">
           <span className="type-body-strong text-priority-gold">{streak} resolved in a row</span>
           <span className="type-label text-priority-gold/80">3 more for Ten Straight</span>

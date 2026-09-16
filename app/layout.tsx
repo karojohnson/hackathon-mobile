@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import localFont from "next/font/local"
 
 import "./globals.css"
@@ -21,6 +22,11 @@ const robotoMono = localFont({
   variable: "--font-mono",
   display: "swap",
 })
+
+export const metadata: Metadata = {
+  title: "tastytrade · Bites",
+  description: "Chapter 2 prototype — learn options by placing simulated trades.",
+}
 
 export default function RootLayout({
   children,

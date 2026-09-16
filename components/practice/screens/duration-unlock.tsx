@@ -1,8 +1,8 @@
 import { cn } from "cn"
 
 import { usePractice } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
 import { expirations } from "@/data/mock-options-data"
+import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { Check, Lock, Unlock } from "@/lib/icons"
 
 const AXES = [
@@ -14,7 +14,7 @@ const AXES = [
 
 export function DurationUnlockScreen() {
   const { symbol, unlockedAxes } = usePractice()
-  const quote = watchlist.find((q) => q.symbol === symbol)
+  const quote = practiceQuoteFor(symbol)
 
   return (
     <div className="flex flex-col gap-6">
@@ -27,7 +27,7 @@ export function DurationUnlockScreen() {
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-priority-gold">Now open on the chain</span>
         {expirations.map((exp) => (
-          <div key={exp.id} className="flex flex-col rounded-lg bg-muted px-3.5 py-3 text-center">
+          <div key={exp.id} className="flex flex-col rounded-lg glass-card p-4 text-center">
             <span className="type-body-strong text-foreground">
               {exp.label} ({exp.daysOut})
             </span>
@@ -40,6 +40,7 @@ export function DurationUnlockScreen() {
 
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-muted-foreground">Drill down</span>
+        <div className="flex flex-col rounded-lg glass-card px-4">
         {AXES.map((axis) => {
           const unlocked = unlockedAxes.includes(axis.id) || axis.id === "duration"
           return (
@@ -59,6 +60,7 @@ export function DurationUnlockScreen() {
             </div>
           )
         })}
+        </div>
       </div>
     </div>
   )

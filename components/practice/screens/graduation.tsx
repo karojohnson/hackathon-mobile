@@ -1,13 +1,13 @@
 import { usePractice } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
 import { expirations, shortPutSpreadFor } from "@/data/mock-options-data"
+import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { formatCurrency } from "@/lib/format"
 import { ExternalLink } from "@/lib/icons"
 
 export function GraduationScreen() {
   const { symbol, dialStop, resolvedTrades } = usePractice()
-  const quote = watchlist.find((q) => q.symbol === symbol)
-  const price = quote?.price ?? 100
+  const quote = practiceQuoteFor(symbol)
+  const price = quote.price
   const spread = shortPutSpreadFor(price, expirations[1].daysOut, dialStop)
   // Seeded with the practice history the screen reports (14 trades at ~71%),
   // so a single in-session resolution nudges the rate instead of redefining it.
@@ -33,7 +33,7 @@ export function GraduationScreen() {
 
       <p className="type-body-strong text-foreground">The same trade, with real money behind it.</p>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-border p-4">
+      <div className="flex flex-col gap-2 rounded-lg glass-card p-4">
         <div className="flex items-center justify-between">
           <span className="type-body-strong text-foreground">Short put spread</span>
           <span className="type-label text-muted-foreground">{symbol}</span>
@@ -58,12 +58,12 @@ export function GraduationScreen() {
 
       <span className="type-label text-priority-gold">⚠ Real money. Sized to what you actually hold.</span>
 
-      <div className="flex items-center justify-between rounded-lg bg-muted px-3.5 py-3">
+      <div className="flex items-center justify-between rounded-lg glass-card p-4">
         <span className="type-body text-foreground">Simulated practice ends here.</span>
         <ExternalLink className="size-4 text-muted-foreground" />
       </div>
 
-      <p className="type-label text-center text-muted-foreground">This is a prototype — no real money moves.</p>
+      <p className="type-label text-center text-muted-foreground">This is a prototype. No real money moves.</p>
     </div>
   )
 }

@@ -56,13 +56,20 @@ interface PracticeContextValue extends PracticeState {
 
 const PracticeContext = React.createContext<PracticeContextValue | null>(null)
 
-export const PRACTICE_STORAGE_KEY = "hackathon-practice-state-v1"
+/*
+ * Bumped to v2 when Chapter 2 moved from real tickers (AAPL/TSLA/NVDA/COIN)
+ * to the invented ones in the Figma file (ZNTH/ARVO/KLTR/MERD). A session
+ * saved under v1 holds `symbol: "AAPL"`, which no longer exists in
+ * SYMBOL_CATALYSTS — catalystsFor() would fall back to ZNTH's calendar and
+ * render it under an AAPL header. Bumping the key retires that state.
+ */
+export const PRACTICE_STORAGE_KEY = "hackathon-practice-state-v2"
 
 const XP_PER_LEVEL = 3000
 
 const initialState: PracticeState = {
   currentScreen: "cold-start",
-  symbol: "AAPL",
+  symbol: "ZNTH",
   chosenDirection: "rallies",
   dialStop: 70,
   unlockedAxes: ["direction"],
@@ -73,10 +80,31 @@ const initialState: PracticeState = {
   structuresEarned: ["put-spread", "call-spread", "iron-condor", "straddle"],
 }
 
-export function PracticeProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<PracticeState>(initialState)
+export interface PracticeProviderProps {
+  children: React.ReactNode
+  /**
+   * Starting state, merged over the defaults. Only read on mount — later
+   * changes to this object are ignored, same as React's own `defaultValue`.
+   */
+  seed?: Partial<PracticeState>
+  /**
+   * Whether this provider reads and writes `PRACTICE_STORAGE_KEY`. Defaults
+   * to true (the live clickable prototype, which should survive a refresh).
+   *
+   * The screen gallery at /practice-screens mounts one provider per screen
+   * on a single page, so it passes `false`: fourteen providers sharing one
+   * storage key would race each other on every write and would also hydrate
+   * away the per-tile `seed` — and worse, would overwrite whatever progress
+   * the real prototype had saved just by opening the gallery.
+   */
+  persist?: boolean
+}
+
+export function PracticeProvider({ children, seed, persist = true }: PracticeProviderProps) {
+  const [state, setState] = React.useState<PracticeState>(() => ({ ...initialState, ...seed }))
 
   React.useEffect(() => {
+    if (!persist) return
     try {
       const raw = window.localStorage.getItem(PRACTICE_STORAGE_KEY)
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync read of localStorage on mount, not a derived-state loop
@@ -84,10 +112,11 @@ export function PracticeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore malformed/unavailable storage — falls back to defaults
     }
-  }, [])
+  }, [persist])
 
   const skippedFirstWrite = React.useRef(false)
   React.useEffect(() => {
+    if (!persist) return
     if (!skippedFirstWrite.current) {
       skippedFirstWrite.current = true
       return
@@ -97,7 +126,7 @@ export function PracticeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore write failures (e.g. private browsing)
     }
-  }, [state])
+  }, [state, persist])
 
   const goTo = React.useCallback((screen: ScreenId) => {
     setState((prev) => ({ ...prev, currentScreen: screen }))

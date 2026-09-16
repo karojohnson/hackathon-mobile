@@ -48,6 +48,7 @@
     --color-accent-blue: var(--accent-blue);
     --color-positive: var(--positive);
     --color-negative: var(--negative);
+    --color-partial: var(--partial);
     --color-warning: var(--warning);
     --color-focus: var(--focus);
     --color-text-secondary: var(--text-secondary);
@@ -125,6 +126,13 @@
     --positive: #008060;
     /* color-text-general-negative-tick */
     --negative: #d10a2c;
+    /*
+     * Partial result — a 2-of-4, not a loss. The Figma file scores these
+     * orange rather than red precisely so a partial isn't failure-coded;
+     * reusing --negative here would invert that. Dark is the design's own
+     * #e87b4b; light is darkened to clear 4.5:1 on the light surface.
+     */
+    --partial: #a84a16;
     /* color-text-alerts-warning */
     --warning: #946a00;
     --chart-1: oklch(0.87 0 0);
@@ -208,6 +216,7 @@
     --positive: #2db26a;
     /* color-text-general-negative-tick */
     --negative: #fc4138;
+    --partial: #e87b4b;
     /* color-text-alerts-warning */
     --warning: #ffc800;
     --chart-1: oklch(0.87 0 0);
@@ -449,5 +458,45 @@
       color-mix(in oklch, var(--accent-blue) 13%, transparent) 35%,
       color-mix(in oklch, var(--accent-blue) 0%, transparent) 70%
     );
+  }
+  /*
+   * Practice tab (Chapter 2). Same corner-anchored accent-blue wash as the
+   * dashboard above, at the same strength — the Practice tab sits behind the
+   * same bottom nav, so it has to read as the same canvas, not a separate
+   * product. Kept as its own class rather than reusing `.dashboard-top-glow`
+   * so the two can diverge later without one silently restyling the other.
+   */
+  .practice-top-glow {
+    background: radial-gradient(
+      220% 120% at 100% 0%,
+      color-mix(in oklch, var(--accent-blue) 31%, transparent) 0%,
+      color-mix(in oklch, var(--accent-blue) 13%, transparent) 35%,
+      color-mix(in oklch, var(--accent-blue) 0%, transparent) 70%
+    );
+  }
+}
+
+/*
+ * Reduced motion. Vestibular-disorder accessibility requirement, not a
+ * preference — the app previously had no `prefers-reduced-motion` handling
+ * of any kind.
+ *
+ * This covers every CSS transition and animation, which is the whole of the
+ * Chapter 2 surface (its only motion is `transition-colors` on the ticker
+ * and direction chips). Components animating through motion/react — splash,
+ * onboarding, order-success, swipeable-position-row — are JS-driven and are
+ * handled separately by MotionConfig in the theme provider.
+ *
+ * Durations go to 1ms rather than 0 so transitionend/animationend listeners
+ * still fire and nothing waits forever on a callback that never arrives.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -2,11 +2,11 @@ import { cn } from "cn"
 
 import { AxisTag } from "@/components/practice/axis-tag"
 import type { Axis } from "@/components/providers/practice-provider"
-import type { Quote } from "@/data/mock-market-data"
+import type { PracticeQuote } from "@/data/mock-practice-data"
 import { formatPercent } from "@/lib/format"
 
 export interface TickerChipProps {
-  quote: Quote
+  quote: PracticeQuote
   catalystLabel: string
   axis: Axis
   unlocked: boolean
@@ -22,8 +22,9 @@ export function TickerChip({ quote, catalystLabel, axis, unlocked, selected, onS
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex w-full flex-col gap-1.5 rounded-lg border px-3.5 py-3 text-left",
-        selected ? "border-priority-gold bg-priority-gold-surface" : "border-transparent bg-muted"
+        "flex w-full flex-col gap-1.5 rounded-lg border px-3.5 py-3 text-left transition-colors",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+        selected ? "border-accent-blue bg-accent-blue/12" : "glass-card"
       )}
     >
       <div className="flex items-center justify-between">
@@ -44,7 +45,7 @@ export function TickerChip({ quote, catalystLabel, axis, unlocked, selected, onS
         </div>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <span className={cn("type-label truncate", selected ? "text-priority-gold" : "text-muted-foreground")}>
+        <span className={cn("type-label truncate", selected ? "text-accent-blue" : "text-muted-foreground")}>
           {catalystLabel}
         </span>
         <AxisTag axis={axis} unlocked={unlocked} />

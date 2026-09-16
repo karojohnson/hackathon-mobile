@@ -3,15 +3,29 @@
 import * as React from "react"
 import { cn } from "cn"
 
-import { ArrowLeftRight, Compass, Home, LineChart, Sparkles, Wallet } from "@/lib/icons"
+import { Activity, ArrowLeftRight, LineChart, Sparkles, Wallet } from "@/lib/icons"
 
+/**
+ * Five tabs, matching the Figma tab bar, and shared by both prototypes so
+ * Chapter 2 doesn't read as a different product than the dashboard.
+ *
+ * Only two of these actually branch: `Bites` renders the practice tab, and
+ * everything else renders the dashboard (see app/page.tsx). That's why the
+ * labels are chosen for what the one dashboard screen actually contains —
+ * its own section headings are "Watchlist" and "Positions" — rather than
+ * for an information architecture that doesn't exist yet.
+ *
+ * Dropped from the previous six: Home (a label for "everything else" when
+ * there's one screen), Discover (Bites owns "worth a look" now, and two
+ * tabs for one intent dilutes both), and Portfolio (same concept as
+ * Positions; Figma and the dashboard heading both say Positions).
+ */
 const items = [
-  { label: "Home", icon: Home },
-  { label: "Discover", icon: Compass },
-  { label: "Trade", icon: ArrowLeftRight },
-  { label: "Portfolio", icon: Wallet },
   { label: "Watchlist", icon: LineChart },
-  { label: "Practice", icon: Sparkles },
+  { label: "Positions", icon: Wallet },
+  { label: "Trade", icon: ArrowLeftRight },
+  { label: "Activity", icon: Activity },
+  { label: "Bites", icon: Sparkles },
 ] as const
 
 export interface BottomNavProps {
@@ -52,6 +66,7 @@ export function BottomNav({ className, activeIndex, onActiveChange }: BottomNavP
             onClick={() => handleClick(index)}
             className={cn(
               "flex flex-1 flex-col items-center gap-1 rounded-lg px-0.5 py-1.5 transition-colors",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
               isActive ? "text-foreground" : "text-muted-foreground"
             )}
           >

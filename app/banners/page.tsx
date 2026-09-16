@@ -58,7 +58,7 @@ export default function BannersPage() {
         <div className="flex flex-col gap-1">
           <h1 className="type-title text-foreground">All banners</h1>
           <p className="type-body text-muted-foreground">
-            Every banner variant shown across the dashboards, in one place — each at the exact
+            Every banner variant shown across the dashboards, in one place, each at the exact
             width it renders at on the phone mockup.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function BannersPage() {
           <Variant label="etfs">
             <PreferenceSpotlight preference="etfs" />
           </Variant>
-          <Variant label="stocks — renders nothing (watchlist/positions already cover it)">
+          <Variant label="stocks: renders nothing (watchlist/positions already cover it)">
             <div className="rounded-lg border border-dashed border-border p-3 text-center">
               <span className="type-label text-muted-foreground/70">null</span>
             </div>
@@ -116,7 +116,7 @@ export default function BannersPage() {
         </Section>
 
         <Section title="Severity banner" source="dashboard-concept-a.tsx">
-          <Variant label="variant: red, emphasis (in use — Concept A's manual-review nudge)">
+          <Variant label="variant: red, emphasis (in use: Concept A's manual-review nudge)">
             <SignalBanner
               variant="red"
               emphasis
@@ -133,7 +133,7 @@ export default function BannersPage() {
               variant="gray"
               eyebrow="Heads up"
               title="Nothing urgent right now"
-              body="Same banner shell, quieter priority — no dashboard uses this combination yet."
+              body="Same banner shell, quieter priority. No dashboard uses this combination yet."
               cta="Review"
             />
           </Variant>

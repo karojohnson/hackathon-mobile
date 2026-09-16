@@ -20,9 +20,23 @@ export interface PracticeShellProps {
 export function PracticeShell({ children, footer, activeTabIndex, onActiveTabChange }: PracticeShellProps) {
   return (
     <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-24">
+      {/*
+        Same accent-blue wash the dashboard runs (see `.dashboard-top-glow`),
+        anchored above the banner so it bleeds up behind the status bar and
+        down through the header — Chapter 2 shares a bottom nav with the
+        dashboard, so it should share its canvas rather than sitting on a
+        flat one. `-top-14` cancels the shell's own pt-14-equivalent bleed.
+      */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-14 h-141 practice-top-glow" />
       <PracticeBanner />
-      <div className="flex flex-1 flex-col gap-6 px-4 pb-4">{children}</div>
-      <div className="glass-nav sticky bottom-14 mt-auto flex flex-col gap-2 px-4 pt-3 pb-3">{footer}</div>
+      <div className="relative flex flex-1 flex-col gap-6 px-4 pb-4">{children}</div>
+      {/*
+        Dissolve-into-the-CTA footer rather than a bordered bar: `glass-nav`
+        drew a hard rule right above the bottom nav's own hard rule, stacking
+        two seams. The gradient is the same one the onboarding steps use, and
+        the generous pt- gives it room to actually read as a fade.
+      */}
+      <div className="glass-sheet-fade sticky bottom-14 mt-auto flex flex-col gap-2 px-4 pt-12 pb-3">{footer}</div>
       <BottomNav
         activeIndex={activeTabIndex}
         onActiveChange={onActiveTabChange}

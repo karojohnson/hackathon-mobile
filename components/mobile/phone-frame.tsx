@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 
 import { AppSplashGate } from "@/components/splash/app-splash-gate"
 import { StatusBar } from "@/components/mobile/status-bar"
@@ -48,15 +49,45 @@ export function usePhoneViewport() {
  * content scrolls in the nested div below instead, so sheets/overlays stay
  * pinned to the screen no matter the scroll position.
  */
-export function PhoneFrame({ children }: { children: React.ReactNode }) {
+export interface PhoneFrameProps {
+  children: React.ReactNode
+  /**
+   * Whether the 3-second launch splash plays. The clickable prototype wants
+   * it; the screen gallery at /practice-screens does not — fourteen tiles
+   * each covering themselves with a cherry for three seconds is just a wait.
+   */
+  splash?: boolean
+  /**
+   * `"fit"` (default) shrinks to the browser viewport so the whole device is
+   * visible on a laptop. `"full"` pins the device to its true 876px so tiles
+   * in a scrolling gallery are all the same size regardless of window height.
+   * `"auto"` drops the device height entirely and grows to fit the content —
+   * for reviewing a long screen end to end without scrolling inside the
+   * bezel. Nothing scrolls in `"auto"`, so it is a review mode, not a
+   * faithful device preview.
+   */
+  height?: "fit" | "full" | "auto"
+}
+
+export function PhoneFrame({ children, splash = true, height = "fit" }: PhoneFrameProps) {
   const [viewport, setViewport] = React.useState<HTMLDivElement | null>(null)
+  const content = splash ? <AppSplashGate>{children}</AppSplashGate> : children
+  const isAuto = height === "auto"
 
   return (
     <div
-      className="relative aspect-417/876 h-[min(876px,calc(100dvh-3rem))] overflow-hidden rounded-[64px] border-12 border-neutral-900 bg-background shadow-2xl"
+      className={cn(
+        "relative overflow-hidden rounded-[64px] border-12 border-neutral-900 bg-background shadow-2xl",
+        isAuto ? "w-[417px]" : "aspect-417/876",
+        height === "full" && "h-[876px]",
+        height === "fit" && "h-[min(876px,calc(100dvh-3rem))]"
+      )}
       style={{ maxWidth: "417px" }}
     >
-      <div ref={setViewport} className="relative h-full w-full overflow-hidden [contain:layout]">
+      <div
+        ref={setViewport}
+        className={cn("relative w-full overflow-hidden [contain:layout]", !isAuto && "h-full")}
+      >
         {/*
           pt-14 (56px) pushes every page's content down below the status
           bar/Dynamic Island uniformly (the status bar itself is 54px) — a
@@ -65,10 +96,17 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
           against this container's padding box, so the space above it during
           the splash is just more of the same bg-background, not a visible gap.
         */}
-        <div className="h-full w-full overflow-x-hidden overflow-y-auto pt-14 outline-hidden">
-          <PhoneViewportContext.Provider value={viewport}>
-            <AppSplashGate>{children}</AppSplashGate>
-          </PhoneViewportContext.Provider>
+        <div
+          className={cn(
+            "w-full overflow-x-hidden pt-14 outline-hidden",
+            // In "auto" the device has no height of its own, so a page
+            // shorter than a real screen would leave bare bg below its
+            // bottom nav. Floor it at one screen and stretch the page to
+            // fill that floor, the way `h-full` does in the other modes.
+            isAuto ? "flex min-h-[876px] flex-col *:flex-1" : "h-full overflow-y-auto"
+          )}
+        >
+          <PhoneViewportContext.Provider value={viewport}>{content}</PhoneViewportContext.Provider>
         </div>
       </div>
 

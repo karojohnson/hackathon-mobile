@@ -4,10 +4,18 @@ import * as React from "react"
 
 export type PrototypeId = 1 | 2
 
-// The bottom-nav tab index for the "Practice" tab, i.e. Prototype 2 (Chapter 2).
-export const PRACTICE_TAB_INDEX = 5
+// The bottom-nav tab index for the "Bites" tab, i.e. Prototype 2 (Chapter 2).
+// Last of the five in components/mobile/bottom-nav.tsx.
+export const PRACTICE_TAB_INDEX = 4
 
-export const PROTOTYPE_STORAGE_KEY = "hackathon-active-prototype-v1"
+/*
+ * Bumped to v2 when the bottom nav went from six tabs to the Figma five and
+ * Bites moved from index 5 to 4. This key persists `activeTab` as a raw
+ * integer, so a session saved under v1 could hold `5` — an index that no
+ * longer exists, which would silently fall through to the dashboard while
+ * `activePrototype` reported 1. Bumping retires that state.
+ */
+export const PROTOTYPE_STORAGE_KEY = "hackathon-active-prototype-v2"
 
 export interface PrototypeContextValue {
   activeTab: number
@@ -25,7 +33,10 @@ export function PrototypeProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = window.localStorage.getItem(PROTOTYPE_STORAGE_KEY)
       const parsed = raw === null ? NaN : Number.parseInt(raw, 10)
-      if (Number.isInteger(parsed) && parsed >= 0 && parsed <= 5) {
+      // Bites is the last tab, so its index is also the valid upper bound —
+      // derived rather than hardcoded so this can't drift out of sync with
+      // the nav again if a tab is added or removed.
+      if (Number.isInteger(parsed) && parsed >= 0 && parsed <= PRACTICE_TAB_INDEX) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync read of localStorage on mount, not a derived-state loop
         setActiveTab(parsed)
       }

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { MotionConfig } from "motion/react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
 function ThemeProvider({
@@ -16,7 +17,12 @@ function ThemeProvider({
       {...props}
     >
       <ThemeHotkey />
-      {children}
+      {/*
+        The CSS half of reduced motion lives in globals.css; that only
+        reaches CSS transitions. `reducedMotion="user"` is what makes every
+        motion/react animation in the app honour the OS setting too.
+      */}
+      <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </NextThemesProvider>
   )
 }

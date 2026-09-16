@@ -28,7 +28,7 @@ export function RecordScreen() {
 
       <StatRadar values={{ direction: 71, duration: 66, distance: 54, volatility: 48 }} />
 
-      <div className="flex flex-col">
+      <div className="flex flex-col rounded-lg glass-card px-4">
         {AXES.map((axis) => (
           <div key={axis.id} className="flex flex-col gap-1 border-b border-border py-2.5 last:border-b-0">
             <div className="flex items-center justify-between">
@@ -62,8 +62,8 @@ export function RecordScreen() {
                 key={structure.id}
                 className={
                   earned
-                    ? "flex aspect-square items-center justify-center rounded-lg bg-muted"
-                    : "flex aspect-square items-center justify-center rounded-lg bg-muted/40"
+                    ? "flex aspect-square items-center justify-center rounded-lg glass-card"
+                    : "flex aspect-square items-center justify-center rounded-lg glass-card opacity-45"
                 }
                 title={structure.label}
               >

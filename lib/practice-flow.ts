@@ -1,5 +1,5 @@
 import type { Axis, PracticeState, ResolvedTrade, ScreenId } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
+import { practiceQuoteFor } from "@/data/mock-practice-data"
 
 export const PRACTICE_SCREEN_ORDER: ScreenId[] = [
   "cold-start",
@@ -53,8 +53,8 @@ export const PRACTICE_FOOTER_CTAS: Record<ScreenId, PracticeFooterCta[]> = {
  * axis — so the demo tells a consistent story across runs.
  */
 export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id"> {
-  const quote = watchlist.find((q) => q.symbol === state.symbol)
-  const trendUp = (quote?.changePercent ?? 0) >= 0
+  const quote = practiceQuoteFor(state.symbol)
+  const trendUp = quote.changePercent >= 0
   // Mirrors direction.tsx's displayed default, and guards against a stale
   // persisted null from an earlier session's localStorage.
   const thesis = state.chosenDirection ?? "rallies"
@@ -77,6 +77,6 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
     axesCorrect,
     axesMissed,
     xpEarned,
-    finishedPrice: quote?.price ?? 0,
+    finishedPrice: quote.price,
   }
 }

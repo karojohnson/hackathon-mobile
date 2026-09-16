@@ -22,7 +22,7 @@ export default function ConceptsPage() {
         <div className="flex flex-col gap-1">
           <h1 className="type-title text-foreground">Dashboard concepts</h1>
           <p className="type-body text-muted-foreground">
-            Two exploratory directions for discussion — static, not wired up.
+            Two exploratory directions for discussion. Static, not wired up.
           </p>
         </div>
       </div>

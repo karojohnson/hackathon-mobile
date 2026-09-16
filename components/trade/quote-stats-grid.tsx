@@ -20,14 +20,14 @@ const fields: StatField[] = [
     label: "52-wk high",
     tldr: "The highest price this stock has traded at over the past year.",
     detail:
-      "It's just a data point, not a ceiling — the stock can trade above it once a new high is set. Traders watch it as a reference: trading close to it signals strong momentum, while trading far below it can mean the stock is out of favor.",
+      "It's just a data point, not a ceiling. The stock can trade above it once a new high is set. Traders watch it as a reference: trading close to it signals strong momentum, while trading far below it can mean the stock is out of favor.",
   },
   {
     key: "week52Low",
     label: "52-wk low",
     tldr: "The lowest price this stock has traded at over the past year.",
     detail:
-      "It's just a data point, not a floor the stock is guaranteed to respect. Sitting near it isn't automatically \"cheap\" — it often means something (weak earnings, bad news) pushed sellers to keep stepping in.",
+      "It's just a data point, not a floor the stock is guaranteed to respect. Sitting near it isn't automatically \"cheap\": it often means something (weak earnings, bad news) pushed sellers to keep stepping in.",
   },
   {
     key: "dayHigh",
@@ -41,14 +41,14 @@ const fields: StatField[] = [
     label: "Day's low",
     tldr: "The lowest price this stock has hit today.",
     detail:
-      "Same idea as the day's high, just the other direction — the worst price the stock has traded at since the market opened. If the current price is sitting right on it, selling pressure may still be active.",
+      "Same idea as the day's high, just the other direction: the worst price the stock has traded at since the market opened. If the current price is sitting right on it, selling pressure may still be active.",
   },
   {
     key: "open",
     label: "Open",
     tldr: "The price this stock started trading at today.",
     detail:
-      "Set by the first trade of the session, it doesn't have to match yesterday's close — overnight news can push it noticeably higher or lower (a \"gap\"). Comparing the current price to the open shows how it's moved since trading began today.",
+      "Set by the first trade of the session, it doesn't have to match yesterday's close: overnight news can push it noticeably higher or lower (a \"gap\"). Comparing the current price to the open shows how it's moved since trading began today.",
   },
   {
     key: "volume",

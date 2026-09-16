@@ -1,16 +1,16 @@
 import { AxisTag } from "@/components/practice/axis-tag"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { usePractice } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
 import { expirations, ironCondorFor } from "@/data/mock-options-data"
+import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { formatCurrency } from "@/lib/format"
 
 const AXES = ["direction", "duration", "distance", "volatility"] as const
 
 export function DialInAllFourScreen() {
   const { symbol } = usePractice()
-  const quote = watchlist.find((q) => q.symbol === symbol)
-  const price = quote?.price ?? 100
+  const quote = practiceQuoteFor(symbol)
+  const price = quote.price
   const condor = ironCondorFor(price, expirations[1].daysOut)
 
   return (

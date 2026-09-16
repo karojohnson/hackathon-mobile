@@ -1,8 +1,8 @@
 import { DialSlider } from "@/components/practice/dial-slider"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { usePractice } from "@/components/providers/practice-provider"
-import { watchlist } from "@/data/mock-market-data"
 import { expirations, shortPutSpreadFor } from "@/data/mock-options-data"
+import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { formatCurrency } from "@/lib/format"
 
 const THESIS_LABEL = {
@@ -14,8 +14,8 @@ const THESIS_LABEL = {
 
 export function DialInScreen() {
   const { symbol, dialStop, setDialStop, chosenDirection } = usePractice()
-  const quote = watchlist.find((q) => q.symbol === symbol)
-  const price = quote?.price ?? 100
+  const quote = practiceQuoteFor(symbol)
+  const price = quote.price
   const spread = shortPutSpreadFor(price, expirations[1].daysOut, dialStop)
   const thesisLabel = THESIS_LABEL[chosenDirection ?? "rallies"]
 

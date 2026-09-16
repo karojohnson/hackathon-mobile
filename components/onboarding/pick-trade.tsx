@@ -49,7 +49,7 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
 
           <h1 className="type-title text-foreground">Place your first trade</h1>
           <p className="type-body text-muted-foreground">
-            Tap one to get started — you can always trade something else later.{" "}
+            Tap one to get started. You can always trade something else later.{" "}
             <button
               type="button"
               onClick={onSkip}
