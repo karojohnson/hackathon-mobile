@@ -1,5 +1,7 @@
 "use client"
 
+import * as React from "react"
+
 import Link from "next/link"
 import { cn } from "cn"
 
@@ -14,6 +16,8 @@ import { NetWorthSheet } from "@/components/dashboard/net-worth-sheet"
 import { TodoList } from "@/components/dashboard/todo-list"
 import { PreferenceSpotlight } from "@/components/dashboard/preference-spotlight"
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-overlay"
+import { PracticeProvider } from "@/components/providers/practice-provider"
+import { PracticeTab } from "@/components/practice/practice-tab"
 import { Button } from "@/components/ui/button"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
 import { watchlist as allQuotes } from "@/data/mock-market-data"
@@ -33,10 +37,19 @@ export default function Page() {
     closePosition,
     adjustCash,
   } = useOnboarding()
+  const [activeTab, setActiveTab] = React.useState(0)
 
   const watchedQuotes = allQuotes.filter((q) => watchlist.includes(q.symbol))
   const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0)
   const netWorth = cash + positionsValue
+
+  if (activeTab === 5) {
+    return (
+      <PracticeProvider>
+        <PracticeTab activeTabIndex={activeTab} onActiveTabChange={setActiveTab} />
+      </PracticeProvider>
+    )
+  }
 
   return (
     // -mt-14/pt-14 cancel out (same 56px the phone-frame scroll container
@@ -152,7 +165,11 @@ export default function Page() {
         </div>
       </div>
 
-      <BottomNav className="sticky inset-x-0 bottom-0 z-10" />
+      <BottomNav
+        className="sticky inset-x-0 bottom-0 z-10"
+        activeIndex={activeTab}
+        onActiveChange={setActiveTab}
+      />
     </div>
   )
 }
