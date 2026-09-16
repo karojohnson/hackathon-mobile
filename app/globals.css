@@ -291,6 +291,17 @@
  * Use for hierarchy before reaching for containers (visual principle #10).
  */
 @layer utilities {
+  /*
+   * Below the scale on purpose. The record screen's stat rows carry a
+   * sublabel, a tier pill, a percentage and a sample count on one 342px
+   * line; at `.type-label` (12px) the widest row overflows before it
+   * reaches the percentage. Caption scale for those secondary bits only.
+   */
+  .type-micro {
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 525;
+  }
   .type-label {
     font-size: 12px;
     line-height: 16px;
@@ -359,6 +370,36 @@
     @apply backdrop-blur-lg backdrop-saturate-150;
     background: color-mix(in oklch, var(--elevated-surface) 65%, transparent);
     border: 1px solid color-mix(in oklch, var(--border) 55%, transparent);
+  }
+  /*
+   * Practice-mode banner (Chapter 2). A light frosted strip that runs from
+   * the very top of the screen — behind the status-bar clock — down past the
+   * "simulated · nothing here trades" row, so practice mode is flagged
+   * before any content is read.
+   *
+   * 60% of `surface` rather than `glass-nav`'s 72%: the point is to lighten
+   * and frost the accent-blue wash behind it, not to cover it. An earlier
+   * version used an opaque gold gradient, which cut the wash off with a hard
+   * seam and made Chapter 2 read as a different product.
+   */
+  .glass-banner {
+    /*
+     * Fill stack copied from the Figma banner (node 249:5363): a flat 60%
+     * `surface` base with a soft neutral sheen falling off downward from the
+     * top edge, so the strip reads as lit from above rather than as a flat
+     * panel. `0deg` puts 0% at the bottom, matching Figma's export.
+     *
+     * No bottom border, deliberately — the sheen is what separates the
+     * banner from the content, and a hairline here reads as a hard seam
+     * against the accent-blue wash showing through.
+     *
+     * blur-xl is 24px, matching the design's backdrop blur. No
+     * backdrop-saturate: the design doesn't have one.
+     */
+    @apply backdrop-blur-xl;
+    background:
+      linear-gradient(0deg, transparent 0%, rgba(102, 102, 102, 0.2) 100%),
+      color-mix(in oklch, var(--surface) 60%, transparent);
   }
   .glass-floating {
     @apply backdrop-blur-xl backdrop-saturate-150;

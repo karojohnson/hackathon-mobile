@@ -14,6 +14,15 @@ export const transitions = {
   spring: { type: "spring", stiffness: 400, damping: 32 } satisfies Transition,
   /** Bottom sheets / drawers sliding in from an edge. */
   sheet: { type: "spring", stiffness: 380, damping: 38 } satisfies Transition,
+  /**
+   * Numbers ticking up to a target. Longer and flatter than `standard`,
+   * because a count-up read at spring speed is a blur rather than a number
+   * you can watch arrive. Used imperatively via `animate()` on a motion
+   * value, so callers must check `useReducedMotion()` themselves — the
+   * `<MotionConfig reducedMotion="user">` in theme-provider.tsx only covers
+   * declarative `<motion.*>` components.
+   */
+  countUp: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } satisfies Transition,
 } as const
 
 export type TransitionName = keyof typeof transitions

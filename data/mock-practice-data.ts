@@ -1,4 +1,6 @@
 import type { Axis } from "@/components/providers/practice-provider"
+import type { StrategyId } from "@/data/mock-options-data"
+import { watchlist } from "@/data/mock-market-data"
 
 export interface CatalystEvent {
   date: string
@@ -26,7 +28,7 @@ export interface SymbolCatalyst {
 
 export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
   {
-    symbol: "ZNTH",
+    symbol: "AAPL",
     impliedMovePercent: 7.2,
     events: [
       /*
@@ -37,20 +39,15 @@ export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
        * padlocks and no open door, then sent the customer to the Direction
        * picker anyway. One unlocked chip plus three locked ones reads as
        * "here's one you can do now, three you'll grow into".
-       *
-       * Note this is where the build departs from Figma: the design authors
-       * each cold-start chip's axis tag by hand, so its ZNTH calendar opens
-       * on a Volatility rebalance while the chip still reads DIRECTION. We
-       * derive the tag instead, so ZNTH leads with its earnings date.
        */
-      { date: "Sep 22", label: "Q3 earnings", chipLabel: "Earnings Tuesday · ± 7.2% move", axis: "direction", daysOut: 6 },
+      { date: "Sep 22", label: "Q4 earnings", chipLabel: "Earnings Tuesday · ± 7.2% move", axis: "direction", daysOut: 6 },
       { date: "Sep 29", label: "Index rebalance", chipLabel: "Index rebalance: forced buying", axis: "volatility", daysOut: 13 },
-      { date: "Oct 2", label: "Investor day", axis: "direction", daysOut: 16 },
+      { date: "Oct 2", label: "Product event", axis: "direction", daysOut: 16 },
       { date: "Oct 14", label: "Analyst day", axis: "distance", daysOut: 28 },
     ],
   },
   {
-    symbol: "KLTR",
+    symbol: "NVDA",
     impliedMovePercent: 9.2,
     events: [
       { date: "Oct 8", label: "Gap fill watch", chipLabel: "Gapped 9% on no news", axis: "distance", daysOut: 22 },
@@ -58,7 +55,7 @@ export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
     ],
   },
   {
-    symbol: "ARVO",
+    symbol: "AMZN",
     impliedMovePercent: 8.1,
     events: [
       { date: "Oct 6", label: "Elevated IV", chipLabel: "IV rank 71% · premium is rich", axis: "volatility", daysOut: 20 },
@@ -66,49 +63,58 @@ export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
     ],
   },
   {
-    symbol: "MERD",
+    symbol: "TSLA",
     impliedMovePercent: 4.5,
     events: [
-      { date: "Sep 29", label: "Index rebalance", chipLabel: "Index rebalance · Sep 29", axis: "duration", daysOut: 13 },
+      { date: "Sep 29", label: "Delivery numbers", chipLabel: "Delivery numbers · Sep 29", axis: "duration", daysOut: 13 },
       { date: "Nov 5", label: "Q3 earnings", axis: "direction", daysOut: 50 },
     ],
   },
 ]
 
 /**
- * Quotes for the four Chapter 2 symbols, straight from the Figma file
- * (`01 Cold start`). These are invented companies on purpose — the practice
- * flow shouldn't read as a recommendation on a real ticker.
+ * The four symbols Chapter 2 practises on.
  *
- * Deliberately NOT added to `watchlist` in data/mock-market-data.ts: that
- * list feeds Prototype 1's dashboard and watchlist screens, and ZNTH has no
- * business showing up there. Chapter 2 is the only consumer, so the data
- * lives here with the rest of the Chapter 2 fixtures.
+ * These are real, well-known tickers, and their prices and names come
+ * straight out of the shared `watchlist` that Prototype 1's dashboard uses
+ * — so AAPL is quoted at the same number in both chapters. An earlier pass
+ * used invented companies (ZNTH/ARVO/KLTR/MERD) to keep the flow from
+ * reading as a recommendation; the "PRACTICE · simulated, nothing here
+ * trades" banner on every screen already carries that, and made-up tickers
+ * cost more in recognition than they bought in caution.
  */
 export interface PracticeQuote {
   symbol: string
   name: string
   price: number
   changePercent: number
+  changeAbs: number
 }
 
-export const PRACTICE_QUOTES: PracticeQuote[] = [
-  { symbol: "ZNTH", name: "Zenith Grid Holdings", price: 100.0, changePercent: 0.62 },
-  { symbol: "ARVO", name: "Arvo Semiconductor", price: 64.18, changePercent: -1.1 },
-  { symbol: "KLTR", name: "Kestrel Air Group", price: 212.4, changePercent: 0.34 },
-  { symbol: "MERD", name: "Meridian Power", price: 38.75, changePercent: 2.06 },
-]
+export const PRACTICE_SYMBOLS = ["AAPL", "AMZN", "NVDA", "TSLA"] as const
+
+export const PRACTICE_QUOTES: PracticeQuote[] = PRACTICE_SYMBOLS.map((symbol) => {
+  const quote = watchlist.find((q) => q.symbol === symbol)
+  if (!quote) throw new Error(`Practice symbol ${symbol} is missing from the shared watchlist`)
+  return {
+    symbol: quote.symbol,
+    name: quote.name,
+    price: quote.price,
+    changePercent: quote.changePercent,
+    changeAbs: quote.changeAbs,
+  }
+})
 
 /**
  * The ONLY way a Chapter 2 screen should get a price.
  *
  * Returns non-optionally on purpose. Every screen used to do
- * `watchlist.find(...)?.price ?? 100`, and when the symbols moved to the
- * invented set that lookup started missing on all nine call sites — the
- * `?? 100` silently matched ZNTH's real price, so five screens looked
- * correct while quietly pricing every other symbol at 100, and Resolution's
- * `?? 0` rendered "finished at $0.00". A total return kills the fallback
- * that made a broken lookup render plausibly.
+ * `watchlist.find(...)?.price ?? 100`, and when the symbol set changed that
+ * lookup started missing on all nine call sites — the `?? 100` silently
+ * matched one symbol's real price, so five screens looked correct while
+ * quietly pricing every other symbol at 100, and Resolution's `?? 0`
+ * rendered "finished at $0.00". A total return kills the fallback that made
+ * a broken lookup render plausibly.
  */
 export function practiceQuoteFor(symbol: string): PracticeQuote {
   return PRACTICE_QUOTES.find((q) => q.symbol === symbol) ?? PRACTICE_QUOTES[0]
@@ -136,8 +142,8 @@ export interface OpenTrade {
 
 export const OPEN_TRADES: OpenTrade[] = [
   {
-    id: "znth-oct16",
-    symbol: "ZNTH",
+    id: "aapl-oct16",
+    symbol: "AAPL",
     thesis: "Up, but under 6%, and calm.",
     structure: "iron condor",
     maxLoss: 320,
@@ -145,8 +151,8 @@ export const OPEN_TRADES: OpenTrade[] = [
     direction: "up",
   },
   {
-    id: "kltr-oct16",
-    symbol: "KLTR",
+    id: "nvda-oct16",
+    symbol: "NVDA",
     thesis: "Up, at all.",
     structure: "short put spread",
     maxLoss: 350,
@@ -159,6 +165,37 @@ export function catalystsFor(symbol: string): SymbolCatalyst {
   return SYMBOL_CATALYSTS.find((c) => c.symbol === symbol) ?? SYMBOL_CATALYSTS[0]
 }
 
+/**
+ * Trades that resolved before this session started.
+ *
+ * Chapter 2 opens on a customer six weeks in, not on an empty account — the
+ * streak counter says 6, the record screen says 40 resolved trades, and the
+ * XP bar sits at 2,840. "Resolved this week" on the Your-trades screen is
+ * gated on there being resolved trades, so with an empty array the whole
+ * section silently never rendered and the screen contradicted every
+ * neighbouring one. These two are what the Figma frame shows.
+ */
+export interface PriorResolution {
+  id: string
+  symbol: string
+  correct: number
+  total: number
+}
+
+export const PRIOR_RESOLUTIONS: PriorResolution[] = [
+  { id: "prior-tsla", symbol: "TSLA", correct: 4, total: 4 },
+  { id: "prior-amzn", symbol: "AMZN", correct: 2, total: 4 },
+]
+
+/**
+ * Every structure the cabinet on the record screen can hold.
+ *
+ * The glyph for each one lives in `components/practice/structure-glyph.tsx`,
+ * keyed by this id — the Figma frames label a structure with its payoff
+ * shape rather than its name, because a customer who can't yet say "jade
+ * lizard" can still recognise the silhouette they have been looking at for
+ * eight screens.
+ */
 export type StructureShape =
   | "put-spread"
   | "call-spread"
@@ -166,6 +203,25 @@ export type StructureShape =
   | "straddle"
   | "strangle"
   | "covered-call"
+  | "jade-lizard"
+  | "butterfly"
+  | "calendar"
+  | "ratio-spread"
+  | "broken-wing"
+  | "collar"
+
+/**
+ * The options model and the certificate cabinet name the same structures
+ * differently — `strategyFor` returns "long-strangle" where the cabinet
+ * calls it "strangle". Lives here next to StructureShape rather than in a
+ * screen: dial-in, open-trades and graduation all need it.
+ */
+export const GLYPH_FOR: Record<StrategyId, StructureShape> = {
+  "put-spread": "put-spread",
+  "call-spread": "call-spread",
+  "iron-condor": "iron-condor",
+  "long-strangle": "strangle",
+}
 
 export interface StructureDef {
   id: StructureShape
@@ -179,17 +235,44 @@ export const ALL_STRUCTURES: StructureDef[] = [
   { id: "straddle", label: "Straddle" },
   { id: "strangle", label: "Strangle" },
   { id: "covered-call", label: "Covered call" },
+  { id: "jade-lizard", label: "Jade lizard" },
+  { id: "butterfly", label: "Butterfly" },
+  { id: "calendar", label: "Calendar" },
+  { id: "ratio-spread", label: "Ratio spread" },
+  { id: "broken-wing", label: "Broken wing" },
+  { id: "collar", label: "Collar" },
 ]
+
+export function structureFor(id: string): StructureDef | undefined {
+  return ALL_STRUCTURES.find((s) => s.id === id)
+}
+
+/**
+ * The next structure the XP bar is paying toward. Surfaced on both the
+ * payout screen ("90 XP to the jade lizard") and the record screen's
+ * cabinet footer — a progress bar with nothing named at the end of it is
+ * just a bar.
+ */
+export const NEXT_STRUCTURE_UNLOCK = {
+  id: "jade-lizard" as StructureShape,
+  label: "Jade lizard",
+  sublabel: "a new structure to use",
+  atXp: 3000,
+}
+
+/** The streak milestone the payout screen counts toward. */
+export const NEXT_STREAK_MILESTONE = { label: "Ten Straight", at: 10 }
 
 export interface CertificateDef {
   id: string
   label: string
   earnedOn: string
+  shape: StructureShape
 }
 
 export const CERTIFICATES: CertificateDef[] = [
-  { id: "defined-risk", label: "Defined Risk", earnedOn: "Sep 2" },
-  { id: "directional-trades", label: "Directional Trades", earnedOn: "Aug 18" },
+  { id: "defined-risk", label: "Defined Risk", earnedOn: "Sep 2", shape: "put-spread" },
+  { id: "directional-trades", label: "Directional Trades", earnedOn: "Aug 18", shape: "covered-call" },
 ]
 
 export const LOCKED_CERTIFICATE = { id: "volatility", label: "Volatility" }
@@ -229,3 +312,50 @@ export const FEE_UNLOCKS: FeeUnlock[] = [
     after: "locked",
   },
 ]
+
+/**
+ * Per-axis skill on the record screen. `n` is how many resolved trades
+ * actually tested that axis — the Figma frame shows it as `(n=40)`, and it
+ * is the number that makes a 48% read as "unproven" rather than "bad".
+ */
+export interface AxisRecord {
+  id: Axis
+  label: string
+  sublabel: string
+  value: number
+  tier: "SHARP" | "SOLID" | "DEVELOPING" | "UNPROVEN"
+  n: number
+}
+
+export const AXIS_RECORDS: AxisRecord[] = [
+  { id: "direction", label: "Direction", sublabel: "delta", value: 71, tier: "SHARP", n: 40 },
+  { id: "duration", label: "Duration", sublabel: "theta · expiration", value: 66, tier: "SOLID", n: 40 },
+  { id: "distance", label: "Distance", sublabel: "strike selection", value: 54, tier: "DEVELOPING", n: 31 },
+  { id: "volatility", label: "Volatility", sublabel: "vega · IV at entry", value: 48, tier: "UNPROVEN", n: 19 },
+]
+
+/**
+ * How many expirations are open at each tier. Duration is the tier that
+ * unlocks the picker, and it opens two of the three — the far-dated one
+ * stays behind the next tier so the unlock has somewhere left to go.
+ */
+export const DURATION_TIER_EXPIRATIONS = 2
+
+/**
+ * The options-approval level this chapter is arguing the customer up to.
+ *
+ * Deliberately NOT derived from the XP level. They are different systems:
+ * XP is the game's, this one is the firm's, and the whole point of the
+ * earned screen is that practice produces *evidence* for a review rather
+ * than the upgrade itself. Deriving one from the other would quietly claim
+ * the game grants the approval.
+ */
+export const OPTIONS_LEVEL = {
+  from: 2,
+  to: 3,
+  detail: "long options → defined-risk spreads",
+  submittedOn: "Sep 14",
+}
+
+/** Practice history the customer arrives with, before this session's trades. */
+export const PRACTICE_HISTORY = { resolvedTrades: 40, since: "Aug 4" }

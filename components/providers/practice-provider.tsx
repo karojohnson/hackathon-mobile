@@ -20,23 +20,69 @@ export type ScreenId =
 
 export type Axis = "direction" | "duration" | "distance" | "volatility"
 export type DirectionThesis = "rallies" | "sellsOff" | "flat" | "outsized"
-export type DialStop = 50 | 70 | 90
+
+/**
+ * One axis's verdict on a resolved trade.
+ *
+ * This replaced a pair of `axesCorrect`/`axesMissed` string arrays. Those
+ * could say which axes paid but had nowhere to hang the two things the
+ * Figma resolution frame leads with: what each axis was actually worth
+ * (they aren't all 20 XP), and why the missed one missed. Splitting a
+ * verdict across two arrays also meant every consumer re-derived the
+ * ordering, and none of them agreed on it.
+ */
+export interface AxisResult {
+  axis: Axis
+  correct: boolean
+  xp: number
+  /** Why this axis missed, in the design's voice. Only set on a miss. */
+  note?: string
+}
 
 export interface ResolvedTrade {
   id: string
   symbol: string
   outcome: "win" | "loss" | "partial"
-  axesCorrect: Axis[]
-  axesMissed: Axis[]
+  axisResults: AxisResult[]
   xpEarned: number
   finishedPrice: number
+  /** "day 28 of your 30-day window" — the slow clock the chapter runs on. */
+  dayOfWindow: number
+  windowDays: number
+  /** The move that decided it, e.g. "gapped +11.0% on Sep 22 earnings". */
+  gapNote: string
+  /** One-line verdict, e.g. "Distance was the miss." */
+  verdictLine: string
+  /** The closing card's headline, e.g. "The contract needed all four." */
+  contractHeadline: string
+  /** What it cost, e.g. "Top breached. Max loss $320." Empty on a clean win. */
+  lossNote: string
+}
+
+export function axesCorrect(trade: ResolvedTrade): AxisResult[] {
+  return trade.axisResults.filter((r) => r.correct)
+}
+
+export function axesMissed(trade: ResolvedTrade): AxisResult[] {
+  return trade.axisResults.filter((r) => !r.correct)
 }
 
 export interface PracticeState {
   currentScreen: ScreenId
   symbol: string
   chosenDirection: DirectionThesis | null
-  dialStop: DialStop
+  /**
+   * How many strikes out of the money the short leg sits, 1 to 5. The dial
+   * the customer drags moves this, and probability of profit is derived
+   * from it rather than the other way round.
+   *
+   * One field for all four structures on purpose: it means the same thing
+   * for a vertical, a condor and a strangle, so the control reads the same
+   * way whichever Direction you picked. See `strategyFor`.
+   */
+  strikeStep: number
+  /** The expiration selected on the Duration screen, id from `expirations`. */
+  expirationId: string
   unlockedAxes: Axis[]
   xp: number
   level: number
@@ -49,7 +95,8 @@ interface PracticeContextValue extends PracticeState {
   goTo: (screen: ScreenId) => void
   setSymbol: (symbol: string) => void
   setDirection: (thesis: DirectionThesis) => void
-  setDialStop: (stop: DialStop) => void
+  setStrikeStep: (step: number) => void
+  setExpirationId: (id: string) => void
   unlockAxis: (axis: Axis) => void
   resolveTrade: (trade: Omit<ResolvedTrade, "id">) => void
 }
@@ -57,21 +104,23 @@ interface PracticeContextValue extends PracticeState {
 const PracticeContext = React.createContext<PracticeContextValue | null>(null)
 
 /*
- * Bumped to v2 when Chapter 2 moved from real tickers (AAPL/TSLA/NVDA/COIN)
- * to the invented ones in the Figma file (ZNTH/ARVO/KLTR/MERD). A session
- * saved under v1 holds `symbol: "AAPL"`, which no longer exists in
- * SYMBOL_CATALYSTS — catalystsFor() would fall back to ZNTH's calendar and
- * render it under an AAPL header. Bumping the key retires that state.
+ * Bumped to v4. v2 sessions hold `symbol: "ZNTH"`, which no longer exists
+ * in PRACTICE_QUOTES since Chapter 2 moved to real tickers; v2 and v3 both
+ * hold a dial field that no longer exists (`dialStop: 70`, then
+ * `shortStrikeIndex`/`condorWidthIndex`). Either would hydrate over
+ * `strikeStep` as a nonsense value, or leave it absent entirely and send
+ * `strategyFor` a NaN step. Bumping the key retires that state.
  */
-export const PRACTICE_STORAGE_KEY = "hackathon-practice-state-v2"
+export const PRACTICE_STORAGE_KEY = "hackathon-practice-state-v4"
 
-const XP_PER_LEVEL = 3000
+export const XP_PER_LEVEL = 3000
 
 const initialState: PracticeState = {
   currentScreen: "cold-start",
-  symbol: "ZNTH",
+  symbol: "AAPL",
   chosenDirection: "rallies",
-  dialStop: 70,
+  strikeStep: 2,
+  expirationId: "14d",
   unlockedAxes: ["direction"],
   xp: 2840,
   level: 7,
@@ -140,8 +189,12 @@ export function PracticeProvider({ children, seed, persist = true }: PracticePro
     setState((prev) => ({ ...prev, chosenDirection: thesis }))
   }, [])
 
-  const setDialStop = React.useCallback((stop: DialStop) => {
-    setState((prev) => ({ ...prev, dialStop: stop }))
+  const setStrikeStep = React.useCallback((step: number) => {
+    setState((prev) => ({ ...prev, strikeStep: step }))
+  }, [])
+
+  const setExpirationId = React.useCallback((id: string) => {
+    setState((prev) => ({ ...prev, expirationId: id }))
   }, [])
 
   const unlockAxis = React.useCallback((axis: Axis) => {
@@ -165,8 +218,26 @@ export function PracticeProvider({ children, seed, persist = true }: PracticePro
   }, [])
 
   const value = React.useMemo<PracticeContextValue>(
-    () => ({ ...state, goTo, setSymbol, setDirection, setDialStop, unlockAxis, resolveTrade }),
-    [state, goTo, setSymbol, setDirection, setDialStop, unlockAxis, resolveTrade]
+    () => ({
+      ...state,
+      goTo,
+      setSymbol,
+      setDirection,
+      setStrikeStep,
+      setExpirationId,
+      unlockAxis,
+      resolveTrade,
+    }),
+    [
+      state,
+      goTo,
+      setSymbol,
+      setDirection,
+      setStrikeStep,
+      setExpirationId,
+      unlockAxis,
+      resolveTrade,
+    ]
   )
 
   return <PracticeContext.Provider value={value}>{children}</PracticeContext.Provider>

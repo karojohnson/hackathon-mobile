@@ -10,6 +10,7 @@ export {
   AlertTriangle,
   ArrowDownRight,
   ArrowLeftRight,
+  ArrowRight,
   ArrowUpRight,
   Award,
   BatteryFull,

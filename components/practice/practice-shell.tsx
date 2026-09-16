@@ -18,8 +18,15 @@ export interface PracticeShellProps {
  * footer CTA row, and the persistent app-level bottom nav.
  */
 export function PracticeShell({ children, footer, activeTabIndex, onActiveTabChange }: PracticeShellProps) {
+  /*
+   * pt-29 (116px) below = the banner's own 96px (h-24) plus 20px of
+   * breathing room, so content clears the banner instead of starting flush
+   * against it. The banner is absolutely positioned, so this padding is the
+   * only thing holding content off it: change the banner's height and this
+   * changes too.
+   */
   return (
-    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-24">
+    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-29">
       {/*
         Same accent-blue wash the dashboard runs (see `.dashboard-top-glow`),
         anchored above the banner so it bleeds up behind the status bar and

@@ -1,5 +1,7 @@
-import type { Axis, PracticeState, ResolvedTrade, ScreenId } from "@/components/providers/practice-provider"
-import { practiceQuoteFor } from "@/data/mock-practice-data"
+import type { AxisResult, Axis, PracticeState, ResolvedTrade, ScreenId } from "@/components/providers/practice-provider"
+import { expirationFor, shortPutSpreadFor } from "@/data/mock-options-data"
+import { catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
+import { formatCurrencyWhole } from "@/lib/format"
 
 export const PRACTICE_SCREEN_ORDER: ScreenId[] = [
   "cold-start",
@@ -44,16 +46,56 @@ export const PRACTICE_FOOTER_CTAS: Record<ScreenId, PracticeFooterCta[]> = {
   ],
 }
 
+export const AXIS_LABEL: Record<Axis, string> = {
+  direction: "Direction",
+  duration: "Duration",
+  distance: "Distance",
+  volatility: "Volatility",
+}
+
+export const AXIS_SUBLABEL: Record<Axis, string> = {
+  direction: "delta",
+  duration: "theta · expiration",
+  distance: "strike selection",
+  volatility: "vega · IV at entry",
+}
+
+/** What each axis pays when it lands. Volatility is worth more: it's the last tier. */
+const AXIS_XP: Record<Axis, number> = { direction: 20, duration: 20, distance: 20, volatility: 30 }
+
 /**
- * Deterministic mock scoring for the Resolution screen — Direction is the
- * only axis the player actually chose (the rest are auto-scored, matching
- * the source prototype's "we track all four axes from day one, you just
- * haven't been asked about three of them yet" mechanic). Distance is the
- * one that's "supposed" to miss on a first pass — it's the newest/hardest
- * axis — so the demo tells a consistent story across runs.
+ * The scripted move that decides every first-pass resolution: a gap far
+ * larger than the implied move the briefing screen quoted. It has to
+ * outrun the implied move for Distance to be a fair miss — the whole
+ * lesson of the resolution screen is that being right about direction and
+ * wrong about magnitude are two separate skills.
+ */
+const SCRIPTED_GAP_PERCENT = 11.0
+
+/**
+ * Deterministic mock scoring for the Resolution screen.
+ *
+ * Direction is the only axis the player actually chose — the rest are
+ * auto-scored, matching the chapter's "we track all four axes from day
+ * one, you just haven't been asked about three of them yet" mechanic.
+ * Distance is the one that's meant to miss: it's the newest and hardest
+ * axis, and it's the one the scripted gap is built to defeat, so the demo
+ * tells the same story on every run.
+ *
+ * Note what this produces on the happy path: a scorecard that reads 3 of 4
+ * on a trade that *made money*. The stock went the way the customer said
+ * (Direction lands) but went much further than they sized for (Distance
+ * misses), and a short put spread pays in full either way. That gap
+ * between "the contract paid" and "your read was right" is the chapter's
+ * argument, and the closing card says so out loud rather than pretending
+ * a profitable trade was a clean one.
  */
 export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id"> {
   const quote = practiceQuoteFor(state.symbol)
+  const catalyst = catalystsFor(state.symbol)
+  const expiration = expirationFor(state.expirationId)
+  const spread = shortPutSpreadFor(quote.price, expiration.daysOut, state.strikeStep)
+
   const trendUp = quote.changePercent >= 0
   // Mirrors direction.tsx's displayed default, and guards against a stale
   // persisted null from an earlier session's localStorage.
@@ -64,19 +106,61 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
     (thesis === "rallies" && trendUp) ||
     (thesis === "sellsOff" && !trendUp)
 
-  const axesCorrect: Axis[] = directionCorrect
-    ? ["direction", "duration", "volatility"]
-    : ["duration", "volatility"]
-  const axesMissed: Axis[] = directionCorrect ? ["distance"] : ["direction", "distance"]
+  const gapPercent = trendUp ? SCRIPTED_GAP_PERCENT : -SCRIPTED_GAP_PERCENT
+  const finishedPrice = Number((quote.price * (1 + gapPercent / 100)).toFixed(2))
+  const leadEvent = catalyst.events[0]
 
-  const xpEarned = axesCorrect.length * 20
+  const axisResults: AxisResult[] = [
+    {
+      axis: "direction",
+      correct: directionCorrect,
+      xp: directionCorrect ? AXIS_XP.direction : 0,
+      note: directionCorrect
+        ? undefined
+        : `You said it would ${thesis === "sellsOff" ? "sell off" : "rally"}. It did the opposite.`,
+    },
+    { axis: "duration", correct: true, xp: AXIS_XP.duration },
+    {
+      axis: "distance",
+      correct: false,
+      xp: 0,
+      note: `Implied move was ${catalyst.impliedMovePercent}%. You set the floor at ${spread.sellStrike}. It moved ${Math.abs(gapPercent).toFixed(1)}%.`,
+    },
+    { axis: "volatility", correct: true, xp: AXIS_XP.volatility },
+  ]
+
+  const correct = axisResults.filter((r) => r.correct)
+  const missed = axisResults.filter((r) => !r.correct)
+  const xpEarned = correct.reduce((sum, r) => sum + r.xp, 0)
+
+  // The short put spread only loses if the underlying breaks *below* the
+  // short strike, which on this script happens exactly when the customer
+  // called the direction wrong.
+  const floorHeld = directionCorrect
 
   return {
     symbol: state.symbol,
-    outcome: axesMissed.length === 0 ? "win" : axesCorrect.length === 0 ? "loss" : "partial",
-    axesCorrect,
-    axesMissed,
+    outcome: missed.length === 0 ? "win" : correct.length === 0 ? "loss" : "partial",
+    axisResults,
     xpEarned,
-    finishedPrice: quote.price,
+    finishedPrice,
+    dayOfWindow: Math.max(1, expiration.daysOut - 2),
+    windowDays: expiration.daysOut,
+    gapNote: `gapped ${gapPercent > 0 ? "+" : ""}${gapPercent.toFixed(1)}% on ${leadEvent.date} ${leadEvent.label.toLowerCase()}`,
+    verdictLine:
+      missed.length === 0
+        ? "All four paid."
+        : missed.length === 1
+          ? `${AXIS_LABEL[missed[0].axis]} was the miss.`
+          : `${missed.length} axes missed.`,
+    contractHeadline:
+      missed.length === 0
+        ? "The contract worked."
+        : floorHeld
+          ? "The contract paid. Your read didn't."
+          : "The contract needed all four.",
+    lossNote: floorHeld
+      ? `Floor held at ${spread.sellStrike}. You kept the ${formatCurrencyWhole(spread.maxGain)} credit.`
+      : `Floor breached. Max loss ${formatCurrencyWhole(spread.maxLoss)}.`,
   }
 }

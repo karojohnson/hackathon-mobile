@@ -58,12 +58,27 @@ import { ChevronRight } from "@/lib/icons"
  */
 const SCRIPTED_TRADE: ResolvedTrade = {
   id: "0",
-  symbol: "ZNTH",
+  symbol: "AAPL",
   outcome: "partial",
-  axesCorrect: ["direction", "duration", "volatility"],
-  axesMissed: ["distance"],
-  xpEarned: 60,
-  finishedPrice: 241.83,
+  axisResults: [
+    { axis: "direction", correct: true, xp: 20 },
+    { axis: "duration", correct: true, xp: 20 },
+    {
+      axis: "distance",
+      correct: false,
+      xp: 0,
+      note: "Implied move was 7.2%. You set the floor at 235. It moved 11.0%.",
+    },
+    { axis: "volatility", correct: true, xp: 30 },
+  ],
+  xpEarned: 70,
+  finishedPrice: 268.43,
+  dayOfWindow: 12,
+  windowDays: 14,
+  gapNote: "gapped +11.0% on Sep 22 q4 earnings",
+  verdictLine: "Distance was the miss.",
+  contractHeadline: "The contract paid. Your read didn't.",
+  lossNote: "Floor held at 235. You kept the $150 credit.",
 }
 
 interface ScreenEntry {
