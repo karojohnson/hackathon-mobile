@@ -54,3 +54,103 @@ export function strikesFor(price: number, daysOut: number, type: OptionType): Op
     premium: estimatePremium(price, atm + offset * increment, daysOut, type),
   }))
 }
+
+export interface SpreadQuote {
+  sellStrike: number
+  buyStrike: number
+  credit: number
+  maxGain: number
+  maxLoss: number
+  breakeven: number
+}
+
+const DIAL_STOP_OFFSET: Record<50 | 70 | 90, number> = { 50: 0, 70: -1, 90: -2 }
+
+/**
+ * Short put spread sized off a target "chance this works" (50/70/90) — the
+ * further OTM the short strike, the higher the displayed probability and
+ * the smaller the credit. `strikesFor` already returns 7 strikes centered
+ * on the money (offsets -3..3); index 3 is at-the-money.
+ */
+export function shortPutSpreadFor(
+  price: number,
+  daysOut: number,
+  dialStop: 50 | 70 | 90
+): SpreadQuote {
+  const strikes = strikesFor(price, daysOut, "put")
+  const atmIndex = 3
+  const sellIndex = atmIndex + DIAL_STOP_OFFSET[dialStop]
+  const buyIndex = Math.max(0, sellIndex - 1)
+  const sell = strikes[sellIndex]
+  const buy = strikes[buyIndex]
+  const credit = Number((sell.premium - buy.premium).toFixed(2))
+  return {
+    sellStrike: sell.strike,
+    buyStrike: buy.strike,
+    credit,
+    maxGain: Number((credit * 100).toFixed(2)),
+    maxLoss: Number(((sell.strike - buy.strike - credit) * 100).toFixed(2)),
+    breakeven: Number((sell.strike - credit).toFixed(2)),
+  }
+}
+
+export interface IronCondorQuote {
+  sellPutStrike: number
+  buyPutStrike: number
+  sellCallStrike: number
+  buyCallStrike: number
+  credit: number
+  maxGain: number
+  maxLoss: number
+  lowerBreakeven: number
+  upperBreakeven: number
+}
+
+/** Iron condor — one strike in from at-the-money on each side, protective wing one strike further out. */
+export function ironCondorFor(price: number, daysOut: number): IronCondorQuote {
+  const puts = strikesFor(price, daysOut, "put")
+  const calls = strikesFor(price, daysOut, "call")
+  const atmIndex = 3
+  const sellPut = puts[atmIndex - 1]
+  const buyPut = puts[atmIndex - 2]
+  const sellCall = calls[atmIndex + 1]
+  const buyCall = calls[atmIndex + 2]
+  const credit = Number(
+    (sellPut.premium - buyPut.premium + (sellCall.premium - buyCall.premium)).toFixed(2)
+  )
+  const putWidth = sellPut.strike - buyPut.strike
+  const callWidth = buyCall.strike - sellCall.strike
+  return {
+    sellPutStrike: sellPut.strike,
+    buyPutStrike: buyPut.strike,
+    sellCallStrike: sellCall.strike,
+    buyCallStrike: buyCall.strike,
+    credit,
+    maxGain: Number((credit * 100).toFixed(2)),
+    maxLoss: Number(((Math.max(putWidth, callWidth) - credit) * 100).toFixed(2)),
+    lowerBreakeven: Number((sellPut.strike - credit).toFixed(2)),
+    upperBreakeven: Number((sellCall.strike + credit).toFixed(2)),
+  }
+}
+
+export interface OptionStrikeDetailed extends OptionStrike {
+  delta: number
+}
+
+function estimateDelta(price: number, strike: number, type: OptionType): number {
+  const distance = (strike - price) / price
+  const raw = type === "call" ? 0.5 - distance * 2.4 : 0.5 + distance * 2.4
+  return Math.max(0.02, Math.min(0.98, Number(raw.toFixed(2))))
+}
+
+/** Same strikes as `strikesFor`, with an approximate delta attached — used by the chain screen. */
+export function strikesWithDeltaFor(
+  price: number,
+  daysOut: number,
+  type: OptionType
+): OptionStrikeDetailed[] {
+  return strikesFor(price, daysOut, type).map((s) => ({
+    ...s,
+    delta: estimateDelta(price, s.strike, type),
+  }))
+}
