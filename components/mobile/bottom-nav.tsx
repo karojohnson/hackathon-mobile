@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "cn"
 
-import { ArrowLeftRight, Compass, Home, LineChart, Wallet } from "@/lib/icons"
+import { ArrowLeftRight, Compass, Home, LineChart, Sparkles, Wallet } from "@/lib/icons"
 
 const items = [
   { label: "Home", icon: Home },
@@ -11,18 +11,29 @@ const items = [
   { label: "Trade", icon: ArrowLeftRight },
   { label: "Portfolio", icon: Wallet },
   { label: "Watchlist", icon: LineChart },
+  { label: "Practice", icon: Sparkles },
 ] as const
 
 export interface BottomNavProps {
   className?: string
+  /** Controlled active tab index. Omit to let the nav manage its own state (e.g. the static prototype-kit demo). */
+  activeIndex?: number
+  /** Required to actually change tabs when `activeIndex` is controlled from a parent. */
+  onActiveChange?: (index: number) => void
 }
 
 /**
  * Functional glass surface (section 11) — one of the few places translucency
  * is used. Ordinary content cards stay opaque.
  */
-export function BottomNav({ className }: BottomNavProps) {
-  const [active, setActive] = React.useState(0)
+export function BottomNav({ className, activeIndex, onActiveChange }: BottomNavProps) {
+  const [internalActive, setInternalActive] = React.useState(0)
+  const active = activeIndex ?? internalActive
+
+  function handleClick(index: number) {
+    if (onActiveChange) onActiveChange(index)
+    else setInternalActive(index)
+  }
 
   return (
     <nav
@@ -38,7 +49,7 @@ export function BottomNav({ className }: BottomNavProps) {
           <button
             key={item.label}
             type="button"
-            onClick={() => setActive(index)}
+            onClick={() => handleClick(index)}
             className={cn(
               "flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 transition-colors",
               isActive ? "text-foreground" : "text-muted-foreground"
