@@ -51,7 +51,7 @@ export function RecordScreen() {
         <div className="flex items-baseline justify-between">
           <span className="type-label uppercase tracking-wide text-muted-foreground">Structures earned</span>
           <span className="type-label tabular-nums text-muted-foreground">
-            {structuresEarned.length} / 12
+            {structuresEarned.length} / {ALL_STRUCTURES.length}
           </span>
         </div>
         <div className="grid grid-cols-6 gap-2">

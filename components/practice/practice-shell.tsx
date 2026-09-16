@@ -22,7 +22,7 @@ export function PracticeShell({ children, footer, activeTabIndex, onActiveTabCha
     <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-24">
       <PracticeBanner />
       <div className="flex flex-1 flex-col gap-6 px-4 pb-4">{children}</div>
-      <div className="glass-nav sticky bottom-14 -mx-4 mt-auto flex flex-col gap-2 px-4 pt-3 pb-3">{footer}</div>
+      <div className="glass-nav sticky bottom-14 mt-auto flex flex-col gap-2 px-4 pt-3 pb-3">{footer}</div>
       <BottomNav
         activeIndex={activeTabIndex}
         onActiveChange={onActiveTabChange}

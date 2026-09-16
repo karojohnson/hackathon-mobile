@@ -5,18 +5,26 @@ import { watchlist } from "@/data/mock-market-data"
 import { expirations, shortPutSpreadFor } from "@/data/mock-options-data"
 import { formatCurrency } from "@/lib/format"
 
+const THESIS_LABEL = {
+  rallies: "up",
+  sellsOff: "down",
+  flat: "flat",
+  outsized: "a big move",
+} as const
+
 export function DialInScreen() {
-  const { symbol, dialStop, setDialStop } = usePractice()
+  const { symbol, dialStop, setDialStop, chosenDirection } = usePractice()
   const quote = watchlist.find((q) => q.symbol === symbol)
   const price = quote?.price ?? 100
   const spread = shortPutSpreadFor(price, expirations[1].daysOut, dialStop)
+  const thesisLabel = THESIS_LABEL[chosenDirection ?? "rallies"]
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="type-title text-foreground">{symbol}</span>
-          <span className="type-label text-muted-foreground">Direction · you said up</span>
+          <span className="type-label text-muted-foreground">Direction · you said {thesisLabel}</span>
         </div>
         <span className="type-body-strong tabular-nums text-foreground">${price.toFixed(2)}</span>
       </div>

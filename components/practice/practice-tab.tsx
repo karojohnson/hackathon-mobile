@@ -51,10 +51,7 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
 
   function handleCta(cta: PracticeFooterCta) {
     if (currentScreen === "duration-unlock") unlockAxis("duration")
-    if (currentScreen === "distance-drill") {
-      unlockAxis("distance")
-      unlockAxis("volatility")
-    }
+    if (currentScreen === "distance-drill") unlockAxis("distance")
     if (currentScreen === "resolution") resolveTrade(computeResolution(practice))
     goTo(cta.goTo)
   }

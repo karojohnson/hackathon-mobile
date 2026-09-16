@@ -51,12 +51,12 @@ export function BottomNav({ className, activeIndex, onActiveChange }: BottomNavP
             type="button"
             onClick={() => handleClick(index)}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 transition-colors",
+              "flex flex-1 flex-col items-center gap-1 rounded-lg px-0.5 py-1.5 transition-colors",
               isActive ? "text-foreground" : "text-muted-foreground"
             )}
           >
             <Icon className="size-5" />
-            <span className="type-label">{item.label}</span>
+            <span className="text-[10px] leading-tight">{item.label}</span>
           </button>
         )
       })}

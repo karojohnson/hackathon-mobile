@@ -13,7 +13,7 @@ export function PayoutScreen() {
       <div className="flex flex-col items-center gap-1 text-center">
         <span className="type-hero text-priority-gold">+{lastTrade?.xpEarned ?? 0} XP</span>
         <span className="type-body text-muted-foreground">
-          {lastTrade?.outcome === "win" ? "The contract paid out." : "The contract paid nothing."}
+          {lastTrade ? `${lastTrade.axesCorrect.length} of ${lastTrade.axesCorrect.length + lastTrade.axesMissed.length} axes paid.` : ""}
         </span>
       </div>
 

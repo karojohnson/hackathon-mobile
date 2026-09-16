@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cn } from "cn"
 
 export interface PayoffChartPoint {
@@ -18,6 +19,9 @@ const PAD = 20
 
 /** Simplified payoff diagram — a straight-line approximation of the real step function, good enough to teach the shape. */
 export function PayoffChart({ points, breakevens, height = 120, className }: PayoffChartProps) {
+  const clipIdBase = React.useId()
+  const aboveZeroClipId = `${clipIdBase}-above-zero`
+  const belowZeroClipId = `${clipIdBase}-below-zero`
   const strikes = points.map((p) => p.strike)
   const values = points.map((p) => p.value)
   const minStrike = Math.min(...strikes)
@@ -40,8 +44,18 @@ export function PayoffChart({ points, breakevens, height = 120, className }: Pay
 
   return (
     <svg viewBox={`0 0 ${WIDTH} ${height}`} className={cn("w-full", className)} preserveAspectRatio="none">
+      <defs>
+        <clipPath id={aboveZeroClipId}>
+          <rect x={0} y={0} width={WIDTH} height={zeroY} />
+        </clipPath>
+        <clipPath id={belowZeroClipId}>
+          <rect x={0} y={zeroY} width={WIDTH} height={height - zeroY} />
+        </clipPath>
+      </defs>
       <line x1={PAD} x2={WIDTH - PAD} y1={zeroY} y2={zeroY} stroke="currentColor" strokeOpacity={0.15} strokeDasharray="4 4" />
-      <path d={fillPath} fill="var(--positive)" fillOpacity={0.15} />
+      {/* Fill is clipped at the zero line so gains render in the positive color and losses in the negative color, instead of one color across the whole domain. */}
+      <path d={fillPath} fill="var(--positive)" fillOpacity={0.15} clipPath={`url(#${aboveZeroClipId})`} />
+      <path d={fillPath} fill="var(--negative)" fillOpacity={0.15} clipPath={`url(#${belowZeroClipId})`} />
       <path d={linePath} fill="none" stroke="var(--positive)" strokeWidth={2} />
       {breakevens.map((b) => (
         <circle key={b} cx={xFor(b)} cy={zeroY} r={4} fill="var(--positive)" />

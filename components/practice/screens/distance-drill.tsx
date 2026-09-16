@@ -17,7 +17,7 @@ export function DistanceDrillScreen() {
         <p className="type-label text-muted-foreground">Distance tier · 3 of 5 · +15 XP each</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg bg-blue-950/40 p-4">
+      <div className="flex flex-col gap-2 rounded-lg bg-priority-blue-surface! p-4">
         <span className="type-label uppercase tracking-wide text-priority-blue">We think</span>
         <p className="type-body text-foreground">
           {symbol} drifts up, stays under ${spread.sellStrike.toFixed(0)}, and gets there by {expirations[2].label}.
@@ -44,8 +44,10 @@ export function DistanceDrillScreen() {
           <span className="type-body-strong text-foreground">Call spread</span>
           <span className="type-label text-muted-foreground">{symbol}</span>
         </div>
+        {/* shortPutSpreadFor is a put-spread generator being reused here for a call spread;
+            it returns buyStrike < sellStrike, so we sell the lower strike and buy the higher one. */}
         <span className="type-label text-muted-foreground">
-          sell the {spread.sellStrike} call, buy the {spread.buyStrike} call · expires {expirations[2].label}
+          sell the {spread.buyStrike} call, buy the {spread.sellStrike} call · expires {expirations[2].label}
         </span>
         <DialSlider value={dialStop} onChange={setDialStop} />
       </div>

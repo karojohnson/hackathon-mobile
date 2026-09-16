@@ -41,7 +41,7 @@ export function DurationUnlockScreen() {
       <div className="flex flex-col gap-2">
         <span className="type-label uppercase tracking-wide text-muted-foreground">Drill down</span>
         {AXES.map((axis) => {
-          const unlocked = unlockedAxes.includes(axis.id)
+          const unlocked = unlockedAxes.includes(axis.id) || axis.id === "duration"
           return (
             <div key={axis.id} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
               <div className="flex items-center gap-2">

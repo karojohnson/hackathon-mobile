@@ -84,7 +84,7 @@ export default function OptionsPage() {
   }
 
   return (
-    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col gap-5 px-4 pt-14">
+    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col gap-5 px-4 pt-22">
       <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-4 rotate-180" />
         Back

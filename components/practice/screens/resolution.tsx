@@ -46,7 +46,7 @@ export function ResolutionScreen() {
         <span className="type-body-strong text-foreground">
           {preview.outcome === "win" ? "The contract worked." : "The contract missed on Distance."}
         </span>
-        <span className="type-label text-muted-foreground">Streak intact · {practice.streak} resolved in a row.</span>
+        <span className="type-label text-muted-foreground">Streak intact · {practice.streak + 1} resolved in a row.</span>
       </div>
     </div>
   )

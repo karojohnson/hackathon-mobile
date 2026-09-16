@@ -9,11 +9,12 @@ export interface TickerChipProps {
   quote: Quote
   catalystLabel: string
   axis: Axis
+  unlocked: boolean
   selected: boolean
   onSelect: () => void
 }
 
-export function TickerChip({ quote, catalystLabel, axis, selected, onSelect }: TickerChipProps) {
+export function TickerChip({ quote, catalystLabel, axis, unlocked, selected, onSelect }: TickerChipProps) {
   const trend = quote.changePercent >= 0 ? "positive" : "negative"
 
   return (
@@ -46,7 +47,7 @@ export function TickerChip({ quote, catalystLabel, axis, selected, onSelect }: T
         <span className={cn("type-label truncate", selected ? "text-priority-gold" : "text-muted-foreground")}>
           {catalystLabel}
         </span>
-        <AxisTag axis={axis} unlocked={axis === "direction"} />
+        <AxisTag axis={axis} unlocked={unlocked} />
       </div>
     </button>
   )

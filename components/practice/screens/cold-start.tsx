@@ -6,7 +6,7 @@ import { catalystsFor } from "@/data/mock-practice-data"
 const FEATURED_SYMBOLS = ["AAPL", "TSLA", "NVDA", "COIN"]
 
 export function ColdStartScreen() {
-  const { symbol, setSymbol } = usePractice()
+  const { symbol, setSymbol, unlockedAxes } = usePractice()
   const quotes = FEATURED_SYMBOLS.map((s) => watchlist.find((q) => q.symbol === s)).filter(
     (q): q is NonNullable<typeof q> => Boolean(q)
   )
@@ -26,7 +26,8 @@ export function ColdStartScreen() {
               key={quote.symbol}
               quote={quote}
               axis={nextEvent?.axis ?? "direction"}
-              catalystLabel={nextEvent ? `${nextEvent.label} · implied move ± ${catalyst.impliedMovePercent}%` : "Nothing scheduled"}
+              catalystLabel={nextEvent ? nextEvent.label : "Nothing scheduled"}
+              unlocked={unlockedAxes.includes(nextEvent?.axis ?? "direction")}
               selected={symbol === quote.symbol}
               onSelect={() => setSymbol(quote.symbol)}
             />
