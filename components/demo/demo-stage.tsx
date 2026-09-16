@@ -40,7 +40,7 @@ export function DemoStage({ children }: { children: React.ReactNode }) {
         {showControls ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         {showControls ? "Hide presenter view" : "Show presenter view"}
       </Button>
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
+      <div className="fixed top-4 left-4 z-50 flex flex-col items-start gap-2">
         <div className="flex items-center gap-1 rounded-lg bg-background p-1">
           <Button
             variant={activePrototype === 1 ? "default" : "ghost"}
