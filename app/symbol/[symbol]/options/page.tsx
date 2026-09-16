@@ -46,7 +46,7 @@ export default function OptionsPage() {
 
   if (!quote) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col items-center justify-center gap-4 px-6 pt-14 text-center">
         <p className="type-body text-muted-foreground">We couldn&apos;t find {symbol}.</p>
         <Link href="/" className="type-body-strong text-foreground underline">
           Back to dashboard
@@ -84,7 +84,7 @@ export default function OptionsPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-5 px-4 pt-8">
+    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col gap-5 px-4 pt-14">
       <Link href="/" className="type-body flex w-fit items-center gap-1 text-muted-foreground">
         <ChevronRight className="size-4 rotate-180" />
         Back

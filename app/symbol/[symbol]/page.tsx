@@ -57,7 +57,7 @@ export default function SymbolPage() {
 
   if (!quote) {
     return (
-      <div className="glass-sheet flex min-h-full flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col items-center justify-center gap-4 px-6 pt-14 text-center">
         <p className="type-body text-muted-foreground">We couldn&apos;t find {symbol}.</p>
         <Link href="/" className="type-body-strong text-foreground underline">
           Back to dashboard
@@ -100,7 +100,7 @@ export default function SymbolPage() {
 
   if (step === "success") {
     return (
-      <div className="glass-sheet flex min-h-full flex-col">
+      <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-14">
         <OrderSuccess
           symbol={quote.symbol}
           name={quote.name}
@@ -113,7 +113,7 @@ export default function SymbolPage() {
   }
 
   return (
-    <div className="glass-sheet -mt-14 relative flex min-h-full flex-col gap-5 px-4 pt-16">
+    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col gap-5 px-4 pt-16">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 quiz-top-glow" />
 
       <div className="flex flex-col">
