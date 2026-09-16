@@ -149,10 +149,45 @@ const REFERENCES: Exploration[] = [
 
 const ALL = [...EXPLORATIONS, ...REFERENCES]
 
+/*
+ * Retint the two blue accents on the red columns only: the headline's accent
+ * word (`text-accent-blue` in interest-quiz.tsx) and the filled step-progress
+ * segments (`bg-accent-blue` in step-progress.tsx). On a red wash these were
+ * the last elements fighting the atmosphere.
+ *
+ * `.bg-accent-blue.h-1` deliberately scopes the bar rule to the progress
+ * segments, so a selected interest pill (same `bg-accent-blue`, no `h-1`)
+ * stays blue per the colour brief's "selected states" role.
+ *
+ * Both share one custom property so word and bar always match. The value
+ * raises chroma rather than only lightening — `color-mix` toward white
+ * desaturates, which read washed out. Two declarations: the `color-mix` is
+ * the fallback, the relative `oklch(from ...)` wins where supported.
+ *
+ * `max(l, 0.62)` is a lightness floor: Deep Burgundy's own lightness put the
+ * headline at 2.98:1 on the surface, under even the 3.0 large-text floor.
+ * `min(c * 1.4, 0.19)` caps chroma: an uncapped boost pushed the saturated
+ * reds out of sRGB and they clipped to flat #ff0000.
+ *
+ * Note this trades away part of the original colour brief, which reserved
+ * blue for progress and informational emphasis. Worth a second look before
+ * promoting out of exploration.
+ */
 function overrideCss(e: Exploration) {
+  const accents =
+    e.key === "blue"
+      ? ""
+      : `
+[data-ember="${e.key}"] {
+  --explore-accent: color-mix(in oklch, ${e.swatches[0]} 82%, white);
+  --explore-accent: oklch(from ${e.swatches[0]} max(l, 0.62) min(calc(c * 1.4), 0.19) h);
+}
+[data-ember="${e.key}"] h1 .text-accent-blue { color: var(--explore-accent); }
+[data-ember="${e.key}"] .bg-accent-blue.h-1 { background-color: var(--explore-accent); }`
+
   return `
 [data-ember="${e.key}"] .quiz-top-glow { background: ${e.quiz}; }
-[data-ember="${e.key}"] .practice-top-glow { background: ${e.practice}; }`
+[data-ember="${e.key}"] .practice-top-glow { background: ${e.practice}; }${accents}`
 }
 
 /**

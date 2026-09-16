@@ -1,6 +1,7 @@
 import { cn } from "cn"
 
 import { usePractice, type DirectionThesis } from "@/components/providers/practice-provider"
+import { catalystsFor } from "@/data/mock-practice-data"
 import { Check, Minus, TrendingDown, TrendingUp, Zap } from "@/lib/icons"
 
 const OPTIONS: { id: DirectionThesis; label: string; sublabel: string; icon: typeof TrendingUp }[] = [
@@ -16,8 +17,11 @@ const OPTIONS: { id: DirectionThesis; label: string; sublabel: string; icon: typ
 ]
 
 export function DirectionScreen() {
-  const { chosenDirection, setDirection } = usePractice()
+  const { symbol, chosenDirection, setDirection } = usePractice()
   const selected = chosenDirection ?? "rallies"
+  const catalyst = catalystsFor(symbol)
+  // The same event the briefing calendar accents, so the two screens agree.
+  const focusEvent = catalyst.events.find((event) => event.focus) ?? catalyst.events[0]
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,6 +29,29 @@ export function DirectionScreen() {
         <h1 className="type-title text-foreground">Direction</h1>
         <p className="type-body text-muted-foreground">rally, sell off, flat, or an outsized move</p>
       </div>
+
+      {/*
+        "From the briefing" carry-forward, Figma node 76:271. Without it this
+        screen never names the symbol at all — you pick a thesis about an
+        unnamed stock with no reference to the catalyst that made it
+        interesting. Metrics are the design's; the accent is accent-blue
+        rather than its gold, which is reserved here for the practice flag.
+      */}
+      {focusEvent && (
+        <div className="flex flex-col gap-1 rounded-xl border border-accent-blue bg-accent-blue/12 px-[13px] py-[11px]">
+          <div className="flex items-center gap-2">
+            <span className="type-label font-bold tracking-[1px] text-accent-blue">
+              From the briefing
+            </span>
+            <span className="type-label ml-auto tabular-nums text-muted-foreground/70">
+              {focusEvent.daysOut} days out
+            </span>
+          </div>
+          <span className="type-body font-medium text-foreground">
+            {focusEvent.label} {focusEvent.date} · implied move ± {catalyst.impliedMovePercent}%
+          </span>
+        </div>
+      )}
 
       <span className="type-label uppercase tracking-wide text-muted-foreground">What do you think happens</span>
 

@@ -71,7 +71,7 @@ export function BottomNav({ className, activeIndex, onActiveChange }: BottomNavP
             )}
           >
             <Icon className="size-5" />
-            <span className="text-[10px] leading-tight">{item.label}</span>
+            <span className="type-label leading-tight">{item.label}</span>
           </button>
         )
       })}

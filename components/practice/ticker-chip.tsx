@@ -1,20 +1,16 @@
 import { cn } from "cn"
 
-import { AxisTag } from "@/components/practice/axis-tag"
-import type { Axis } from "@/components/providers/practice-provider"
 import type { PracticeQuote } from "@/data/mock-practice-data"
 import { formatPercent } from "@/lib/format"
 
 export interface TickerChipProps {
   quote: PracticeQuote
   catalystLabel: string
-  axis: Axis
-  unlocked: boolean
   selected: boolean
   onSelect: () => void
 }
 
-export function TickerChip({ quote, catalystLabel, axis, unlocked, selected, onSelect }: TickerChipProps) {
+export function TickerChip({ quote, catalystLabel, selected, onSelect }: TickerChipProps) {
   const trend = quote.changePercent >= 0 ? "positive" : "negative"
 
   return (
@@ -44,12 +40,9 @@ export function TickerChip({ quote, catalystLabel, axis, unlocked, selected, onS
           </span>
         </div>
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <span className={cn("type-label truncate", selected ? "text-accent-blue" : "text-muted-foreground")}>
-          {catalystLabel}
-        </span>
-        <AxisTag axis={axis} unlocked={unlocked} />
-      </div>
+      <span className={cn("type-label truncate", selected ? "text-accent-blue" : "text-muted-foreground")}>
+        {catalystLabel}
+      </span>
     </button>
   )
 }

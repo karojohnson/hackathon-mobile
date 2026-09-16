@@ -16,8 +16,22 @@ export interface CatalystEvent {
    * 224px before it truncates.
    */
   chipLabel?: string
-  axis: Axis
+  /**
+   * Axes this event informs, shown as tags on the briefing calendar (Figma
+   * node 41:281). An array because a big catalyst moves more than one: Q3
+   * earnings tells you direction, distance and volatility at once, which is
+   * what makes it the event worth planning around.
+   */
+  informs: Axis[]
   daysOut: number
+  /**
+   * The focal event: accented row, accented date and days-out, and the only
+   * row that carries a `note`. Set explicitly rather than inferred from
+   * position, so reordering the calendar can't silently move the emphasis.
+   */
+  focus?: boolean
+  /** Extra line on the focal row, e.g. how it sits against an expiration. */
+  note?: string
 }
 
 export interface SymbolCatalyst {
@@ -32,42 +46,54 @@ export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
     impliedMovePercent: 7.2,
     events: [
       /*
-       * The lead symbol's nearest event is a Direction event on purpose.
-       * Cold-start tags each chip with `events[0].axis`, and Direction is
-       * the only axis unlocked at the start — so when every symbol's first
-       * event was Volatility or Distance, the entry screen rendered four
-       * padlocks and no open door, then sent the customer to the Direction
-       * picker anyway. One unlocked chip plus three locked ones reads as
-       * "here's one you can do now, three you'll grow into".
+       * Q4 earnings leads and is the focal row: the highest-impact catalyst
+       * and the only one informing three axes at once, which is why the
+       * design gives it the accent and the expiration note.
+       *
+       * It also has to inform Direction, because Direction is the only axis
+       * unlocked at the start. When the lead event fed only Volatility or
+       * Distance, screen 01 rendered four padlocks and no open door, then
+       * sent the customer to the Direction picker anyway.
+       *
+       * The cold-start chip reads `events[0].chipLabel`, so this ordering
+       * also decides what the lead ticker chip says on screen 01.
        */
-      { date: "Sep 22", label: "Q4 earnings", chipLabel: "Earnings Tuesday · ± 7.2% move", axis: "direction", daysOut: 6 },
-      { date: "Sep 29", label: "Index rebalance", chipLabel: "Index rebalance: forced buying", axis: "volatility", daysOut: 13 },
-      { date: "Oct 2", label: "Product event", axis: "direction", daysOut: 16 },
-      { date: "Oct 14", label: "Analyst day", axis: "distance", daysOut: 28 },
+      {
+        date: "Sep 22",
+        label: "Q4 earnings",
+        chipLabel: "Earnings Tuesday · ± 7.2% move",
+        informs: ["direction", "distance", "volatility"],
+        daysOut: 6,
+        focus: true,
+        note: "your next expiration lands just after this",
+      },
+      { date: "Sep 29", label: "Index rebalance", chipLabel: "Index rebalance: forced buying", informs: ["volatility"], daysOut: 13 },
+      { date: "Oct 2", label: "Product event", informs: ["direction"], daysOut: 16 },
+      { date: "Oct 14", label: "Analyst day", informs: ["distance"], daysOut: 28 },
     ],
   },
   {
     symbol: "NVDA",
     impliedMovePercent: 9.2,
     events: [
-      { date: "Oct 8", label: "Gap fill watch", chipLabel: "Gapped 9% on no news", axis: "distance", daysOut: 22 },
-      { date: "Oct 22", label: "Q3 earnings", axis: "direction", daysOut: 36 },
+      { date: "Oct 8", label: "Gap fill watch", chipLabel: "Gapped 9% on no news", informs: ["distance"], daysOut: 22 },
+      { date: "Oct 22", label: "Q3 earnings", informs: ["direction"], daysOut: 36 },
     ],
   },
   {
     symbol: "AMZN",
     impliedMovePercent: 8.1,
     events: [
-      { date: "Oct 6", label: "Elevated IV", chipLabel: "IV rank 71% · premium is rich", axis: "volatility", daysOut: 20 },
-      { date: "Nov 19", label: "Q3 earnings", axis: "direction", daysOut: 64 },
+      { date: "Oct 6", label: "Elevated IV", chipLabel: "IV rank 71% · premium is rich", informs: ["volatility"], daysOut: 20 },
+      { date: "Nov 19", label: "Q3 earnings", informs: ["direction"], daysOut: 64 },
     ],
   },
   {
     symbol: "TSLA",
     impliedMovePercent: 4.5,
     events: [
-      { date: "Sep 29", label: "Delivery numbers", chipLabel: "Delivery numbers · Sep 29", axis: "duration", daysOut: 13 },
-      { date: "Nov 5", label: "Q3 earnings", axis: "direction", daysOut: 50 },
+      { date: "Sep 29", label: "Delivery numbers", chipLabel: "Delivery numbers · Sep 29", informs: ["duration"], daysOut: 13 },
+      { date: "Nov 5", label: "Q3 earnings", informs: ["direction"], daysOut: 50 },
     ],
   },
 ]
@@ -359,3 +385,31 @@ export const OPTIONS_LEVEL = {
 
 /** Practice history the customer arrives with, before this session's trades. */
 export const PRACTICE_HISTORY = { resolvedTrades: 40, since: "Aug 4" }
+
+/**
+ * The four signals on the "What's coming" briefing, from Figma node 122:263.
+ *
+ * These are the *inputs* a trader reads, each one feeding one of the four
+ * axes — which is the teaching point, and why the row shows both: "Implied
+ * move" is the thing you look at, "distance" is the decision it informs. An
+ * earlier pass listed the axis names alone, which lost that pairing.
+ *
+ * A signal is open once its axis is unlocked; until then the row shows which
+ * tier unlocks it.
+ */
+export interface SignalDef {
+  id: string
+  /** The signal itself, e.g. "Implied move". */
+  label: string
+  /** The axis this signal feeds. */
+  informs: Axis
+  /** Tier that unlocks it, shown as "tier N" while locked. */
+  tier: number
+}
+
+export const SIGNALS: SignalDef[] = [
+  { id: "catalyst-calendar", label: "Catalyst calendar", informs: "direction", tier: 1 },
+  { id: "event-vs-expiration", label: "Event vs expiration", informs: "duration", tier: 2 },
+  { id: "implied-move", label: "Implied move", informs: "distance", tier: 3 },
+  { id: "iv-rank", label: "IV rank", informs: "volatility", tier: 4 },
+]
