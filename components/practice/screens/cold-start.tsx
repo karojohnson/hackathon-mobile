@@ -3,7 +3,7 @@ import { usePractice } from "@/components/providers/practice-provider"
 import { PRACTICE_QUOTES, catalystsFor } from "@/data/mock-practice-data"
 
 export function ColdStartScreen() {
-  const { symbol, setSymbol, unlockedAxes } = usePractice()
+  const { symbol, setSymbol } = usePractice()
   const quotes = PRACTICE_QUOTES
 
   return (
@@ -20,9 +20,7 @@ export function ColdStartScreen() {
             <TickerChip
               key={quote.symbol}
               quote={quote}
-              axis={nextEvent?.axis ?? "direction"}
               catalystLabel={nextEvent ? (nextEvent.chipLabel ?? nextEvent.label) : "Nothing scheduled"}
-              unlocked={unlockedAxes.includes(nextEvent?.axis ?? "direction")}
               selected={symbol === quote.symbol}
               onSelect={() => setSymbol(quote.symbol)}
             />

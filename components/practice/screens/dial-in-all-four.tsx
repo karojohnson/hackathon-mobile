@@ -31,14 +31,21 @@ export function DialInAllFourScreen() {
 
       <PayoffChart
         points={[
-          { strike: condor.buyPutStrike * 0.97, value: -condor.maxLoss },
+          { strike: price * 0.88, value: -condor.maxLoss },
           { strike: condor.buyPutStrike, value: -condor.maxLoss },
           { strike: condor.sellPutStrike, value: condor.maxGain },
           { strike: condor.sellCallStrike, value: condor.maxGain },
           { strike: condor.buyCallStrike, value: -condor.maxLoss },
-          { strike: condor.buyCallStrike * 1.03, value: -condor.maxLoss },
+          { strike: price * 1.12, value: -condor.maxLoss },
         ]}
-        breakevens={[condor.lowerBreakeven, condor.upperBreakeven]}
+        xMin={price * 0.88}
+        xMax={price * 1.12}
+        yMin={-condor.maxLoss}
+        yMax={condor.maxGain}
+        // A condor only wins between the two breakevens, so the band is
+        // bounded on both sides rather than running to the right edge.
+        profitFrom={condor.lowerBreakeven}
+        profitTo={condor.upperBreakeven}
       />
 
       <div className="flex flex-col gap-2 rounded-lg glass-card p-4">

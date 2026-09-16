@@ -20,7 +20,12 @@ export type ScreenId =
 
 export type Axis = "direction" | "duration" | "distance" | "volatility"
 export type DirectionThesis = "rallies" | "sellsOff" | "flat" | "outsized"
-export type DialStop = 50 | 70 | 90
+/**
+ * Probability of profit the dial is set to, as a whole percent in
+ * [POP_MIN, POP_MAX]. Was a union of three fixed stops; the dial is a
+ * continuous drag now, so any value in range is valid.
+ */
+export type DialStop = number
 
 export interface ResolvedTrade {
   id: string

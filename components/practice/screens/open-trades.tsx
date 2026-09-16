@@ -55,7 +55,7 @@ export function OpenTradesScreen() {
               <article key={trade.id} className="flex flex-col gap-3 rounded-lg glass-card p-4">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
-                    <Arrow className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <Arrow className="size-5 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="type-body-strong truncate text-foreground">{trade.symbol}</span>
                   </div>
                   <span className="type-label shrink-0 text-muted-foreground">resolves {trade.resolvesOn}</span>
@@ -94,7 +94,7 @@ export function OpenTradesScreen() {
                   <div className="flex min-w-0 items-center gap-2">
                     {/* Glyph carries the verdict too, so it isn't colour-only. */}
                     <Arrow
-                      className={cn("size-4 shrink-0", clean ? "text-positive" : "text-partial")}
+                      className={cn("size-5 shrink-0", clean ? "text-positive" : "text-partial")}
                       aria-hidden
                     />
                     <span className="type-body-strong truncate text-foreground">{trade.symbol}</span>

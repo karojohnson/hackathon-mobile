@@ -60,7 +60,7 @@ export function GraduationScreen() {
 
       <div className="flex items-center justify-between rounded-lg glass-card p-4">
         <span className="type-body text-foreground">Simulated practice ends here.</span>
-        <ExternalLink className="size-4 text-muted-foreground" />
+        <ExternalLink className="size-5 text-muted-foreground" />
       </div>
 
       <p className="type-label text-center text-muted-foreground">This is a prototype. No real money moves.</p>

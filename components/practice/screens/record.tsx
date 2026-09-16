@@ -70,7 +70,7 @@ export function RecordScreen() {
                 {earned ? (
                   <span className="type-label text-foreground">{structure.label.slice(0, 2)}</span>
                 ) : (
-                  <Lock className="size-4 text-muted-foreground/50" />
+                  <Lock className="size-5 text-muted-foreground/50" />
                 )}
               </div>
             )

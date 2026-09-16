@@ -34,7 +34,7 @@ export function EarnedScreen() {
           return (
             <div key={fee.id} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
               <div className="flex items-center gap-2">
-                {unlocked ? <Unlock className="size-4 text-priority-gold" /> : <Lock className="size-4 text-muted-foreground" />}
+                {unlocked ? <Unlock className="size-5 text-priority-gold" /> : <Lock className="size-5 text-muted-foreground" />}
                 <div className="flex flex-col">
                   <span className={unlocked ? "type-body text-foreground" : "type-body text-muted-foreground/60"}>
                     {fee.label}
@@ -57,13 +57,13 @@ export function EarnedScreen() {
         <div className="grid grid-cols-3 gap-2">
           {CERTIFICATES.map((cert) => (
             <div key={cert.id} className="flex flex-col gap-1 rounded-lg border border-priority-gold bg-priority-gold-surface p-3">
-              <Award className="size-4 text-priority-gold" />
+              <Award className="size-5 text-priority-gold" />
               <span className="type-body-strong text-foreground">{cert.label}</span>
               <span className="type-label text-muted-foreground">{cert.earnedOn}</span>
             </div>
           ))}
           <div className="flex flex-col items-center justify-center gap-1 rounded-lg glass-card p-4 text-center">
-            <Lock className="size-4 text-muted-foreground" />
+            <Lock className="size-5 text-muted-foreground" />
             <span className="type-label text-muted-foreground">{LOCKED_CERTIFICATE.label}</span>
           </div>
         </div>

@@ -27,15 +27,15 @@ export function DistanceDrillScreen() {
       <div className="flex flex-col rounded-lg glass-card px-4">
         <div className="flex items-center justify-between border-b border-border py-2.5">
           <span className="type-body text-foreground">up</span>
-          <Check className="size-4 text-positive" />
+          <Check className="size-5 text-positive" />
         </div>
         <div className="flex items-center justify-between border-b border-border py-2.5">
           <span className="type-body text-foreground">stays under ${spread.sellStrike.toFixed(0)}</span>
-          <Check className="size-4 text-positive" />
+          <Check className="size-5 text-positive" />
         </div>
         <div className="flex items-center justify-between py-2.5">
           <span className="type-body text-foreground">by {expirations[2].label}</span>
-          <X className="size-4 text-negative" />
+          <X className="size-5 text-negative" />
         </div>
       </div>
 

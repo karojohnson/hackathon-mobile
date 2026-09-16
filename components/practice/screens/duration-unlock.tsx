@@ -19,7 +19,7 @@ export function DurationUnlockScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-1 text-center">
-        <Unlock className="size-6 text-priority-gold" />
+        <Unlock className="size-5 text-priority-gold" />
         <h1 className="type-title text-foreground">Duration</h1>
         <p className="type-label text-muted-foreground">by when? · theta · expiration</p>
       </div>
@@ -46,7 +46,7 @@ export function DurationUnlockScreen() {
           return (
             <div key={axis.id} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
               <div className="flex items-center gap-2">
-                {unlocked ? <Check className="size-4 text-positive" /> : <Lock className="size-4 text-muted-foreground" />}
+                {unlocked ? <Check className="size-5 text-positive" /> : <Lock className="size-5 text-muted-foreground" />}
                 <div className="flex flex-col">
                   <span className={cn("type-body", unlocked ? "text-foreground" : "text-muted-foreground/60")}>
                     {axis.label}

@@ -54,13 +54,27 @@ function overrideCss({ key, hex }: Candidate) {
       color-mix(in oklch, ${hex} ${mid}%, transparent) 35%,
       color-mix(in oklch, ${hex} 0%, transparent) 70%`
 
+  // See the note on overrideCss in app/ember-explorations/page.tsx: retints
+  // the headline accent word and the filled step-progress segments on red
+  // columns only, chroma-boosted rather than washed toward white.
+  const accents =
+    key === "blue"
+      ? ""
+      : `
+[data-glow="${key}"] {
+  --explore-accent: color-mix(in oklch, ${hex} 82%, white);
+  --explore-accent: oklch(from ${hex} max(l, 0.62) min(calc(c * 1.4), 0.19) h);
+}
+[data-glow="${key}"] h1 .text-accent-blue { color: var(--explore-accent); }
+[data-glow="${key}"] .bg-accent-blue.h-1 { background-color: var(--explore-accent); }`
+
   return `
 [data-glow="${key}"] .quiz-top-glow {
   background: radial-gradient(140% 100% at 50% 0%,${stops(24, 10)});
 }
 [data-glow="${key}"] .practice-top-glow {
   background: radial-gradient(220% 120% at 100% 0%,${stops(31, 13)});
-}`
+}${accents}`
 }
 
 /**

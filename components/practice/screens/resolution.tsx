@@ -31,7 +31,7 @@ export function ResolutionScreen() {
           ([axis, correct]) => (
             <div key={axis} className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0">
               <div className="flex items-center gap-2">
-                {correct ? <Check className="size-4 text-positive" /> : <X className="size-4 text-negative" />}
+                {correct ? <Check className="size-5 text-positive" /> : <X className="size-5 text-negative" />}
                 <span className="type-body text-foreground">{AXIS_LABEL[axis]}</span>
               </div>
               <span className={cn("type-label", correct ? "text-positive" : "text-negative")}>

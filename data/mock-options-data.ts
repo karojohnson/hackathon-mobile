@@ -64,33 +64,72 @@ export interface SpreadQuote {
   breakeven: number
 }
 
-const DIAL_STOP_OFFSET: Record<50 | 70 | 90, number> = { 50: 0, 70: -1, 90: -2 }
+/** Annualised vol for the mock underlyings. Prototype constant, not a quote. */
+const MOCK_IV = 0.3
+
+/** Probability range the dial spans, as whole percents. */
+export const POP_MIN = 50
+export const POP_MAX = 90
 
 /**
- * Short put spread sized off a target "chance this works" (50/70/90) — the
- * further OTM the short strike, the higher the displayed probability and
- * the smaller the credit. `strikesFor` already returns 7 strikes centered
- * on the money (offsets -3..3); index 3 is at-the-money.
+ * Inverse normal CDF (Abramowitz & Stegun 26.2.23), accurate to ~4.5e-4 —
+ * far beyond what a teaching prototype needs. Used to turn a target
+ * probability into a strike distance in standard deviations.
  */
-export function shortPutSpreadFor(
-  price: number,
-  daysOut: number,
-  dialStop: 50 | 70 | 90
-): SpreadQuote {
-  const strikes = strikesFor(price, daysOut, "put")
-  const atmIndex = 3
-  const sellIndex = atmIndex + DIAL_STOP_OFFSET[dialStop]
-  const buyIndex = Math.max(0, sellIndex - 1)
-  const sell = strikes[sellIndex]
-  const buy = strikes[buyIndex]
-  const credit = Number((sell.premium - buy.premium).toFixed(2))
+function normalQuantile(p: number): number {
+  const tail = p > 0.5 ? 1 - p : p
+  const t = Math.sqrt(-2 * Math.log(tail))
+  const z =
+    t -
+    (2.515517 + 0.802853 * t + 0.010328 * t * t) /
+      (1 + 1.432788 * t + 0.189269 * t * t + 0.001308 * t * t * t)
+  return p > 0.5 ? z : -z
+}
+
+/**
+ * Short put spread sized from a target probability of profit.
+ *
+ * Derived analytically rather than by stepping along a strike ladder. The
+ * previous version picked strikes by index and read premiums off a decay
+ * curve whose adjacent values barely differed, so a 2.5-wide spread came out
+ * at $0.15 credit — $15 of max gain against $235 of max loss at 70%, a trade
+ * nobody would take. That broke the one thing this screen teaches: that
+ * buying a higher chance of winning costs you upside.
+ *
+ * The relationships here are the textbook ones, and they reproduce the
+ * design's own readout exactly (Figma 26:128 — 100/95 spread, 2.50 credit,
+ * $250 max gain, $250 max loss, breakeven 97.50, at 50%):
+ *
+ *   - short strike sits `z(pop)` standard deviations below spot, so it is
+ *     at-the-money at 50% and further out as the probability climbs
+ *   - credit ≈ width × (1 − pop): the market pays you the odds
+ *   - max gain = credit, max loss = width − credit, breakeven = strike − credit
+ *
+ * `pop` is a whole percent and may be any value in [POP_MIN, POP_MAX] — the
+ * dial is continuous, not three fixed stops.
+ */
+export function shortPutSpreadFor(price: number, daysOut: number, pop: number): SpreadQuote {
+  const clamped = Math.min(POP_MAX, Math.max(POP_MIN, pop)) / 100
+  const increment = strikeIncrement(price)
+  const width = increment * 2
+
+  const sigma = MOCK_IV * Math.sqrt(daysOut / 365)
+  const sellStrike = Number(
+    (Math.round((price * (1 - normalQuantile(clamped) * sigma)) / increment) * increment).toFixed(2)
+  )
+  const buyStrike = Number((sellStrike - width).toFixed(2))
+
+  // Floor the credit so the deep-OTM end still shows a real (if small) payout
+  // rather than collapsing to zero and making max gain read as $0.
+  const credit = Number(Math.max(0.05, width * (1 - clamped)).toFixed(2))
+
   return {
-    sellStrike: sell.strike,
-    buyStrike: buy.strike,
+    sellStrike,
+    buyStrike,
     credit,
     maxGain: Number((credit * 100).toFixed(2)),
-    maxLoss: Number(((sell.strike - buy.strike - credit) * 100).toFixed(2)),
-    breakeven: Number((sell.strike - credit).toFixed(2)),
+    maxLoss: Number(((width - credit) * 100).toFixed(2)),
+    breakeven: Number((sellStrike - credit).toFixed(2)),
   }
 }
 
