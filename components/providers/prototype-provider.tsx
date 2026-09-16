@@ -22,12 +22,29 @@ export interface PrototypeContextValue {
   setActiveTab: (index: number) => void
   activePrototype: PrototypeId
   setActivePrototype: (prototype: PrototypeId) => void
+  /**
+   * False until the persisted tab has been read back on mount. The first
+   * painted frame always says prototype 1 (the SSR default), so anything
+   * that renders *differently* per prototype — the launch splash's logo —
+   * has to hold off until this flips, or it shows the wrong one for a frame
+   * on a reload straight into Bites.
+   */
+  hydrated: boolean
+  /**
+   * Bumped every time a prototype is launched from the presenter toggle.
+   * A change means "this prototype just started", which is what replays the
+   * launch splash. Plain tab taps inside the app don't bump it — those are
+   * navigation, not a launch.
+   */
+  launchCount: number
 }
 
 const PrototypeContext = React.createContext<PrototypeContextValue | null>(null)
 
 export function PrototypeProvider({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = React.useState(0)
+  const [hydrated, setHydrated] = React.useState(false)
+  const [launchCount, setLaunchCount] = React.useState(0)
 
   React.useEffect(() => {
     try {
@@ -43,6 +60,7 @@ export function PrototypeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore malformed/unavailable storage — falls back to the default tab
     }
+    setHydrated(true)
   }, [])
 
   const skippedFirstWrite = React.useRef(false)
@@ -60,6 +78,9 @@ export function PrototypeProvider({ children }: { children: React.ReactNode }) {
 
   const setActivePrototype = React.useCallback((prototype: PrototypeId) => {
     setActiveTab(prototype === 2 ? PRACTICE_TAB_INDEX : 0)
+    // Counts as a launch even when it's the prototype already on screen:
+    // clicking its button in the presenter toggle should replay its splash.
+    setLaunchCount((count) => count + 1)
   }, [])
 
   const value = React.useMemo<PrototypeContextValue>(
@@ -68,8 +89,10 @@ export function PrototypeProvider({ children }: { children: React.ReactNode }) {
       setActiveTab,
       activePrototype: activeTab === PRACTICE_TAB_INDEX ? 2 : 1,
       setActivePrototype,
+      hydrated,
+      launchCount,
     }),
-    [activeTab, setActivePrototype]
+    [activeTab, setActivePrototype, hydrated, launchCount]
   )
 
   return <PrototypeContext.Provider value={value}>{children}</PrototypeContext.Provider>
