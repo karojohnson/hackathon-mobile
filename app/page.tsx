@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-
 import Link from "next/link"
 import { cn } from "cn"
 
@@ -20,6 +18,7 @@ import { PracticeProvider } from "@/components/providers/practice-provider"
 import { PracticeTab } from "@/components/practice/practice-tab"
 import { Button } from "@/components/ui/button"
 import { useOnboarding } from "@/components/providers/onboarding-provider"
+import { PRACTICE_TAB_INDEX, usePrototype } from "@/components/providers/prototype-provider"
 import { watchlist as allQuotes } from "@/data/mock-market-data"
 import { formatCurrency } from "@/lib/format"
 import { Plus, Wallet } from "@/lib/icons"
@@ -37,13 +36,13 @@ export default function Page() {
     closePosition,
     adjustCash,
   } = useOnboarding()
-  const [activeTab, setActiveTab] = React.useState(0)
+  const { activeTab, setActiveTab } = usePrototype()
 
   const watchedQuotes = allQuotes.filter((q) => watchlist.includes(q.symbol))
   const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0)
   const netWorth = cash + positionsValue
 
-  if (activeTab === 5) {
+  if (activeTab === PRACTICE_TAB_INDEX) {
     return (
       <PracticeProvider>
         <PracticeTab activeTabIndex={activeTab} onActiveTabChange={setActiveTab} />

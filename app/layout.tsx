@@ -3,6 +3,7 @@ import localFont from "next/font/local"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { OnboardingProvider } from "@/components/providers/onboarding-provider"
+import { PrototypeProvider } from "@/components/providers/prototype-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { DemoStage } from "@/components/demo/demo-stage"
 import { cn } from "@/lib/utils";
@@ -35,9 +36,11 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <OnboardingProvider>
-            <TooltipProvider>
-              <DemoStage>{children}</DemoStage>
-            </TooltipProvider>
+            <PrototypeProvider>
+              <TooltipProvider>
+                <DemoStage>{children}</DemoStage>
+              </TooltipProvider>
+            </PrototypeProvider>
           </OnboardingProvider>
         </ThemeProvider>
       </body>

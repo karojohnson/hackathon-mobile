@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { PhoneFrame } from "@/components/mobile/phone-frame"
 import { ControlSidebar } from "@/components/demo/control-sidebar"
 import { Button } from "@/components/ui/button"
+import { usePrototype } from "@/components/providers/prototype-provider"
 import { Eye, EyeOff, RotateCcw } from "@/lib/icons"
 import { resetDemo } from "@/lib/reset-demo"
 
@@ -22,6 +23,7 @@ const BARE_ROUTES = ["/banners"]
 export function DemoStage({ children }: { children: React.ReactNode }) {
   const [showControls, setShowControls] = React.useState(false)
   const pathname = usePathname()
+  const { activePrototype, setActivePrototype } = usePrototype()
 
   if (BARE_ROUTES.includes(pathname)) {
     return <>{children}</>
@@ -38,17 +40,35 @@ export function DemoStage({ children }: { children: React.ReactNode }) {
         {showControls ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         {showControls ? "Hide presenter view" : "Show presenter view"}
       </Button>
-      {!showControls && (
-        <Button
-          variant="secondary"
-          size="sm"
-          className="fixed top-4 left-4 z-50 gap-1.5"
-          onClick={resetDemo}
-        >
-          <RotateCcw className="size-4" />
-          Reset demo
-        </Button>
-      )}
+      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
+        <div className="flex items-center gap-1 rounded-lg bg-background p-1">
+          <Button
+            variant={activePrototype === 1 ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActivePrototype(1)}
+          >
+            Prototype 1
+          </Button>
+          <Button
+            variant={activePrototype === 2 ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActivePrototype(2)}
+          >
+            Prototype 2
+          </Button>
+        </div>
+        {!showControls && (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => resetDemo(activePrototype)}
+          >
+            <RotateCcw className="size-4" />
+            Reset Prototype {activePrototype}
+          </Button>
+        )}
+      </div>
       <PhoneFrame>{children}</PhoneFrame>
       {showControls && <ControlSidebar />}
     </div>

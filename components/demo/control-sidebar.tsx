@@ -12,6 +12,7 @@ import {
   type PreferenceWeights,
   type TodoFlags,
 } from "@/components/providers/onboarding-provider"
+import { usePrototype } from "@/components/providers/prototype-provider"
 import { todoDefs } from "@/data/demo-todos"
 import { resetDemo } from "@/lib/reset-demo"
 
@@ -32,6 +33,7 @@ const weightLabels: Record<keyof PreferenceWeights, string> = {
 export function ControlSidebar() {
   const { preferenceWeights, setPreferenceWeights, todos, setTodoFlag, dominantPreference } =
     useOnboarding()
+  const { activePrototype } = usePrototype()
   const pathname = usePathname()
 
   function setWeight(key: keyof PreferenceWeights, value: number) {
@@ -117,8 +119,8 @@ export function ControlSidebar() {
         >
           {pathname === "/concepts" ? "Back to dashboard" : "View dashboard concepts"}
         </Link>
-        <Button variant="ghost" onClick={resetDemo}>
-          Reset demo
+        <Button variant="ghost" onClick={() => resetDemo(activePrototype)}>
+          Reset Prototype {activePrototype}
         </Button>
       </div>
     </div>
