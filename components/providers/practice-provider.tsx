@@ -123,12 +123,13 @@ export function PracticeProvider({ children }: { children: React.ReactNode }) {
 
   const resolveTrade = React.useCallback((trade: Omit<ResolvedTrade, "id">) => {
     setState((prev) => {
-      const xp = prev.xp + trade.xpEarned
+      const totalXp = prev.xp + trade.xpEarned
+      const levelsGained = Math.floor(totalXp / XP_PER_LEVEL)
       return {
         ...prev,
         resolvedTrades: [...prev.resolvedTrades, { ...trade, id: String(prev.resolvedTrades.length) }],
-        xp,
-        level: 1 + Math.floor(xp / XP_PER_LEVEL),
+        xp: totalXp % XP_PER_LEVEL,
+        level: prev.level + levelsGained,
         streak: trade.outcome === "loss" ? 0 : prev.streak + 1,
       }
     })
