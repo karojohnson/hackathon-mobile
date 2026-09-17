@@ -60,6 +60,17 @@
     --color-priority-blue: var(--priority-blue);
     --color-priority-blue-surface: var(--priority-blue-surface);
     --color-button-neutral: var(--button-neutral);
+    /* Badge variants — see docs/token-map.md */
+    --color-badge-primary-surface: var(--badge-primary-surface);
+    --color-badge-primary-text: var(--badge-primary-text);
+    --color-badge-secondary-surface: var(--badge-secondary-surface);
+    --color-badge-secondary-text: var(--badge-secondary-text);
+    --color-badge-pending-surface: var(--badge-pending-surface);
+    --color-badge-pending-text: var(--badge-pending-text);
+    --color-badge-error-surface: var(--badge-error-surface);
+    --color-badge-error-text: var(--badge-error-text);
+    --color-badge-success-surface: var(--badge-success-surface);
+    --color-badge-success-text: var(--badge-success-text);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -102,7 +113,17 @@
     --blue-01: #428dc9;
     /* color.background.accent.blue-03 -> color.solid.blue.050 */
     --blue-03: #e7f1f9;
-    --glass-border-shade: color-mix(in oklch, var(--border) 35%, transparent);
+    /*
+     * Raised from 35%: on the light canvas a 35%-alpha #b5aba4 hairline
+     * around an #ffffffa8 fill left cards without a readable edge.
+     */
+    --glass-border-shade: color-mix(in oklch, var(--border) 55%, transparent);
+    /* Pre-redesign value, for /compare's "before" column only. */
+    --glass-border-shade-before: color-mix(in oklch, var(--border) 35%, transparent);
+    /* Top-lit inner highlight. Near-opaque white in light, where the card
+       fill is already pale and only a bright lip separates it from the
+       canvas; a whisper in dark, where the fill does the work. */
+    --glass-inner-light: rgba(255, 255, 255, 0.75);
     /* color-text-general-secondary-text */
     --muted-foreground: #6e645e;
     --text-secondary: #6e645e;
@@ -166,6 +187,40 @@
     --button-neutral: #f7f5f3;
     /* --shadow-bottom-100 -> color-other-elevation: color-alpha-neutral-200 */
     --shadow-bottom-100: 0px 0px 2px 0px rgba(18, 18, 18, 0.13), 0px 4px 6px 0px rgba(18, 18, 18, 0.13);
+
+    /*
+     * Badge — copied from the real component, not invented here. Source:
+     * web-based-2.0/packages/ui/src/lib/components/ui/badge/index.ts, whose
+     * cva pairs an `accent-*-alpha-02` tinted surface with the matching
+     * `text-icon-general-*` foreground. Resolved through
+     * build/light-theme.css -> build/static-vars.css.
+     *
+     * Three of the five foregrounds are the same source tokens already
+     * bridged above as --priority-blue/gold/red, so they alias rather than
+     * duplicate a hex. Green and secondary are new: note they are the
+     * *icon* colors, a different swatch from --positive (positive-tick) and
+     * --muted-foreground (general-secondary-text), so they are not aliases.
+     */
+    /* color-background-accent-blue-alpha-02 -> color-alpha-blue-100 */
+    --badge-primary-surface: rgba(0, 104, 188, 0.17);
+    /* color-text-icon-general-blue — already bridged as --priority-blue */
+    --badge-primary-text: var(--priority-blue);
+    /* color-background-general-surface-alpha-02 -> color-alpha-neutral-100 */
+    --badge-secondary-surface: rgba(18, 18, 18, 0.09);
+    /* color-text-icon-general-secondary -> color-solid-neutral-650 */
+    --badge-secondary-text: #525252;
+    /* color-background-accent-gold-alpha-02 -> color-alpha-gold-100 */
+    --badge-pending-surface: rgba(237, 175, 0, 0.35);
+    /* color-text-icon-general-gold — already bridged as --priority-gold */
+    --badge-pending-text: var(--priority-gold);
+    /* color-background-accent-red-alpha-02 -> color-alpha-red-100 */
+    --badge-error-surface: rgba(255, 8, 0, 0.15);
+    /* color-text-icon-general-red — already bridged as --priority-red */
+    --badge-error-text: var(--priority-red);
+    /* color-background-accent-green-alpha-02 -> color-alpha-green-100 */
+    --badge-success-surface: rgba(0, 131, 32, 0.18);
+    /* color-text-icon-general-green -> color-solid-green-600 */
+    --badge-success-text: #196c3d;
 }
 
 .dark {
@@ -194,6 +249,11 @@
     /* color.background.accent.blue-03 -> color.solid.blue.950 */
     --blue-03: #082035;
     --glass-border-shade: color-mix(in oklch, var(--border) 30%, transparent);
+    /* Pre-redesign value — unchanged in dark, kept for symmetry. */
+    --glass-border-shade-before: color-mix(in oklch, var(--border) 30%, transparent);
+    /* See the :root note — a whisper here, since the card fill already
+       separates itself from a #000 canvas. */
+    --glass-inner-light: rgba(255, 255, 255, 0.05);
     /* color-text-general-secondary-text */
     --muted-foreground: #afafaa;
     --text-secondary: #afafaa;
@@ -248,6 +308,29 @@
     --button-neutral: #333333;
     /* --shadow-bottom-100 -> color-other-elevation: color-alpha-neutral-400 */
     --shadow-bottom-100: 0px 0px 2px 0px rgba(18, 18, 18, 0.44), 0px 4px 6px 0px rgba(18, 18, 18, 0.44);
+
+    /* Badge — see the :root block above for provenance. Dark-theme values
+       resolve through build/dark-theme.css -> build/static-vars.css. */
+    /* color-background-accent-blue-alpha-02 -> color-alpha-blue-900 */
+    --badge-primary-surface: rgba(18, 148, 255, 0.2);
+    /* color-text-icon-general-blue — already bridged as --priority-blue */
+    --badge-primary-text: var(--priority-blue);
+    /* color-background-general-surface-alpha-02 -> color-alpha-neutral-900 */
+    --badge-secondary-surface: rgba(244, 244, 244, 0.08);
+    /* color-text-icon-general-secondary -> color-solid-neutral-350 */
+    --badge-secondary-text: #acacac;
+    /* color-background-accent-gold-alpha-02 -> color-alpha-gold-900 */
+    --badge-pending-surface: rgba(255, 184, 9, 0.13);
+    /* color-text-icon-general-gold — already bridged as --priority-gold */
+    --badge-pending-text: var(--priority-gold);
+    /* color-background-accent-red-alpha-02 -> color-alpha-red-900 */
+    --badge-error-surface: rgba(255, 46, 60, 0.23);
+    /* color-text-icon-general-red — already bridged as --priority-red */
+    --badge-error-text: var(--priority-red);
+    /* color-background-accent-green-alpha-02 -> color-alpha-green-900 */
+    --badge-success-surface: rgba(0, 134, 59, 0.25);
+    /* color-text-icon-general-green -> color-solid-green-400 */
+    --badge-success-text: #55aa71;
 }
 
 /*
@@ -302,6 +385,24 @@
     line-height: 14px;
     font-weight: 525;
   }
+  /*
+   * Section label / overline. typography-v2-xsmall-650 (10/12/650) plus
+   * tracking — the source scale has no uppercase step, so the tracking is
+   * ours, matching what record.tsx had already hand-rolled.
+   *
+   * Deliberately a rank *below* `.type-label`, not equal to it. Eyebrows
+   * used to be `type-label uppercase tracking-wide` (38 call sites), which
+   * is the same 12px as the sublabels sitting underneath them — so a
+   * section head and a caption carried identical weight and nothing in a
+   * screen outranked anything else.
+   */
+  .type-eyebrow {
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
   .type-label {
     font-size: 12px;
     line-height: 16px;
@@ -324,10 +425,38 @@
     line-height: 22px;
     font-weight: 650;
   }
+  /*
+   * The rank for a figure reported inside a card or a list row: XP earned,
+   * level, streak count, days-out, a strike, a hit rate. typography-v2-
+   * xlarge-650 (20/28), a real step in build/typography.css.
+   *
+   * This is the step the chapter was missing. Every one of those numbers
+   * used to be `.type-body-strong` (14px), i.e. the same size as its own
+   * caption, so a reward and the word describing it carried equal weight.
+   */
+  .type-figure {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
   .type-title {
     font-size: 24px;
     line-height: 32px;
     font-weight: 650;
+  }
+  /*
+   * Between title (2xlarge) and hero (40px): typography-v2-3xlarge-650
+   * (28/36). For a screen's headline verdict — "3 of 4", "2 → 3", "15
+   * times" — which has to outrank the section heads around it without
+   * taking the hero, a size this chapter reserves for a single figure.
+   */
+  .type-display {
+    font-size: 28px;
+    line-height: 36px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
   .type-hero {
     font-size: 40px;
@@ -424,6 +553,20 @@
       color-mix(in oklch, var(--background) 0%, transparent) 100%
     );
   }
+  /*
+   * The pinned footer strip itself — the `glass-sheet-fade` gradient's
+   * terminal colour, as a flat fill.
+   *
+   * The fade used to be the strip's own background, which meant it had to
+   * reserve 48px of padding above the button for the gradient to read.
+   * That padding is layout, so every screen carried 48px of dead space
+   * between its last element and its CTA, on top of the content's own
+   * 16px. The strip now paints this flat fill and the gradient hangs
+   * above it as an overlay, costing nothing.
+   */
+  .footer-base {
+    background: color-mix(in oklch, var(--background) 90%, transparent);
+  }
   .glass-nav-fade {
     background: linear-gradient(
       to top,
@@ -443,6 +586,121 @@
     @apply backdrop-blur-md backdrop-saturate-150;
     border: 1px solid var(--glass-border-shade);
     background: var(--surface-glass);
+    /*
+     * 1px of top-lit inner highlight, so a card reads as a plane catching
+     * light from above rather than as a flat fill with an outline. This is
+     * what carries the card in the light theme: there, `surface-glass` is
+     * #ffffffa8 on a #f7f5f3 canvas — white on near-white — so the border
+     * was doing the separating on its own and the cards all but vanished.
+     * See --glass-inner-light / --glass-border-shade per theme.
+     */
+    box-shadow: inset 0 1px 0 var(--glass-inner-light);
+  }
+  /*
+   * The pre-redesign `.glass-card`, kept verbatim for the /compare page's
+   * vendored "before" components. Identical to `.glass-card` above minus
+   * the inner highlight, and it reads `--glass-border-shade-before` so the
+   * light theme's old 35% hairline is preserved too. Delete this, the two
+   * tokens it uses, and components/practice/before/ once the comparison is
+   * no longer needed.
+   */
+  .glass-card-before {
+    @apply backdrop-blur-md backdrop-saturate-150;
+    border: 1px solid var(--glass-border-shade-before);
+    background: var(--surface-glass);
+  }
+  /*
+   * Elevation ladder. Three levels, canvas excluded:
+   *
+   *   surface-sunken  a well that *holds* rows — grouped lists, ladders,
+   *                   axis breakdowns. Recedes from the canvas.
+   *   glass-card      the standard content card, above.
+   *   surface-raised  the one card per screen that outranks the rest: the
+   *                   resolution verdict, the payout streak, the ticket.
+   *
+   * The chapter previously had one level for all three jobs, so a grouped
+   * list of eight rows and the single most important statement on a screen
+   * were drawn identically.
+   */
+  .surface-sunken {
+    background: var(--surface-glass-sunken);
+    border: 1px solid color-mix(in oklch, var(--border) 22%, transparent);
+  }
+  .surface-raised {
+    @apply backdrop-blur-md backdrop-saturate-150;
+    background: color-mix(in oklch, var(--elevated-surface) 88%, transparent);
+    border: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+    box-shadow: var(--shadow-bottom-100), inset 0 1px 0 var(--glass-inner-light);
+  }
+  /*
+   * The informational blue panel — "from the briefing", "we think", "event
+   * vs expiration", "your weakest stat". Four screens carried this idea in
+   * four different spellings (`border-accent-blue bg-accent-blue/12`,
+   * `bg-priority-blue-surface!`, `bg-priority-blue/18`, and a bare tint),
+   * at three different radii. One class, one radius, one tint.
+   */
+  .accent-panel {
+    background: var(--badge-primary-surface);
+    border: 1px solid color-mix(in oklch, var(--accent-blue) 30%, transparent);
+  }
+  /*
+   * A row or card you can tap. Chapter 2's selectable rows carried
+   * `transition-colors` and nothing else, so the only feedback a tap got
+   * was the selected colour arriving — and re-tapping the row you were
+   * already on produced no response at all.
+   *
+   * The scale is tiny on purpose (1.5%): at mobile scale that reads as the
+   * surface taking the press, where anything larger reads as a bounce.
+   * `transform` is listed explicitly rather than using `transition-all`,
+   * which would also animate layout properties.
+   */
+  .row-selectable {
+    transition-property: background-color, border-color, box-shadow, color, transform;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .row-selectable:active {
+    transform: scale(0.985);
+  }
+  /*
+   * The XP track. The level bar is the payout screen's whole argument and
+   * it was a default 2px `Progress` — a hairline carrying the reward. 8px
+   * tall, sunken track, gold fill with a lit top edge so the fill reads as
+   * something poured in rather than a coloured div.
+   */
+  .xp-track {
+    background: var(--surface-glass-sunken);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--border) 30%, transparent);
+  }
+  .xp-fill {
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--priority-gold) 92%, white) 0%,
+      var(--priority-gold) 55%,
+      color-mix(in oklch, var(--priority-gold) 88%, black) 100%
+    );
+  }
+  /*
+   * A single soft gold bloom behind an earned figure (+70 XP). One
+   * gradient, on the one screen that is announcing a reward — not a
+   * decorative wash available everywhere.
+   */
+  .earned-bloom {
+    /*
+     * Stops are 20% down from the first pass's 22%/8% — at full strength
+     * the wash competed with the gold figure sitting in it.
+     *
+     * Centred at 58% rather than 40% and given a taller radius because the
+     * box now runs up to the app bar's lower edge (see the payout screen's
+     * `-top-6`): anchored at 40% of a taller box the densest part of the
+     * glow floated above the text it belongs to.
+     */
+    background: radial-gradient(
+      75% 130% at 50% 58%,
+      color-mix(in oklch, var(--priority-gold) 17.6%, transparent) 0%,
+      color-mix(in oklch, var(--priority-gold) 6.4%, transparent) 45%,
+      transparent 80%
+    );
   }
   /*
    * Position-row / Watchlist glass shell — a denser, two-layer glass
@@ -539,5 +797,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /*
+   * The press scale is a transform, not a transition, so zeroing
+   * durations above doesn't remove it — it would just snap instead of
+   * easing. Dropped outright here; the colour change still acknowledges
+   * the tap.
+   */
+  .row-selectable:active {
+    transform: none;
   }
 }

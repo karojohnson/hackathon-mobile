@@ -19,7 +19,7 @@ import { EmptyState } from "@/components/mobile/empty-state"
 
 import { portfolio, watchlist } from "@/data/mock-market-data"
 import { formatCurrency, formatSignedCurrency, formatPercent } from "@/lib/format"
-import { LineChart, Search } from "@/lib/icons"
+import { LineChart, Lock, Search } from "@/lib/icons"
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -108,16 +108,25 @@ export default function PrototypeKitPage() {
           </Section>
 
           <Section title="Badges & basic market values">
+            {/*
+              The five variants the real tastytrade Badge ships, by name —
+              a smoke test of the actual component surface rather than
+              shadcn's default/outline/ghost set, which this no longer has.
+              `wise` is omitted: Wise-branded surfaces only.
+            */}
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>Default</Badge>
+              <Badge variant="primary">Primary</Badge>
               <Badge variant="secondary">Secondary</Badge>
-              <Badge variant="outline">Outline</Badge>
-              <Badge variant="outline" className="border-positive/30 text-positive">
+              <Badge variant="pending">Pending</Badge>
+              <Badge variant="error">Error</Badge>
+              <Badge variant="success">Success</Badge>
+              <Badge variant="success" numeric>
                 {formatPercent(2.41)}
               </Badge>
-              <Badge variant="outline" className="border-negative/30 text-negative">
+              <Badge variant="error" numeric>
                 {formatPercent(-1.08)}
               </Badge>
+              <Badge variant="secondary" icon={<Lock />} aria-label="Locked" />
             </div>
           </Section>
 

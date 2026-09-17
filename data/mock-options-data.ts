@@ -376,15 +376,29 @@ export function longStrangleFor(price: number, daysOut: number, step: number): S
   }
 }
 
-/** The price window each structure is charted in — constant across every step. */
+/**
+ * The price window each structure is charted in — constant across every
+ * step, and anchored on the underlying's current price rather than on the
+ * nearest strike.
+ *
+ * Anchoring on `price` is what puts the "now" marker at the exact centre of
+ * the symmetric windows, so an iron condor is seen to expand and contract
+ * around the one price the customer is actually looking at. Anchored on the
+ * at-the-money strike it landed a percent or two off centre, which reads as
+ * a rounding error rather than as the rule it is.
+ *
+ * The directional windows stay deliberately lopsided — a short put spread
+ * has nothing to say about the upside, so it spends its axis on the
+ * downside — but they are anchored the same way, so the marker holds still
+ * there too.
+ */
 function windowFor(price: number, thesis: DirectionThesis): [number, number] {
   const increment = strikeIncrement(price)
-  const atm = atmStrike(price)
   const out = (STRIKE_STEP_MAX + 2) * increment
   const near = 2 * increment
-  if (thesis === "rallies") return [round2(atm - out), round2(atm + near)]
-  if (thesis === "sellsOff") return [round2(atm - near), round2(atm + out)]
-  return [round2(atm - out), round2(atm + out)]
+  if (thesis === "rallies") return [round2(price - out), round2(price + near)]
+  if (thesis === "sellsOff") return [round2(price - near), round2(price + out)]
+  return [round2(price - out), round2(price + out)]
 }
 
 interface StrategyCore {

@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/practice/count-up"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { StrikeDial } from "@/components/practice/strike-dial"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
@@ -55,7 +56,10 @@ export function DialInScreen() {
           into a position. */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-1">
-          <span className="type-hero tabular-nums text-foreground">{strategy.pop}</span>
+          {/* Rolls from the previous stop rather than from zero, on the same
+              curve as the chart's paths — so the number and the shape arrive
+              together, which is the cause and effect the dial is teaching. */}
+          <CountUp to={strategy.pop} continuous className="type-hero text-foreground" />
           <span className="type-title text-muted-foreground">%</span>
         </div>
         <span className="type-body text-foreground">{strategy.popLabel}</span>
@@ -76,7 +80,6 @@ export function DialInScreen() {
         track={strategy.track}
         value={strikeStep}
         onChange={setStrikeStep}
-        parts={strategy.parts}
       />
 
       <div className="flex flex-col gap-2 rounded-lg glass-card p-4">

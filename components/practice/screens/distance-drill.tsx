@@ -119,7 +119,6 @@ export function DistanceDrillScreen() {
           track={strategy.track}
           value={strikeStep}
           onChange={setStrikeStep}
-          parts={strategy.parts}
         />
       </div>
     </div>

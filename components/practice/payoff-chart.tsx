@@ -103,7 +103,7 @@ export function PayoffChart({
       viewBox={`0 0 ${WIDTH} ${height}`}
       className={cn("w-full", className)}
       role="img"
-      aria-label={`Payoff diagram between ${minStrike} and ${maxStrike}, breaking even at ${breakevens.join(" and ")}`}
+      aria-label={`Payoff diagram between ${minStrike.toFixed(0)} and ${maxStrike.toFixed(0)}, breaking even at ${breakevens.join(" and ")}`}
     >
       <defs>
         <clipPath id={aboveZeroClipId}>

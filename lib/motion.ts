@@ -8,6 +8,14 @@ import type { Transition } from "motion/react"
 export const transitions = {
   /** Quick UI feedback: toggles, selection state, small reveals. */
   fast: { duration: 0.15, ease: [0.16, 1, 0.3, 1] } satisfies Transition,
+  /**
+   * Tap acknowledgement on a selectable row or control — shorter than
+   * `fast`, because a press that takes 150ms to register reads as lag
+   * rather than as feedback. Chapter 2's selectable rows (ticker chips,
+   * direction options, expiration rows, chain strikes) transitioned colour
+   * only, so a tap on a row that was already selected did nothing at all.
+   */
+  press: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } satisfies Transition,
   /** Default for most page/element transitions. */
   standard: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } satisfies Transition,
   /** Physical, springy motion for drags, chart reveals, number ticks. */

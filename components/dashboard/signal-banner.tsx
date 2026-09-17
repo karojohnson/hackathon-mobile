@@ -92,18 +92,13 @@ export function SignalBanner({
             </span>
           )}
           <div className="ml-auto flex items-center gap-2">
-            {badge && (
-              <Badge
-                variant="outline"
-                className={
-                  badgeTone === "live"
-                    ? "border-positive/30 text-positive"
-                    : "border-border text-muted-foreground"
-                }
-              >
-                {badge}
-              </Badge>
-            )}
+            {/*
+              The tone maps onto the shared Badge's variants rather than
+              overriding its colours: "live" is an enabled state (success),
+              "neutral" is metadata that shouldn't compete with the
+              banner's own eyebrow (secondary).
+            */}
+            {badge && <Badge variant={badgeTone === "live" ? "success" : "secondary"}>{badge}</Badge>}
             {dismissible && (
               <button
                 type="button"

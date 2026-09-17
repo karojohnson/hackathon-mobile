@@ -9,6 +9,18 @@ import { transitions } from "@/lib/motion"
 export interface CountUpProps {
   to: number
   from?: number
+  /**
+   * Roll from wherever the figure currently sits instead of winding back to
+   * `from` first — for a value that changes repeatedly under a control.
+   *
+   * The dial screens need this. A figure that restarts from zero on every
+   * stop reads as a fresh claim each time, which buries the one thing the
+   * dial is teaching: that this number moved, and which way. Rolling from
+   * the previous value at `transitions.standard` also puts the count on the
+   * same 300ms curve as the payoff chart's own paths, so the number and the
+   * shape arrive together.
+   */
+  continuous?: boolean
   /** Appended to the figure once it lands, e.g. "%". Counts as part of the text. */
   suffix?: string
   className?: string
@@ -41,7 +53,7 @@ export interface CountUpProps {
  */
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? React.useEffect : React.useLayoutEffect
 
-export function CountUp({ to, from = 0, suffix = "", className }: CountUpProps) {
+export function CountUp({ to, from = 0, continuous = false, suffix = "", className }: CountUpProps) {
   const reduced = useReducedMotion()
   const count = useMotionValue(to)
   const text = useTransform(count, (value) => `${Math.round(value).toLocaleString()}${suffix}`)
@@ -52,10 +64,17 @@ export function CountUp({ to, from = 0, suffix = "", className }: CountUpProps) 
       return
     }
 
+    if (continuous) {
+      // No wind-back: the motion value already holds the figure on screen,
+      // and on first render that is `to`, so mounting is silent.
+      const controls = animate(count, to, transitions.standard)
+      return () => controls.stop()
+    }
+
     count.set(from)
     const controls = animate(count, to, transitions.countUp)
     return () => controls.stop()
-  }, [count, from, reduced, to])
+  }, [continuous, count, from, reduced, to])
 
   return (
     <motion.span className={cn("tabular-nums", className)} aria-label={`${to}${suffix}`}>

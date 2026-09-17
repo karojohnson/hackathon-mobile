@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/practice/count-up"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { StrikeDial } from "@/components/practice/strike-dial"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
@@ -63,7 +64,7 @@ export function DialInAllFourScreen() {
 
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-1">
-          <span className="type-hero tabular-nums text-foreground">{strategy.pop}</span>
+          <CountUp to={strategy.pop} continuous className="type-hero text-foreground" />
           <span className="type-title text-muted-foreground">%</span>
         </div>
         <span className="type-body text-foreground">Chance this works</span>
@@ -80,14 +81,14 @@ export function DialInAllFourScreen() {
         spot={price}
       />
 
-      {/* All four legs, named. The two shorts are what the dial moves;
-          the wings follow one strike out on each side, which is the whole
-          reason the loss is capped. */}
+      {/* One thumb for all four legs. The dial sets distance; the two shorts
+          move out together and the wings follow one strike beyond each,
+          which is the whole reason the loss stays capped. The legs
+          themselves are named once, in the summary below. */}
       <StrikeDial
         track={strategy.track}
         value={strikeStep}
         onChange={setStrikeStep}
-        parts={strategy.parts}
       />
 
       <div className="flex flex-col gap-2 rounded-lg glass-card p-4">

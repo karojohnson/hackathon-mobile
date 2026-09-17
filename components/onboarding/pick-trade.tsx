@@ -113,7 +113,7 @@ export function PickTrade({ symbols, onPick, onSkip, onBack }: PickTradeProps) {
                   </div>
 
                   <div className="flex items-center gap-2 border-t border-border pt-2.5">
-                    {sentiment && <Badge variant="outline">{sentiment}</Badge>}
+                    {sentiment && <Badge variant="secondary">{sentiment}</Badge>}
                     <span className={cn("type-label font-medium", ratingColor)}>
                       Analysts: {rating}
                     </span>
