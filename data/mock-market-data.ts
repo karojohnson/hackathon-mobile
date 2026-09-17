@@ -40,6 +40,30 @@ export interface ActivityItem {
 const DAY_SECONDS = 86_400
 export const today = Math.floor(new Date("2026-09-09T00:00:00Z").getTime() / 1000)
 
+/**
+ * The one place a "Sep 22"-style date is produced, for every fixture in
+ * both prototypes.
+ *
+ * Two rules it exists to enforce.
+ *
+ * Dates are *derived* from a days-out count, never written alongside one.
+ * The catalyst fixtures used to carry both, authored against a different
+ * anchor than `today`, so every event was eight days out of step with its
+ * own count — and the briefing calendar renders the date and the count in
+ * the same row, where they visibly disagreed.
+ *
+ * And it formats in UTC. `today` is a UTC midnight, so formatting it in a
+ * timezone behind UTC lands on the previous evening and prints the day
+ * before: a 7-day expiration off a Sep 9 anchor rendered as "Sep 15".
+ */
+export function dateLabelFor(daysOut: number): string {
+  return new Date((today + daysOut * DAY_SECONDS) * 1000).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  })
+}
+
 /** Deterministic seeded PRNG (mulberry32) so prototype data is stable across renders. */
 function seededRandom(seed: number) {
   let state = seed

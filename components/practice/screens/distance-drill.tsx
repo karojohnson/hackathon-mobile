@@ -7,7 +7,7 @@ import { usePractice } from "@/components/providers/practice-provider"
 import {
   expirationFor,
   expirations,
-  shortPutSpreadFor,
+  longCallSpreadFor,
   strategyFor,
 } from "@/data/mock-options-data"
 import { practiceQuoteFor } from "@/data/mock-practice-data"
@@ -23,10 +23,21 @@ export function DistanceDrillScreen() {
   // The drill's ask is always the nearest window; the scripted miss is that
   // the customer's own expiration sits past it.
   const asked = expirations[0]
-  const spread = shortPutSpreadFor(price, chosen.daysOut, strikeStep)
-  // The drill's thesis is fixed ("drifts up"), so the structure is always
-  // the bullish one; strategyFor supplies the dial track and both legs.
-  const strategy = strategyFor(price, chosen.daysOut, strikeStep, "rallies")
+  /*
+   * The ceiling, and the reason this screen exists.
+   *
+   * The dial screen sold a put `strikeStep` strikes below the money,
+   * setting a floor. This sells a call the same number of strikes above
+   * it. The iron condor on the next screen sells both, so its two short
+   * legs are exactly the floor and the ceiling the customer set — the
+   * condor arrives as the sum of their own two trades instead of as a new
+   * shape at unfamiliar strikes.
+   *
+   * It used to be another short put spread, which re-taught the floor and
+   * left the ceiling to appear from nowhere one screen later.
+   */
+  const spread = longCallSpreadFor(price, chosen.daysOut, strikeStep)
+  const strategy = strategyFor(price, chosen.daysOut, strikeStep, "capped-upside")
 
   const dateIsRight = chosen.id === asked.id
   const daysPast = chosen.daysOut - asked.daysOut
@@ -40,8 +51,8 @@ export function DistanceDrillScreen() {
   const checklist = [
     { ask: "up", set: "up", ok: true },
     {
-      ask: `stays above ${spread.sellStrike}`,
-      set: `short put at ${spread.sellStrike}`,
+      ask: `stays under ${spread.sellStrike}`,
+      set: `short call at ${spread.sellStrike}`,
       ok: true,
     },
     {
@@ -72,7 +83,7 @@ export function DistanceDrillScreen() {
           We think
         </span>
         <p className="type-body text-foreground">
-          {symbol} drifts up, stays above ${spread.sellStrike.toFixed(0)}, and
+          {symbol} drifts up, stays under {spread.sellStrike.toFixed(0)}, and
           gets there by {asked.label}.
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -133,17 +144,17 @@ export function DistanceDrillScreen() {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <StructureGlyph
-              shape="put-spread"
+              shape="long-call-spread"
               className="size-5 shrink-0 text-positive"
             />
-            <span className="type-body-strong text-foreground">Put spread</span>
+            <span className="type-body-strong text-foreground">Call spread</span>
           </div>
           <span className="type-label text-muted-foreground">{symbol}</span>
         </div>
         {/* Both legs, named. A defined-risk structure that only ever shows
             the leg you sold is indistinguishable from a naked one. */}
         <span className="type-label text-muted-foreground">
-          sell the {spread.sellStrike} put, buy the {spread.buyStrike} put ·
+          buy the {spread.buyStrike} call, sell the {spread.sellStrike} call ·
           expires {chosen.label}
         </span>
         {/* One thumb, one 5-point spread. The dial moves the whole

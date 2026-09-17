@@ -51,7 +51,7 @@ export function EarnedScreen() {
         <span className="type-label uppercase tracking-wide text-muted-foreground">Fees</span>
         <div className="flex flex-col rounded-lg glass-card px-4">
           {FEE_UNLOCKS.map((fee) => {
-            const unlocked = unlockedAxes.includes(fee.axis)
+            const unlocked = !fee.stillLocked && unlockedAxes.includes(fee.axis)
             return (
               <div
                 key={fee.id}

@@ -7,6 +7,7 @@ import { PracticeBanner } from "@/components/practice/practice-banner"
 
 export interface PracticeShellProps {
   children: React.ReactNode
+  /** The screen's CTA row, or null for a screen that has none (`open-trades`). */
   footer: React.ReactNode
   activeTabIndex: number
   onActiveTabChange: (index: number) => void
@@ -130,13 +131,22 @@ export function PracticeShell({
           costs nothing, leaving a deliberate 24px: the content's pb-3 plus
           this strip's pt-3.
         */}
-        <div className="footer-base relative flex flex-col gap-2 px-4 pt-3 pb-3">
-          <div
-            aria-hidden
-            className="glass-sheet-fade pointer-events-none absolute inset-x-0 bottom-full h-12"
-          />
-          {footer}
-        </div>
+        {/*
+          Skipped entirely when a screen has no CTA, rather than rendered
+          empty. `open-trades` has none by design, and an empty band still
+          costs its own 24px of padding and paints a fade over the content
+          above it — on that screen, over the last row of the resolved
+          list.
+        */}
+        {footer ? (
+          <div className="footer-base relative flex flex-col gap-2 px-4 pt-3 pb-3">
+            <div
+              aria-hidden
+              className="glass-sheet-fade pointer-events-none absolute inset-x-0 bottom-full h-12"
+            />
+            {footer}
+          </div>
+        ) : null}
         <BottomNav activeIndex={activeTabIndex} onActiveChange={onActiveTabChange} className="inset-x-0" />
       </div>
     </div>

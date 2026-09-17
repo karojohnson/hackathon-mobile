@@ -1,8 +1,16 @@
 import type { Axis } from "@/components/providers/practice-provider"
 import type { StrategyId } from "@/data/mock-options-data"
-import { watchlist } from "@/data/mock-market-data"
+import { dateLabelFor, watchlist } from "@/data/mock-market-data"
 
 export interface CatalystEvent {
+  /**
+   * Derived from `daysOut` by `dateLabelFor`, never authored.
+   *
+   * These used to be hand-written strings sitting next to their own
+   * days-out count. They were authored against a different anchor than
+   * `today`, so all ten events were eight days out of step with the count
+   * beside them, and the briefing calendar prints both in the same row.
+   */
   date: string
   label: string
   /**
@@ -30,8 +38,6 @@ export interface CatalystEvent {
    * position, so reordering the calendar can't silently move the emphasis.
    */
   focus?: boolean
-  /** Extra line on the focal row, e.g. how it sits against an expiration. */
-  note?: string
 }
 
 export interface SymbolCatalyst {
@@ -40,63 +46,110 @@ export interface SymbolCatalyst {
   events: CatalystEvent[]
 }
 
-export const SYMBOL_CATALYSTS: SymbolCatalyst[] = [
+/**
+ * Catalyst fixtures, minus the date: `date` is derived from `daysOut` below
+ * so the two can never disagree.
+ */
+type CatalystSeed = Omit<CatalystEvent, "date">
+
+interface SymbolCatalystSeed extends Omit<SymbolCatalyst, "events"> {
+  events: CatalystSeed[]
+}
+
+/**
+ * Three screens read `events[0]` and nothing else: the cold-start chip
+ * takes its label from it, the Direction screen quotes it back as the
+ * reason to have an opinion, and `computeResolution` scores the trade
+ * against it. So `events[0]` carries a hard invariant:
+ *
+ *   1. It is the focal event (`focus: true`).
+ *   2. It informs `direction`.
+ *   3. It falls inside the 30 days the briefing header promises.
+ *
+ * Rule 2 is the one that used to hold for AAPL alone. Picking any other
+ * symbol handed the Direction screen a catalyst for a padlocked axis — it
+ * asked "what do you think happens?" underneath an IV reading — and left
+ * the briefing with no accented row and no expiration note at all, because
+ * both hang off `focus`. Every symbol now opens on a catalyst the customer
+ * can actually have a view about, and keeps its signature signal on a
+ * later row, where it becomes the reason to come back at a higher tier.
+ */
+const CATALYST_SEED: SymbolCatalystSeed[] = [
   {
     symbol: "AAPL",
     impliedMovePercent: 7.2,
     events: [
-      /*
-       * Q4 earnings leads and is the focal row: the highest-impact catalyst
-       * and the only one informing three axes at once, which is why the
-       * design gives it the accent and the expiration note.
-       *
-       * It also has to inform Direction, because Direction is the only axis
-       * unlocked at the start. When the lead event fed only Volatility or
-       * Distance, screen 01 rendered four padlocks and no open door, then
-       * sent the customer to the Direction picker anyway.
-       *
-       * The cold-start chip reads `events[0].chipLabel`, so this ordering
-       * also decides what the lead ticker chip says on screen 01.
-       */
       {
-        date: "Sep 22",
         label: "Q4 earnings",
         chipLabel: "Earnings Tuesday · ± 7.2% move",
         informs: ["direction", "distance", "volatility"],
         daysOut: 6,
         focus: true,
-        note: "your next expiration lands just after this",
       },
-      { date: "Sep 29", label: "Index rebalance", chipLabel: "Index rebalance: forced buying", informs: ["volatility"], daysOut: 13 },
-      { date: "Oct 2", label: "Product event", informs: ["direction"], daysOut: 16 },
-      { date: "Oct 14", label: "Analyst day", informs: ["distance"], daysOut: 28 },
-    ],
-  },
-  {
-    symbol: "NVDA",
-    impliedMovePercent: 9.2,
-    events: [
-      { date: "Oct 8", label: "Gap fill watch", chipLabel: "Gapped 9% on no news", informs: ["distance"], daysOut: 22 },
-      { date: "Oct 22", label: "Q3 earnings", informs: ["direction"], daysOut: 36 },
+      { label: "Index rebalance", informs: ["volatility"], daysOut: 13 },
+      { label: "Product event", informs: ["direction"], daysOut: 16 },
+      { label: "Analyst day", informs: ["distance"], daysOut: 28 },
     ],
   },
   {
     symbol: "AMZN",
     impliedMovePercent: 8.1,
     events: [
-      { date: "Oct 6", label: "Elevated IV", chipLabel: "IV rank 71% · premium is rich", informs: ["volatility"], daysOut: 20 },
-      { date: "Nov 19", label: "Q3 earnings", informs: ["direction"], daysOut: 64 },
+      {
+        label: "Analyst day",
+        chipLabel: "Analyst day · guidance in play",
+        informs: ["direction"],
+        daysOut: 10,
+        focus: true,
+      },
+      // The signature signal that used to lead here, and the reason AMZN is
+      // worth reopening once the Volatility tier is unlocked.
+      { label: "Elevated IV", informs: ["volatility"], daysOut: 20 },
+      { label: "Q3 earnings", informs: ["direction", "distance", "volatility"], daysOut: 27 },
+    ],
+  },
+  {
+    symbol: "NVDA",
+    impliedMovePercent: 9.2,
+    events: [
+      {
+        label: "Product launch",
+        chipLabel: "Product launch · ± 9.2% move",
+        informs: ["direction", "volatility"],
+        daysOut: 8,
+        focus: true,
+      },
+      { label: "Gap fill watch", informs: ["distance"], daysOut: 22 },
+      { label: "Q3 earnings", informs: ["direction", "distance", "volatility"], daysOut: 29 },
     ],
   },
   {
     symbol: "TSLA",
     impliedMovePercent: 4.5,
     events: [
-      { date: "Sep 29", label: "Delivery numbers", chipLabel: "Delivery numbers · Sep 29", informs: ["duration"], daysOut: 13 },
-      { date: "Nov 5", label: "Q3 earnings", informs: ["direction"], daysOut: 50 },
+      /*
+       * Deliveries inform direction *and* duration: the number moves the
+       * stock, and it lands on a date you can price a contract around.
+       * That dual reading is why TSLA keeps its duration character here
+       * without needing a padlocked axis to lead the calendar.
+       */
+      {
+        label: "Delivery numbers",
+        chipLabel: "Delivery numbers · ± 4.5% move",
+        informs: ["direction", "duration"],
+        daysOut: 13,
+        focus: true,
+      },
+      { label: "Index rebalance", informs: ["volatility"], daysOut: 21 },
+      { label: "Q3 earnings", informs: ["direction", "distance", "volatility"], daysOut: 28 },
     ],
   },
 ]
+
+export const SYMBOL_CATALYSTS: SymbolCatalyst[] = CATALYST_SEED.map((catalyst) => ({
+  ...catalyst,
+  events: catalyst.events.map((event) => ({ ...event, date: dateLabelFor(event.daysOut) })),
+}))
 
 /**
  * The four symbols Chapter 2 practises on.
@@ -225,6 +278,13 @@ export const PRIOR_RESOLUTIONS: PriorResolution[] = [
 export type StructureShape =
   | "put-spread"
   | "call-spread"
+  /*
+   * The Distance drill's debit spread. A shape, not a cabinet slot: it is
+   * deliberately absent from ALL_STRUCTURES, which stays at twelve so the
+   * record screen keeps its exact 2x6 grid. The drill teaches the ceiling,
+   * it doesn't award a structure.
+   */
+  | "long-call-spread"
   | "iron-condor"
   | "straddle"
   | "strangle"
@@ -247,6 +307,7 @@ export const GLYPH_FOR: Record<StrategyId, StructureShape> = {
   "call-spread": "call-spread",
   "iron-condor": "iron-condor",
   "long-strangle": "strangle",
+  "long-call-spread": "long-call-spread",
 }
 
 export interface StructureDef {
@@ -310,6 +371,21 @@ export interface FeeUnlock {
   axis: Axis
   before: string
   after: string
+  /**
+   * Rendered as locked even once its axis is open.
+   *
+   * Figma frame `07b What this earned` shows the index surcharge still
+   * padlocked while the header above it counts four tiers complete: the
+   * screen deliberately ends on something the customer *doesn't* get, which
+   * is what sets up "what tiers do not unlock" underneath it.
+   *
+   * It needs saying out loud because it used to be true by accident. The
+   * row's `after` was the literal string "locked" and Volatility had no
+   * unlock point anywhere in the flow, so the row rendered locked because
+   * the state was never reached. Once Volatility actually unlocks, that
+   * accident produced an open padlock beside a green "locked".
+   */
+  stillLocked?: boolean
 }
 
 export const FEE_UNLOCKS: FeeUnlock[] = [
@@ -335,7 +411,8 @@ export const FEE_UNLOCKS: FeeUnlock[] = [
     sublabel: "at the Volatility tier",
     axis: "volatility",
     before: "",
-    after: "locked",
+    after: "",
+    stillLocked: true,
   },
 ]
 

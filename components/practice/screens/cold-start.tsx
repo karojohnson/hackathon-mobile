@@ -27,6 +27,18 @@ export function ColdStartScreen() {
           )
         })}
       </div>
+
+      {/*
+        Figma node 10:1570. Not wired to anything: the four above are the
+        chapter's curriculum, and this is here so the screen doesn't imply
+        they're the only four symbols that exist.
+      */}
+      <button
+        type="button"
+        className="type-label w-fit text-accent-blue transition-colors hover:text-accent-blue/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        Search all symbols
+      </button>
     </div>
   )
 }

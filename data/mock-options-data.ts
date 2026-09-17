@@ -15,7 +15,7 @@
  * Still a prototype: zero rates, no skew, one vol per expiration, European
  * exercise.
  */
-import { today } from "@/data/mock-market-data"
+import { dateLabelFor } from "@/data/mock-market-data"
 
 export type OptionType = "call" | "put"
 
@@ -28,7 +28,6 @@ export interface OptionExpiration {
   cadence: "Weekly" | "Monthly"
 }
 
-const DAY_SECONDS = 86_400
 
 /**
  * Implied vol slopes *down* with time, which looks backwards until you
@@ -47,16 +46,13 @@ const EXPIRATION_SEED = [
   { daysOut: 30, impliedVolatility: 35.1, cadence: "Monthly" },
 ] as const
 
-export const expirations: OptionExpiration[] = EXPIRATION_SEED.map((seed) => {
-  const date = new Date((today + seed.daysOut * DAY_SECONDS) * 1000)
-  return {
-    id: `${seed.daysOut}d`,
-    label: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    daysOut: seed.daysOut,
-    impliedVolatility: seed.impliedVolatility,
-    cadence: seed.cadence,
-  }
-})
+export const expirations: OptionExpiration[] = EXPIRATION_SEED.map((seed) => ({
+  id: `${seed.daysOut}d`,
+  label: dateLabelFor(seed.daysOut),
+  daysOut: seed.daysOut,
+  impliedVolatility: seed.impliedVolatility,
+  cadence: seed.cadence,
+}))
 
 export function expirationFor(id: string): OptionExpiration {
   return expirations.find((e) => e.id === id) ?? expirations[0]
@@ -189,8 +185,20 @@ export function strikesFor(
 }
 
 export type StrategyId =
-  "put-spread" | "call-spread" | "iron-condor" | "long-strangle"
+  "put-spread" | "call-spread" | "iron-condor" | "long-strangle" | "long-call-spread"
 export type DirectionThesis = "rallies" | "sellsOff" | "flat" | "outsized"
+
+/**
+ * What `strategyFor` is being asked to build: one of the four direction
+ * theses, or a structure that isn't a thesis at all.
+ *
+ * `capped-upside` is the Distance drill's long call spread. It isn't a
+ * fifth opinion about direction — the drill's thesis is already "drifts
+ * up" — it's the same opinion with a ceiling on it, which is the thing the
+ * Distance tier exists to teach. It earns a key of its own because a
+ * thesis picks a structure, and here the structure is the lesson.
+ */
+export type StructureKey = DirectionThesis | "capped-upside"
 
 export interface PayoffPoint {
   strike: number
@@ -227,6 +235,15 @@ const SHAPE = {
   creditSpread: { profit: 0.4, loss: -1 },
   ironCondor: { profit: 0.62, loss: -1 },
   longStrangle: { loss: -0.5, profit: 1 },
+  /*
+   * The credit spread's ratio, inverted, because the trade is inverted:
+   * a debit spread risks a small known outlay to win the rest of the
+   * width, where a credit spread collects a small credit against the
+   * width. Drawn against the short put spread two screens earlier, the
+   * two silhouettes are the same shape at opposite weights, which is
+   * exactly the comparison the drill is making.
+   */
+  debitSpread: { profit: 1, loss: -0.4 },
 } as const
 
 export interface StrategyLeg {
@@ -362,6 +379,58 @@ export function shortCallSpreadFor(
   }
 }
 
+export interface DebitSpreadQuote {
+  /** The long leg, at the money: what you pay for. */
+  buyStrike: number
+  /** The short leg: the ceiling, and the strike the drill is really setting. */
+  sellStrike: number
+  debit: number
+  maxGain: number
+  maxLoss: number
+  breakeven: number
+  probabilityOfProfit: number
+}
+
+/**
+ * Long call spread — buy at the money, sell `step` strikes up.
+ *
+ * The Distance tier's structure, and the one link that was missing from
+ * the chapter's chain. The dial screen sells a put `step` strikes *below*
+ * the money, setting a floor; this sells a call the same `step` *above*
+ * it, setting a ceiling; the iron condor two screens later sells both.
+ * Because all three read the same `strikeStep`, the condor's two short
+ * legs are literally the floor and the ceiling the customer already set,
+ * and the structure arrives as the sum of their own work rather than as a
+ * new shape with unfamiliar strikes.
+ *
+ * Unlike every other structure here it is a debit: you pay to own the
+ * move rather than collecting to fade it, which is why `maxLoss` is the
+ * outlay and `maxGain` is the width left over.
+ */
+export function longCallSpreadFor(
+  price: number,
+  daysOut: number,
+  step: number
+): DebitSpreadQuote {
+  const increment = strikeIncrement(price)
+  const buyStrike = atmStrike(price)
+  const sellStrike = round2(buyStrike + clampStep(step) * increment)
+  const debit = round2(
+    estimatePremium(price, buyStrike, daysOut, "call") -
+      estimatePremium(price, sellStrike, daysOut, "call")
+  )
+  const breakeven = round2(buyStrike + debit)
+  return {
+    buyStrike,
+    sellStrike,
+    debit,
+    maxGain: round2((sellStrike - buyStrike - debit) * 100),
+    maxLoss: round2(debit * 100),
+    breakeven,
+    probabilityOfProfit: Math.round(probAbove(price, breakeven, daysOut) * 100),
+  }
+}
+
 export interface IronCondorQuote {
   sellPutStrike: number
   buyPutStrike: number
@@ -479,12 +548,16 @@ export function longStrangleFor(
  * downside — but they are anchored the same way, so the marker holds still
  * there too.
  */
-function windowFor(price: number, thesis: DirectionThesis): [number, number] {
+function windowFor(price: number, key: StructureKey): [number, number] {
   const increment = strikeIncrement(price)
   const out = (STRIKE_STEP_MAX + 2) * increment
   const near = 2 * increment
-  if (thesis === "rallies") return [round2(price - out), round2(price + near)]
-  if (thesis === "sellsOff") return [round2(price - near), round2(price + out)]
+  if (key === "rallies") return [round2(price - out), round2(price + near)]
+  // Both spend their axis on the upside: one because that is where it
+  // loses, the other because that is where its ceiling sits.
+  if (key === "sellsOff" || key === "capped-upside") {
+    return [round2(price - near), round2(price + out)]
+  }
   return [round2(price - out), round2(price + out)]
 }
 
@@ -515,10 +588,47 @@ function coreFor(
   price: number,
   daysOut: number,
   step: number,
-  thesis: DirectionThesis,
+  key: StructureKey,
   xDomain: [number, number]
 ): StrategyCore {
-  if (thesis === "sellsOff") {
+  if (key === "capped-upside") {
+    const s = longCallSpreadFor(price, daysOut, step)
+    return {
+      id: "long-call-spread",
+      label: "Call spread",
+      legs: `buy the ${s.buyStrike} call, sell the ${s.sellStrike} call`,
+      parts: [
+        { strike: s.buyStrike, type: "call", role: "long" },
+        { strike: s.sellStrike, type: "call", role: "short" },
+      ],
+      net: -s.debit,
+      isCredit: false,
+      maxGain: s.maxGain,
+      maxLoss: s.maxLoss,
+      openEndedGain: false,
+      breakevens: [s.breakeven],
+      pop: s.probabilityOfProfit,
+      popLabel: CREDIT_POP_LABEL,
+      popSublabel: CREDIT_POP_SUBLABEL,
+      /*
+       * Same silhouette as the short put spread — loss on the left, gain
+       * on the right — at the debit spread's inverted weights. The dial
+       * moves the short leg, so the plateau's left edge travels with the
+       * ceiling while the long leg stays at the money.
+       */
+      points: [
+        { strike: xDomain[0], level: SHAPE.debitSpread.loss },
+        { strike: s.buyStrike, level: SHAPE.debitSpread.loss },
+        { strike: s.sellStrike, level: SHAPE.debitSpread.profit },
+        { strike: xDomain[1], level: SHAPE.debitSpread.profit },
+      ],
+      // The ceiling is what the dial sets; the long leg is pinned at the money.
+      anchorStrike: s.sellStrike,
+      wingStrike: s.buyStrike,
+    }
+  }
+
+  if (key === "sellsOff") {
     const s = shortCallSpreadFor(price, daysOut, step)
     return {
       id: "call-spread",
@@ -549,7 +659,7 @@ function coreFor(
     }
   }
 
-  if (thesis === "flat") {
+  if (key === "flat") {
     const c = ironCondorFor(price, daysOut, step)
     return {
       id: "iron-condor",
@@ -589,7 +699,7 @@ function coreFor(
     }
   }
 
-  if (thesis === "outsized") {
+  if (key === "outsized") {
     const s = longStrangleFor(price, daysOut, step)
     const increment = strikeIncrement(price)
     // Uncapped both ways in theory; chart the payoff out to the window edges.
@@ -682,14 +792,14 @@ export function strategyFor(
   price: number,
   daysOut: number,
   step: number,
-  thesis: DirectionThesis
+  key: StructureKey
 ): StrategyQuote {
-  const xDomain = windowFor(price, thesis)
+  const xDomain = windowFor(price, key)
   const steps: number[] = []
   for (let s = STRIKE_STEP_MIN; s <= STRIKE_STEP_MAX; s++) steps.push(s)
 
   const everyStep = steps.map((s) =>
-    coreFor(price, daysOut, s, thesis, xDomain)
+    coreFor(price, daysOut, s, key, xDomain)
   )
 
   const core = everyStep[clampStep(step) - STRIKE_STEP_MIN]

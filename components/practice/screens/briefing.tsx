@@ -1,12 +1,32 @@
 import { cn } from "cn"
 
 import { usePractice } from "@/components/providers/practice-provider"
+import { expirationFor } from "@/data/mock-options-data"
 import { SIGNALS, catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
 
+/**
+ * How the customer's expiration sits against the focal catalyst, in the
+ * design's words: "your Oct 16 expiration is 2 days after this".
+ *
+ * This was a fixed string in the fixture ("your next expiration lands just
+ * after this"), which named neither the date nor the gap — and the gap is
+ * the entire point. It is the setup for the Duration tier, where covering
+ * the catalyst becomes a choice, and for the drill's "7 days past the ask".
+ * A sentence that cannot say how many days cannot do that work.
+ */
+function expirationNote(expirationLabel: string, gapDays: number): string {
+  if (gapDays === 0) return `your ${expirationLabel} expiration lands on this`
+  const days = Math.abs(gapDays)
+  const unit = days === 1 ? "day" : "days"
+  const side = gapDays > 0 ? "after" : "before"
+  return `your ${expirationLabel} expiration is ${days} ${unit} ${side} this`
+}
+
 export function BriefingScreen() {
-  const { symbol, unlockedAxes } = usePractice()
+  const { symbol, unlockedAxes, expirationId } = usePractice()
   const quote = practiceQuoteFor(symbol)
   const catalyst = catalystsFor(symbol)
+  const expiration = expirationFor(expirationId)
 
   return (
     <div className="flex flex-col gap-6">
@@ -77,8 +97,10 @@ export function BriefingScreen() {
                     </span>
                   ))}
                 </div>
-                {event.note && (
-                  <span className="type-label text-accent-blue">{event.note}</span>
+                {focus && (
+                  <span className="type-label text-accent-blue">
+                    {expirationNote(expiration.label, expiration.daysOut - event.daysOut)}
+                  </span>
                 )}
               </div>
 

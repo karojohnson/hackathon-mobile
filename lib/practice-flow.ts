@@ -34,7 +34,30 @@ export function previousScreen(id: ScreenId): ScreenId | null {
 
 export interface PracticeFooterCta {
   label: string
-  goTo: ScreenId
+  /**
+   * Where the button goes, or omitted for one that acts on the current
+   * screen and stays put (see `action`).
+   */
+  goTo?: ScreenId
+  /**
+   * A correction the button applies in place, instead of navigating.
+   *
+   * `snap-expiration` moves the expiration to the one the drill asked for,
+   * which flips that screen's failing row to a check in front of the room.
+   * The drill is the only screen designed to be failed, and the design
+   * gives it two buttons for exactly that reason: the frame's `actions`
+   * holds "Fix the date" and "Show me how". Shipping only the first told a
+   * beginner they were wrong and handed them no way to learn why.
+   *
+   * `unlock-remaining-tiers` opens Distance and Volatility without walking
+   * them, then travels on. It is what "you've opened up another challenge
+   * to go through" means literally: the tier opens, the customer just
+   * doesn't do it now. Granting is not optional decoration — the earned
+   * screen gates its fee rows on `unlockedAxes`, so a skip that only
+   * navigated would land on "Commission ... locked" and a header counting
+   * two tiers, which is the opposite of what that screen is for.
+   */
+  action?: "snap-expiration" | "unlock-remaining-tiers"
   emphasis?: "primary" | "secondary"
 }
 
@@ -43,18 +66,41 @@ export const PRACTICE_FOOTER_CTAS: Record<ScreenId, PracticeFooterCta[]> = {
   briefing: [{ label: "Pick a direction", goTo: "direction", emphasis: "primary" }],
   direction: [{ label: "Dial it in", goTo: "dial-in", emphasis: "primary" }],
   "dial-in": [{ label: "Make the trade", goTo: "open-trades", emphasis: "primary" }],
-  "open-trades": [{ label: "See resolution", goTo: "resolution", emphasis: "primary" }],
+  /*
+   * Deliberately empty, matching Figma frame `03 Open trades` — the only
+   * frame in the chapter with no button at all. The trade card itself is
+   * what opens the resolution, so the screen reads as "time passed, let's
+   * see where this landed" rather than as one more step in a wizard.
+   */
+  "open-trades": [],
   resolution: [{ label: "See the payout", goTo: "payout", emphasis: "primary" }],
   payout: [{ label: "See what this unlocked", goTo: "duration-unlock", emphasis: "primary" }],
-  "duration-unlock": [{ label: "Set the window", goTo: "distance-drill", emphasis: "primary" }],
-  "distance-drill": [{ label: "Fix the date", goTo: "dial-in-all-four", emphasis: "primary" }],
+  "duration-unlock": [
+    { label: "Set the window", goTo: "distance-drill", emphasis: "primary" },
+    /*
+     * The short path through the chapter, for a demo with less time than
+     * the full fourteen screens: it leaves the Distance tier genuinely
+     * open behind you and goes straight to the three closing screens that
+     * make the argument — the record, what it earned, and the live ticket.
+     */
+    {
+      label: "Skip ahead to your record",
+      action: "unlock-remaining-tiers",
+      goTo: "record",
+      emphasis: "secondary",
+    },
+  ],
+  "distance-drill": [
+    { label: "Fix the date", goTo: "dial-in-all-four", emphasis: "primary" },
+    { label: "Show me how", action: "snap-expiration", emphasis: "secondary" },
+  ],
   "dial-in-all-four": [{ label: "Make the trade", goTo: "chain", emphasis: "primary" }],
   chain: [{ label: "See your record", goTo: "record", emphasis: "primary" }],
   record: [{ label: "See what this earned", goTo: "earned", emphasis: "primary" }],
   earned: [{ label: "Graduate", goTo: "graduation", emphasis: "primary" }],
   graduation: [
     { label: "Make the trade", goTo: "cold-start", emphasis: "primary" },
-    { label: "Not yet — make another trade", goTo: "open-trades", emphasis: "secondary" },
+    { label: "Not yet, make another trade", goTo: "open-trades", emphasis: "secondary" },
   ],
 }
 
@@ -70,6 +116,34 @@ export const AXIS_SUBLABEL: Record<Axis, string> = {
   duration: "theta · expiration",
   distance: "strike selection",
   volatility: "vega · IV at entry",
+}
+
+/**
+ * The plain-language question each axis actually asks, prefixed to the
+ * greek on the tier ladder (Figma frame `05 Tier up`).
+ *
+ * Deliberately a second map rather than an edit to `AXIS_SUBLABEL`. The
+ * design uses the bare greek on the resolution and payout scorecards,
+ * where the customer has already met the axis and the row is a verdict,
+ * and the expanded question only on the ladder that introduces all four as
+ * a set. Folding them together would put "how far? · strike selection" on
+ * a scorecard the design keeps terse, and would also rewrite the frozen
+ * `components/practice/before/` snapshots that feed /compare.
+ *
+ * Note Direction is spelled out rather than given its short form. The
+ * chapter's shorthand for it is "which way", but that string appears only
+ * as a Figma layer name; the frame itself renders the expanded question.
+ */
+export const AXIS_QUESTION: Record<Axis, string> = {
+  direction: "rally, sell off or flat?",
+  duration: "by when?",
+  distance: "how far?",
+  volatility: "how wild?",
+}
+
+/** The ladder form: the question, then the greek behind it. */
+export function axisLadderSublabel(axis: Axis): string {
+  return `${AXIS_QUESTION[axis]} · ${AXIS_SUBLABEL[axis]}`
 }
 
 /** What each axis pays when it lands. Volatility is worth more: it's the last tier. */

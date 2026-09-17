@@ -243,21 +243,23 @@ function ScreenTile({ entry, index, mode }: { entry: ScreenEntry; index: number;
             // 01 a back control too (it exits to the dashboard).
             onBack={() => {}}
             footer={
-              <>
-                {ctas.map((cta) => (
-                  <Button
-                    key={cta.label}
-                    size="lg"
-                    variant={cta.emphasis === "secondary" ? "ghost" : "default"}
-                    className="h-11! w-full"
-                    // Inert on purpose — see the file header. A tile always
-                    // shows the screen its label names.
-                    onClick={() => {}}
-                  >
-                    {cta.label}
-                  </Button>
-                ))}
-              </>
+              ctas.length === 0 ? null : (
+                <>
+                  {ctas.map((cta) => (
+                    <Button
+                      key={cta.label}
+                      size="lg"
+                      variant={cta.emphasis === "secondary" ? "ghost" : "default"}
+                      className="h-11! w-full"
+                      // Inert on purpose — see the file header. A tile always
+                      // shows the screen its label names.
+                      onClick={() => {}}
+                    >
+                      {cta.label}
+                    </Button>
+                  ))}
+                </>
+              )
             }
           >
             <ScreenComponent />

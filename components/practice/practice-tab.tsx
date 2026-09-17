@@ -18,6 +18,7 @@ import { PayoutScreen } from "@/components/practice/screens/payout"
 import { RecordScreen } from "@/components/practice/screens/record"
 import { ResolutionScreen } from "@/components/practice/screens/resolution"
 import { usePractice, type ScreenId } from "@/components/providers/practice-provider"
+import { expirations } from "@/data/mock-options-data"
 import { Button } from "@/components/ui/button"
 import {
   PRACTICE_FOOTER_CTAS,
@@ -50,16 +51,44 @@ export interface PracticeTabProps {
 
 export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabProps) {
   const practice = usePractice()
-  const { currentScreen, goTo, unlockAxis, resolveTrade } = practice
+  const { currentScreen, goTo, unlockAxis, resolveTrade, setExpirationId } = practice
   const ScreenComponent = SCREEN_COMPONENTS[currentScreen]
   const ctas = PRACTICE_FOOTER_CTAS[currentScreen]
   const back = previousScreen(currentScreen)
 
   function handleCta(cta: PracticeFooterCta) {
+    /*
+     * An in-place correction, not a step. It has to return before the
+     * unlocks below: "Show me how" is the customer saying they are not
+     * ready to move on, so advancing the tier on the way past would be
+     * the opposite of what they asked for.
+     */
+    if (cta.action === "snap-expiration") {
+      setExpirationId(expirations[0].id)
+      return
+    }
+
     if (currentScreen === "duration-unlock") unlockAxis("duration")
-    if (currentScreen === "distance-drill") unlockAxis("distance")
+    /*
+     * Distance *and* Volatility, because the next screen is the all-four
+     * dial and it draws a check against every axis. Volatility had no
+     * unlock point anywhere in the flow, so that screen's fourth check was
+     * always a lie and the earned screen's "Index option surcharge" row
+     * was permanently locked, even for someone who walked all fourteen
+     * screens. The chapter compresses the last two tiers into one step;
+     * this is where it happens.
+     */
+    if (currentScreen === "distance-drill") {
+      unlockAxis("distance")
+      unlockAxis("volatility")
+    }
     if (currentScreen === "resolution") resolveTrade(computeResolution(practice))
-    goTo(cta.goTo)
+    // The same two tiers, opened without being walked.
+    if (cta.action === "unlock-remaining-tiers") {
+      unlockAxis("distance")
+      unlockAxis("volatility")
+    }
+    if (cta.goTo) goTo(cta.goTo)
   }
 
   return (
@@ -77,19 +106,21 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
        */
       onBack={back ? () => goTo(back) : () => onActiveTabChange(0)}
       footer={
-        <>
-          {ctas.map((cta) => (
-            <Button
-              key={cta.label}
-              size="lg"
-              variant={cta.emphasis === "secondary" ? "ghost" : "default"}
-              className="h-11! w-full"
-              onClick={() => handleCta(cta)}
-            >
-              {cta.label}
-            </Button>
-          ))}
-        </>
+        ctas.length === 0 ? null : (
+          <>
+            {ctas.map((cta) => (
+              <Button
+                key={cta.label}
+                size="lg"
+                variant={cta.emphasis === "secondary" ? "ghost" : "default"}
+                className="h-11! w-full"
+                onClick={() => handleCta(cta)}
+              >
+                {cta.label}
+              </Button>
+            ))}
+          </>
+        )
       }
     >
       <ScreenComponent />

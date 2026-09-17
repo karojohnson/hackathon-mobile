@@ -2,11 +2,27 @@ import { cn } from "cn"
 
 import { usePractice } from "@/components/providers/practice-provider"
 import { expirations } from "@/data/mock-options-data"
-import { DURATION_TIER_EXPIRATIONS, catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
-import { AXIS_LABEL, AXIS_SUBLABEL } from "@/lib/practice-flow"
+import { DURATION_TIER_EXPIRATIONS, SIGNALS, catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
+import { AXIS_LABEL, axisLadderSublabel } from "@/lib/practice-flow"
 import { Check, Lock, Unlock } from "@/lib/icons"
 
 const AXES = ["direction", "duration", "distance", "volatility"] as const
+
+/**
+ * The chain columns each remaining tier opens, as the design names them
+ * (Figma frame `05 Tier up`: `STRIKE tier 3`, `IV tier 4`).
+ *
+ * Keyed by axis and resolved against `SIGNALS` for the tier number, so
+ * this cannot drift from the briefing screen's own signals list the way
+ * the row it replaces did. That row showed a locked *expiration* — "Oct 8
+ * (30) · next tier" — which promised the wrong thing entirely: neither the
+ * Distance nor the Volatility tier hands out more dates. They hand out
+ * strike selection and IV.
+ */
+const LOCKED_COLUMNS = [
+  { axis: "distance", label: "Strike" },
+  { axis: "volatility", label: "IV" },
+] as const
 
 /**
  * "Duration unlocked" — the Figma frame `05 Tier up`.
@@ -30,7 +46,6 @@ export function DurationUnlockScreen() {
   const leadEvent = catalyst.events[0]
 
   const open = expirations.slice(0, DURATION_TIER_EXPIRATIONS)
-  const stillLocked = expirations.slice(DURATION_TIER_EXPIRATIONS)
 
   return (
     <div className="flex flex-col gap-5">
@@ -75,17 +90,22 @@ export function DurationUnlockScreen() {
             )
           })}
 
-          {stillLocked.map((expiration) => (
-            <div
-              key={expiration.id}
-              className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border px-3.5 py-3"
-            >
-              <Lock className="size-3.5 text-muted-foreground/60" />
-              <span className="type-label tabular-nums text-muted-foreground/60">
-                {expiration.label} ({expiration.daysOut}) · next tier
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {LOCKED_COLUMNS.map((column) => {
+            const tier = SIGNALS.find((signal) => signal.informs === column.axis)?.tier
+            return (
+              <span
+                key={column.axis}
+                className="type-label inline-flex items-center gap-1.5 rounded-md bg-surface-glass-sunken px-2 py-1 text-muted-foreground/70"
+              >
+                <Lock className="size-3 shrink-0" />
+                <span className="tracking-wide uppercase">{column.label}</span>
+                <span className="tabular-nums text-muted-foreground/60">tier {tier}</span>
               </span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <span className="type-label text-muted-foreground">
@@ -140,7 +160,7 @@ export function DurationUnlockScreen() {
                     <span className={cn("type-body", unlocked ? "text-foreground" : "text-muted-foreground/60")}>
                       {AXIS_LABEL[axis]}
                     </span>
-                    <span className="type-label text-muted-foreground">{AXIS_SUBLABEL[axis]}</span>
+                    <span className="type-label text-muted-foreground">{axisLadderSublabel(axis)}</span>
                   </div>
                 </div>
                 <span className={cn("type-label shrink-0", isNew ? "text-priority-gold" : "text-muted-foreground")}>

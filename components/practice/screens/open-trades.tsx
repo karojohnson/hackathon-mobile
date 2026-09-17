@@ -12,7 +12,7 @@ import {
   type StructureShape,
 } from "@/data/mock-practice-data"
 import { formatCurrencyWhole } from "@/lib/format"
-import { TrendingDown, TrendingUp } from "@/lib/icons"
+import { ChevronRight, TrendingDown, TrendingUp } from "@/lib/icons"
 
 /**
  * "Your trades" — the Figma frame `03 Open trades`.
@@ -56,6 +56,7 @@ export function OpenTradesScreen() {
     unlockedAxes,
     streak,
     resolvedTrades,
+    goTo,
   } = usePractice()
 
   const quote = practiceQuoteFor(symbol)
@@ -94,6 +95,12 @@ export function OpenTradesScreen() {
         maxLoss: structure.maxLoss,
         resolvesOn: expiration.label,
         direction: thesis === "sellsOff" ? ("down" as const) : ("up" as const),
+        /*
+         * Only this card opens the resolution. `computeResolution` scores
+         * `state.symbol`, so tapping the standing fixture beside it would
+         * show this trade's verdict under the other one's ticker.
+         */
+        live: true,
       }
     : null
 
@@ -102,7 +109,7 @@ export function OpenTradesScreen() {
     ...(yourTrade ? [yourTrade] : []),
     ...OPEN_TRADES.filter((t) => t.symbol !== symbol).map((t) => {
       const shape: StructureShape = t.structure === "iron condor" ? "iron-condor" : "put-spread"
-      return { ...t, shape }
+      return { ...t, shape, live: false }
     }),
   ].slice(0, 2)
 
@@ -149,16 +156,65 @@ export function OpenTradesScreen() {
           </div>
         )}
 
+        {/*
+          The customer's own trade is the control that opens the
+          resolution, which is why this screen has no footer button (and
+          why Figma frame `03 Open trades` has none either). Tapping the
+          position you placed is the gesture that carries "time has passed,
+          let's see where this landed"; a Next button in the footer carries
+          "step 5 of 14".
+
+          It only navigates. The trade is committed on the resolution
+          screen's own CTA, so resolving here too would score it twice and
+          jump the streak by two.
+        */}
+        {/*
+          This screen has no footer CTA — the live trade card is the way
+          forward. When there isn't one, that leaves nothing to press, so
+          the way back to making a trade has to live here. `thesis` is
+          non-null on every real path today, but this branch is the one the
+          screen was explicitly written to allow.
+        */}
+        {!yourTrade && (
+          <button
+            type="button"
+            onClick={() => goTo("direction")}
+            className="type-label w-fit text-accent-blue transition-colors hover:text-accent-blue/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            Pick a direction to place one
+          </button>
+        )}
+
         {openTrades.map((trade) => {
           const Arrow = trade.direction === "up" ? TrendingUp : TrendingDown
+          const Card = trade.live ? "button" : "article"
           return (
-            <article key={trade.id} className="flex flex-col gap-3 rounded-lg glass-card p-4">
+            <Card
+              key={trade.id}
+              {...(trade.live
+                ? {
+                    type: "button" as const,
+                    onClick: () => goTo("resolution"),
+                    "aria-label": `See how your ${trade.symbol} trade resolved`,
+                  }
+                : {})}
+              className={cn(
+                "flex flex-col gap-3 rounded-lg glass-card p-4 text-left",
+                trade.live &&
+                  "transition-colors hover:bg-surface-glass-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              )}
+            >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <Arrow className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                   <span className="type-body-strong truncate text-foreground">{trade.symbol}</span>
                 </div>
-                <span className="type-label shrink-0 text-muted-foreground">resolves {trade.resolvesOn}</span>
+                <span className="type-label flex shrink-0 items-center gap-0.5 text-muted-foreground">
+                  resolves {trade.resolvesOn}
+                  {/* The only thing marking this card as tappable, so the
+                      presenter can see where to tap without being told. */}
+                  {trade.live && <ChevronRight className="size-3.5" aria-hidden />}
+                </span>
               </div>
 
               <p className="type-body text-foreground">{trade.thesis}</p>
@@ -172,7 +228,7 @@ export function OpenTradesScreen() {
                   most you can lose {formatCurrencyWhole(trade.maxLoss)}
                 </span>
               </div>
-            </article>
+            </Card>
           )
         })}
       </section>
