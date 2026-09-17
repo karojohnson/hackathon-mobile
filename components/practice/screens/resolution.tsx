@@ -2,7 +2,11 @@ import { cn } from "cn"
 
 import { Badge } from "@/components/ui/badge"
 import { usePractice } from "@/components/providers/practice-provider"
-import { AXIS_LABEL, AXIS_SUBLABEL, computeResolution } from "@/lib/practice-flow"
+import {
+  AXIS_LABEL,
+  AXIS_SUBLABEL,
+  computeResolution,
+} from "@/lib/practice-flow"
 import { Check, X } from "@/lib/icons"
 
 /**
@@ -33,13 +37,19 @@ export function ResolutionScreen() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-0.5">
-        <span className="type-body text-muted-foreground">{practice.symbol} finished at</span>
-        <span className="type-hero tabular-nums text-foreground">{preview.finishedPrice.toFixed(2)}</span>
+        <span className="type-body text-muted-foreground">
+          {practice.symbol} finished at
+        </span>
+        <span className="type-hero text-foreground tabular-nums">
+          {preview.finishedPrice.toFixed(2)}
+        </span>
         <span className="type-label text-muted-foreground">
           day {preview.dayOfWindow} of your {preview.windowDays}-day window
         </span>
         {/* Factual context, not an alert — it was orange for no reason. */}
-        <span className="type-label text-muted-foreground">{preview.gapNote}</span>
+        <span className="type-label text-muted-foreground">
+          {preview.gapNote}
+        </span>
       </div>
 
       {/*
@@ -51,12 +61,21 @@ export function ResolutionScreen() {
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline justify-between gap-3">
           <span className="type-display text-foreground">
-            {correct.length} <span className="text-muted-foreground">of {preview.axisResults.length}</span>
+            {correct.length}{" "}
+            <span className="text-muted-foreground">
+              of {preview.axisResults.length}
+            </span>
           </span>
-          <span className="type-figure text-priority-gold">+{preview.xpEarned} XP</span>
+          <span className="type-figure text-priority-gold">
+            +{preview.xpEarned} XP
+          </span>
         </div>
         {/* The one orange left on the screen. */}
-        <span className={cn("type-body", clean ? "text-positive" : "text-partial")}>{preview.verdictLine}</span>
+        <span
+          className={cn("type-body", clean ? "text-positive" : "text-partial")}
+        >
+          {preview.verdictLine}
+        </span>
       </div>
 
       {/*
@@ -75,7 +94,7 @@ export function ResolutionScreen() {
         What is kept from the redesign: the verdict Badge, and the XP at
         `.type-figure` so the payout outweighs the axis name it paid for.
       */}
-      <div className="flex flex-col rounded-lg glass-card px-4">
+      <div className="glass-card flex flex-col rounded-lg px-4">
         {preview.axisResults.map((result) => (
           <div
             key={result.axis}
@@ -89,8 +108,12 @@ export function ResolutionScreen() {
                   <X className="mt-0.5 size-4 shrink-0 text-negative" />
                 )}
                 <div className="flex min-w-0 flex-col">
-                  <span className="type-body text-foreground">{AXIS_LABEL[result.axis]}</span>
-                  <span className="type-label text-muted-foreground">{AXIS_SUBLABEL[result.axis]}</span>
+                  <span className="type-body text-foreground">
+                    {AXIS_LABEL[result.axis]}
+                  </span>
+                  <span className="type-label text-muted-foreground">
+                    {AXIS_SUBLABEL[result.axis]}
+                  </span>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2.5">
@@ -100,7 +123,9 @@ export function ResolutionScreen() {
                 <span
                   className={cn(
                     "type-figure w-9 text-right",
-                    result.correct ? "text-priority-gold" : "text-muted-foreground/50"
+                    result.correct
+                      ? "text-priority-gold"
+                      : "text-muted-foreground/50"
                   )}
                 >
                   {result.correct ? `+${result.xp}` : "0"}
@@ -116,26 +141,33 @@ export function ResolutionScreen() {
               as belonging to the axis above it.
             */}
             {result.note && (
-              <span className="type-label pl-6 text-muted-foreground">{result.note}</span>
+              <span className="type-label pl-6 text-muted-foreground">
+                {result.note}
+              </span>
             )}
           </div>
         ))}
       </div>
 
       {/*
-        What it cost — the screen's conclusion, and the only raised card on
-        it. The tint still carries the verdict (green clean, orange
-        partial); the elevation is what makes it read as the thing the
-        breakdown above was building toward.
+        What it cost — the screen's conclusion. Presented the same way as
+        the payout screen's verdict: centred, uncarded, headline over a
+        muted note, so the same two strings read the same on both screens.
+        `text-center` is load-bearing, as it is there; the spans are flex
+        children and stretch to the column's width, so without it the
+        shorter note hangs left of the headline.
+
+        It was the only raised card on the screen, tinted green or orange
+        to carry the verdict. The tint is no loss: `verdictLine` above is
+        already coloured, and it said the same thing twice.
       */}
-      <div
-        className={cn(
-          "surface-raised flex flex-col gap-0.5 rounded-lg px-4 py-2.5",
-          clean ? "bg-positive/8!" : "bg-partial/6!"
-        )}
-      >
-        <span className="type-lead-strong text-foreground">{preview.contractHeadline}</span>
-        <span className="type-label text-muted-foreground">{preview.lossNote}</span>
+      <div className="flex flex-col gap-0.5 text-center">
+        <span className="type-body-strong text-foreground">
+          {preview.contractHeadline}
+        </span>
+        <span className="type-label text-muted-foreground">
+          {preview.lossNote}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">
