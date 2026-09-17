@@ -54,7 +54,7 @@ export function DashboardConceptA() {
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <h2 className="type-label uppercase tracking-wide text-muted-foreground">Positions</h2>
-          <Badge variant="outline" className="border-positive/30 text-positive">
+          <Badge variant="success">
             Your first trade was {firstPosition.symbol}
           </Badge>
         </div>

@@ -66,7 +66,16 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
     <PracticeShell
       activeTabIndex={activeTabIndex}
       onActiveTabChange={onActiveTabChange}
-      onBack={back ? () => goTo(back) : undefined}
+      scrollResetKey={currentScreen}
+      /*
+       * Every screen gets a back control, including the first. Inside the
+       * flow it steps back one screen; on `cold-start`, which has no
+       * previous screen, it leaves the chapter for the dashboard — the
+       * entry point of a nested flow should be exitable by the same
+       * control that walks it, not a dead end you can only escape through
+       * the bottom nav.
+       */
+      onBack={back ? () => goTo(back) : () => onActiveTabChange(0)}
       footer={
         <>
           {ctas.map((cta) => (

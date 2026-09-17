@@ -3,12 +3,24 @@
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 import { cn } from "cn"
 
+/**
+ * `trackClassName` / `indicatorClassName` reach the two parts this
+ * component renders for you. Without them the only way to restyle the bar
+ * was to stop using this wrapper and compose Base UI's primitives at the
+ * call site — see the practice payout screen, whose XP bar needs a taller
+ * sunken track and a gold fill (`.xp-track` / `.xp-fill`).
+ */
 function Progress({
   className,
+  trackClassName,
+  indicatorClassName,
   children,
   value,
   ...props
-}: ProgressPrimitive.Root.Props) {
+}: ProgressPrimitive.Root.Props & {
+  trackClassName?: string
+  indicatorClassName?: string
+}) {
   return (
     <ProgressPrimitive.Root
       value={value}
@@ -17,8 +29,8 @@ function Progress({
       {...props}
     >
       {children}
-      <ProgressTrack>
-        <ProgressIndicator />
+      <ProgressTrack className={trackClassName}>
+        <ProgressIndicator className={indicatorClassName} />
       </ProgressTrack>
     </ProgressPrimitive.Root>
   )

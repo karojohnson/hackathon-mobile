@@ -1,8 +1,9 @@
+"use client"
+
 import * as React from "react"
 
 import { BottomNav } from "@/components/mobile/bottom-nav"
 import { PracticeBanner } from "@/components/practice/practice-banner"
-import { ChevronRight } from "@/lib/icons"
 
 export interface PracticeShellProps {
   children: React.ReactNode
@@ -10,15 +11,44 @@ export interface PracticeShellProps {
   activeTabIndex: number
   onActiveTabChange: (index: number) => void
   /**
-   * Steps back one screen in flow order. Omitted on the first screen, where
-   * there is nowhere to go back to — the row still renders at its fixed
-   * height so content doesn't jump between screen 01 and the rest.
+   * Steps back one screen in flow order. Omitted on the first screen,
+   * where there is nowhere to go back to. Passed straight through to the
+   * app bar, which is where the control lives — it used to sit in a 48px
+   * row of its own beneath the banner.
    *
    * Navigation only: stepping back does not rewind an unlock or a resolved
    * trade. Walking the flow forward again re-applies them, which is fine for
    * a demo and keeps the provider from needing an undo stack.
    */
   onBack?: () => void
+  /**
+   * Changes whenever a different screen is shown. On change the surrounding
+   * scroller is sent back to the top.
+   *
+   * Screens swap inside one persistent scroll container (PhoneFrame's), so
+   * React replaces the children and the container keeps whatever scrollTop
+   * it had — step forward from the bottom of a long screen and the next one
+   * opens halfway down, past its own heading. Pass the screen id here.
+   *
+   * Omitted by the review harnesses, where each tile renders one fixed
+   * screen and there is nothing to reset.
+   */
+  scrollResetKey?: string
+}
+
+/**
+ * Nearest ancestor that actually scrolls. The shell doesn't own its
+ * scroller — PhoneFrame does — and it sits a few levels up, so this walks
+ * rather than assuming a depth. `scrollHeight > clientHeight` is part of
+ * the test: the frame has a second `overflow-hidden` box in between that
+ * would otherwise match on overflow alone.
+ */
+function scrollableAncestor(node: HTMLElement | null) {
+  for (let el = node?.parentElement ?? null; el; el = el.parentElement) {
+    const overflowY = window.getComputedStyle(el).overflowY
+    if (/auto|scroll/.test(overflowY) && el.scrollHeight > el.clientHeight) return el
+  }
+  return null
 }
 
 /**
@@ -34,14 +64,22 @@ export function PracticeShell({
   activeTabIndex,
   onActiveTabChange,
   onBack,
+  scrollResetKey,
 }: PracticeShellProps) {
+  const rootRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (scrollResetKey === undefined) return
+    // Instant, not smooth: this is a page change, not a movement to follow.
+    scrollableAncestor(rootRef.current)?.scrollTo({ top: 0, behavior: "auto" })
+  }, [scrollResetKey])
   /*
    * No top padding here: PracticeBanner is sticky and sits in normal flow,
    * so its own h-24 reserves the space that a pt-24 used to. Keeping both
    * would double it.
    */
   return (
-    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col">
+    <div ref={rootRef} className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col">
       {/*
         Same accent-blue wash the dashboard runs (see `.dashboard-top-glow`),
         anchored above the banner so it bleeds up behind the status bar and
@@ -50,30 +88,17 @@ export function PracticeShell({
         flat one. `-top-14` cancels the shell's own pt-14-equivalent bleed.
       */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-14 h-141 practice-top-glow" />
-      <PracticeBanner />
+      <PracticeBanner onBack={onBack} />
 
       {/*
-        Fixed-height row so screen 01 (no back target) reserves the same space
-        as every other screen and nothing below it shifts. h-12 against a
-        ~24px control centres to 12px of clearance above and below, so the
-        chevron is not crowded against the banner or the content. Matches Prototype
-        1's control in app/symbol/[symbol]/page.tsx: same rotated chevron,
-        same `type-body` muted label, so the two prototypes read as one app.
+        pt-6 is the app bar's clearance. The 48px back row used to supply it
+        as a side effect of holding the chevron; with the control folded
+        into the bar there is nothing between the bar and the first heading
+        but this. 24px, matching the 24px the content clears the pinned CTA
+        by at the other end, so the body sits in a symmetrical inset. One
+        value for every screen, so nothing shifts stepping through the flow.
       */}
-      <div className="relative flex h-12 shrink-0 items-center px-4">
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="type-body flex w-fit items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ChevronRight className="size-4 rotate-180" aria-hidden />
-            Back
-          </button>
-        ) : null}
-      </div>
-
-      <div className="relative flex flex-1 flex-col gap-6 px-4 pb-4">{children}</div>
+      <div className="relative flex flex-1 flex-col gap-6 px-4 pt-6 pb-3">{children}</div>
 
       {/*
         Footer and nav are one sticky unit rather than two separately-pinned
@@ -93,10 +118,25 @@ export function PracticeShell({
         {/*
           Dissolve-into-the-CTA footer rather than a bordered bar: `glass-nav`
           drew a hard rule right above the bottom nav's own hard rule, stacking
-          two seams. The gradient is the same one the onboarding steps use, and
-          the generous pt- gives it room to actually read as a fade.
+          two seams.
+
+          The gradient hangs *above* the strip as an overlay rather than being
+          the strip's own background. As a background it needed 48px of
+          padding above the button for the fade to read, and padding is
+          layout — so every screen in the chapter carried 48px of dead space
+          between its last element and its CTA, plus the content's own 16px.
+          Scrolled to the bottom, that read as the button having drifted away
+          from the screen. As an overlay the fade is the same 48px tall and
+          costs nothing, leaving a deliberate 24px: the content's pb-3 plus
+          this strip's pt-3.
         */}
-        <div className="glass-sheet-fade flex flex-col gap-2 px-4 pt-12 pb-3">{footer}</div>
+        <div className="footer-base relative flex flex-col gap-2 px-4 pt-3 pb-3">
+          <div
+            aria-hidden
+            className="glass-sheet-fade pointer-events-none absolute inset-x-0 bottom-full h-12"
+          />
+          {footer}
+        </div>
         <BottomNav activeIndex={activeTabIndex} onActiveChange={onActiveTabChange} className="inset-x-0" />
       </div>
     </div>

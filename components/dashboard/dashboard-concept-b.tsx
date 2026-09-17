@@ -22,7 +22,7 @@ export function DashboardConceptB() {
           <span className="type-label text-muted-foreground">Net worth</span>
           <span className="type-title text-foreground tabular-nums">{formatCurrency(portfolio.totalValue)}</span>
         </div>
-        <Badge variant="outline" className="border-warning/40 text-warning">
+        <Badge variant="pending">
           1 action needed
         </Badge>
       </header>

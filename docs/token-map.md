@@ -71,6 +71,61 @@ button fill — no `color-background-button-blue` token exists anywhere in the s
 tokens, which is the same "no official brand button color" finding as the `--primary`
 deviation above.
 
+## Badge
+
+`components/ui/badge.tsx` is a React port of the real component
+(`web-based-2.0/packages/ui/src/lib/components/ui/badge/index.ts`), not a shadcn badge
+recoloured. Carried over verbatim from its cva: `rounded` (Tailwind's 4px, i.e.
+tastytrade's `--medium-border-radius` — **not** this repo's `--radius`, which is 8px),
+`px-1.5 py-1`, `gap-x-1`, a `size-4` icon box, and `font-small-525`
+(`typography-v2-small-525` = 12px/16px/525, which is exactly this repo's `.type-label`).
+Sentence case, no letter-spacing. `variant` is required with no default, so every call
+site states the meaning it intends.
+
+Each variant pairs an `accent-*-alpha-02` surface with the matching `text-icon-general-*`
+foreground:
+
+| Prototype variable | tastytrade source token | Notes |
+|---|---|---|
+| `--badge-primary-surface` | `color-background-accent-blue-alpha-02` | Current/selected item, informational |
+| `--badge-primary-text` | `color-text-icon-general-blue` | Aliases `--priority-blue` (same source token) |
+| `--badge-secondary-surface` | `color-background-general-surface-alpha-02` | Neutral metadata |
+| `--badge-secondary-text` | `color-text-icon-general-secondary` | **Not** `--muted-foreground` — that's `general-secondary-text`, a different swatch |
+| `--badge-pending-surface` | `color-background-accent-gold-alpha-02` | In progress / needs attention soon |
+| `--badge-pending-text` | `color-text-icon-general-gold` | Aliases `--priority-gold` |
+| `--badge-error-surface` | `color-background-accent-red-alpha-02` | Failed or blocked |
+| `--badge-error-text` | `color-text-icon-general-red` | Aliases `--priority-red` |
+| `--badge-success-surface` | `color-background-accent-green-alpha-02` | Completed or enabled |
+| `--badge-success-text` | `color-text-icon-general-green` | **Not** `--positive` — that's `positive-tick` |
+
+The `wise` variant is intentionally not ported: it exists for Wise-branded surfaces and
+nothing in either prototype is one. `--partial` (orange) has no badge variant either — the
+source set has none, so an unproven/partial state uses `pending` rather than inventing a
+sixth colour. `--partial` stays for non-badge text, where it already means "a partial, not
+a loss".
+
+## Surface ladder
+
+Three levels above the canvas, added because one card treatment (`glass-card`) was doing
+three different jobs at once:
+
+| Utility | Job |
+|---|---|
+| `.surface-sunken` | A well that holds rows — grouped lists, ladders, axis breakdowns |
+| `.glass-card` | The standard content card |
+| `.surface-raised` | The one card per screen that outranks the rest |
+
+`.glass-card` gained `inset 0 1px 0 var(--glass-inner-light)` and, in the light theme, a
+border at 55% of `--border` instead of 35%. In light, `--surface-glass` is `#ffffffa8` on a
+`#f7f5f3` canvas — white on near-white — so the hairline was doing the separating alone and
+cards all but vanished.
+
+`.surface-raised` sets `background`, so a sibling `bg-*` utility needs `!` to win (the same
+clash `signal-banner.tsx` already handles with `bg-priority-red-surface!`).
+
+`.accent-panel` replaces four different spellings of the informational blue panel and
+reuses `--badge-primary-surface`, so a selected/primary surface is one value app-wide.
+
 ## Typography
 
 Font family: **Inter** (variable), loaded via `next/font/local` from
@@ -85,6 +140,19 @@ from `build/typography.css`'s `typography-v2-{size}-{weight}` groups (weights 40
 Not every typography-v2 step was ported — only the handful needed for hierarchy in a
 mobile prototype (label → body → title → hero). Add more `.type-*` classes the same way if
 a screen needs a size that isn't here yet.
+
+Three steps were added in the Prototype 2 design pass, because the chapter was living
+almost entirely at 12px and 14px — a reward and the caption naming it carried the same
+weight:
+
+| Class | Source step | Job |
+|---|---|---|
+| `.type-eyebrow` | `xsmall-650` (10/12) + 0.08em | Section labels. A rank *below* `.type-label`, which is what the 38 `type-label uppercase tracking-wide` eyebrows were not |
+| `.type-figure` | `xlarge-650` (20/28) | Any figure reported inside a card or row: XP, level, streak, a strike |
+| `.type-display` | `3xlarge-650` (28/36) | A screen's headline verdict, between title and hero |
+
+The uppercase transform and letter-spacing on `.type-eyebrow` are ours: the source scale
+has no uppercase step.
 
 ## Radius
 

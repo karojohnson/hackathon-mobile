@@ -147,7 +147,7 @@ export default function BannersPage() {
           <Variant label="Concept B intentionally skips a loud banner in favor of a small badge">
             <div className="flex items-center justify-between rounded-lg glass-card p-4">
               <span className="type-body text-muted-foreground">Net worth header row</span>
-              <Badge variant="outline" className="border-warning/40 text-warning">
+              <Badge variant="pending">
                 1 action needed
               </Badge>
             </div>

@@ -28,7 +28,7 @@ import {
 } from "@/components/providers/practice-provider"
 import { PRACTICE_TAB_INDEX } from "@/components/providers/prototype-provider"
 import { Button } from "@/components/ui/button"
-import { PRACTICE_FOOTER_CTAS, previousScreen } from "@/lib/practice-flow"
+import { PRACTICE_FOOTER_CTAS } from "@/lib/practice-flow"
 import { ChevronRight } from "@/lib/icons"
 
 /**
@@ -239,7 +239,9 @@ function ScreenTile({ entry, index, mode }: { entry: ScreenEntry; index: number;
             // Inert like the CTAs below, but present/absent exactly as the
             // real flow has it, so a tile shows the chrome the screen ships
             // with — including screen 01's empty reserved row.
-            onBack={previousScreen(entry.id) ? () => {} : undefined}
+            // Inert, but present on every tile — the live flow gives screen
+            // 01 a back control too (it exits to the dashboard).
+            onBack={() => {}}
             footer={
               <>
                 {ctas.map((cta) => (
