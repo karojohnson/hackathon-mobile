@@ -58,15 +58,15 @@ function StatRow({ record }: { record: AxisRecord }) {
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-1.5">
         <span className="type-body font-medium text-foreground">{record.label}</span>
-        <span className="type-micro min-w-0 truncate text-muted-foreground/65">└ {record.sublabel}</span>
+        <span className="type-label min-w-0 truncate text-muted-foreground/65">└ {record.sublabel}</span>
         <span className="ml-auto" />
         <span
-          className={`type-micro shrink-0 rounded-md px-1.5 py-0.5 font-bold tracking-wider uppercase ${tier.pill} ${tier.text}`}
+          className={`type-label shrink-0 rounded-md px-1.5 py-0.5 font-bold tracking-wider uppercase ${tier.pill} ${tier.text}`}
         >
           {record.tier}
         </span>
         <span className="type-mono shrink-0 text-[15px] font-medium text-foreground">{record.value}%</span>
-        <span className="type-mono type-micro shrink-0 text-muted-foreground/65">(n={record.n})</span>
+        <span className="type-mono type-label shrink-0 text-muted-foreground/65">(n={record.n})</span>
       </div>
       <div
         className="h-[7px] w-full overflow-hidden rounded-full bg-muted"
@@ -96,13 +96,13 @@ export function RecordScreen() {
       <header className="flex items-start gap-2">
         <div className="flex flex-col gap-0.5">
           <h1 className="type-title text-foreground">Your record</h1>
-          <span className="type-micro text-muted-foreground/65">
+          <span className="type-label text-muted-foreground/65">
             └ {totalResolved} resolved trades since {PRACTICE_HISTORY.since}
           </span>
         </div>
         <div className="ml-auto flex flex-col items-end gap-0.5">
           <span className="type-body-strong text-priority-gold">LVL {level}</span>
-          <span className="type-mono type-micro text-muted-foreground">{xp.toLocaleString("en-US")} XP</span>
+          <span className="type-mono type-label text-muted-foreground">{xp.toLocaleString("en-US")} XP</span>
         </div>
       </header>
 
@@ -123,10 +123,10 @@ export function RecordScreen() {
 
       <section className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="type-micro font-bold tracking-[0.13em] text-muted-foreground/65 uppercase">
+          <span className="type-label font-bold tracking-[0.13em] text-muted-foreground/65 uppercase">
             Structures earned
           </span>
-          <span className="type-mono ml-auto text-[11px] text-muted-foreground">
+          <span className="type-mono type-label ml-auto text-muted-foreground">
             {structuresEarned.length} / {ALL_STRUCTURES.length}
           </span>
         </div>
@@ -140,6 +140,10 @@ export function RecordScreen() {
                   className="flex h-10 items-center justify-center rounded-[9px] bg-elevated-surface"
                   title="Locked"
                 >
+                  {/* 12px, matching the Figma `locked` instance. The glyph stacks an
+                      outline, a shackle and a solid body, so it is drawn to read
+                      small and faint — scaled up, the filled body dominates and it
+                      turns into a dark blob with a handle. */}
                   <LockedGlyph className="size-3 text-muted-foreground/50" />
                   <span className="sr-only">Locked structure</span>
                 </div>
@@ -158,7 +162,7 @@ export function RecordScreen() {
               >
                 <StructureGlyph
                   shape={slot.id}
-                  className={isNext ? "size-[17px] text-priority-gold" : "size-[17px] text-foreground"}
+                  className={isNext ? "size-4 text-priority-gold" : "size-4 text-foreground"}
                 />
                 <span className="sr-only">
                   {slot.label}
@@ -174,7 +178,7 @@ export function RecordScreen() {
           <span className="type-label text-priority-gold">
             {NEXT_STRUCTURE_UNLOCK.label} unlocks at {NEXT_STRUCTURE_UNLOCK.atXp.toLocaleString("en-US")} XP
           </span>
-          <span className="type-mono type-micro ml-auto text-muted-foreground">{xpToUnlock} to go</span>
+          <span className="type-mono type-label ml-auto text-muted-foreground">{xpToUnlock} to go</span>
         </div>
       </section>
     </div>
