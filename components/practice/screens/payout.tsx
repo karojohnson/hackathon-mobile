@@ -4,8 +4,14 @@ import { cn } from "cn"
 
 import { CountUp } from "@/components/practice/count-up"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
-import { usePractice, XP_PER_LEVEL } from "@/components/providers/practice-provider"
-import { NEXT_STREAK_MILESTONE, NEXT_STRUCTURE_UNLOCK } from "@/data/mock-practice-data"
+import {
+  usePractice,
+  XP_PER_LEVEL,
+} from "@/components/providers/practice-provider"
+import {
+  NEXT_STREAK_MILESTONE,
+  NEXT_STRUCTURE_UNLOCK,
+} from "@/data/mock-practice-data"
 import { Progress } from "@/components/ui/progress"
 import { AXIS_LABEL, AXIS_SUBLABEL } from "@/lib/practice-flow"
 import { Check, X } from "@/lib/icons"
@@ -46,18 +52,34 @@ export function PayoutScreen() {
           -inset-x-8 overshoots the shell's px-4 so it bleeds off both edges
           instead of ending in a visible vertical seam.
         */}
-        <div aria-hidden className="earned-bloom pointer-events-none absolute -inset-x-8 -top-6 -bottom-2" />
+        <div
+          aria-hidden
+          className="earned-bloom pointer-events-none absolute -inset-x-8 -top-6 -bottom-2"
+        />
         <span className="type-hero relative text-priority-gold">
           +<CountUp to={earned} /> XP
         </span>
+        {/*
+          The verdict reads as this screen's subtitle rather than as a
+          card. It was a raised panel under the figure, which made the
+          screen open with two competing blocks and pushed the level meter
+          further from the "+70 XP" it is supposed to answer. Centred and
+          tight under the figure, the two lines are what the number means.
+          `relative` for the same reason the figure above needs it: the
+          bloom behind is absolutely positioned and would otherwise paint
+          over the text.
+        */}
+        {lastTrade && (
+          <div className="relative flex flex-col gap-0.5 text-center">
+            <span className="type-body-strong text-foreground">
+              {lastTrade.contractHeadline}
+            </span>
+            <span className="type-label text-muted-foreground">
+              {lastTrade.lossNote}
+            </span>
+          </div>
+        )}
       </div>
-
-      {lastTrade && (
-        <div className="flex flex-col gap-0.5 rounded-lg glass-card px-4 py-3">
-          <span className="type-body text-foreground">{lastTrade.contractHeadline}</span>
-          <span className="type-label text-muted-foreground">{lastTrade.lossNote}</span>
-        </div>
-      )}
 
       {/*
         The meter sits directly under the earned figure, ahead of the
@@ -88,12 +110,18 @@ export function PayoutScreen() {
           motivates anything.
         */}
         <div className="flex items-start gap-2">
-          <StructureGlyph shape={NEXT_STRUCTURE_UNLOCK.id} className="mt-0.5 size-4 shrink-0 text-priority-gold" />
+          <StructureGlyph
+            shape={NEXT_STRUCTURE_UNLOCK.id}
+            className="mt-0.5 size-4 shrink-0 text-priority-gold"
+          />
           <div className="flex min-w-0 flex-col">
             <span className="type-body text-foreground">
-              {xpToStructure.toLocaleString()} XP to the {NEXT_STRUCTURE_UNLOCK.label.toLowerCase()}
+              {xpToStructure.toLocaleString()} XP to the{" "}
+              {NEXT_STRUCTURE_UNLOCK.label.toLowerCase()}
             </span>
-            <span className="type-label text-muted-foreground">{NEXT_STRUCTURE_UNLOCK.sublabel}</span>
+            <span className="type-label text-muted-foreground">
+              {NEXT_STRUCTURE_UNLOCK.sublabel}
+            </span>
           </div>
         </div>
       </div>
@@ -106,7 +134,7 @@ export function PayoutScreen() {
         Matches the resolution screen's breakdown exactly; the two show the
         same four axes and must not drift apart.
       */}
-      <div className="flex flex-col rounded-lg glass-card px-4">
+      <div className="glass-card flex flex-col rounded-lg px-4">
         {lastTrade?.axisResults.map((result) => (
           <div
             key={result.axis}
@@ -119,16 +147,25 @@ export function PayoutScreen() {
                 <X className="size-4 shrink-0 text-negative" />
               )}
               <div className="flex min-w-0 flex-col">
-                <span className={cn("type-body", result.correct ? "text-foreground" : "text-muted-foreground")}>
+                <span
+                  className={cn(
+                    "type-body",
+                    result.correct ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
                   {AXIS_LABEL[result.axis]}
                 </span>
-                <span className="type-label text-muted-foreground">{AXIS_SUBLABEL[result.axis]}</span>
+                <span className="type-label text-muted-foreground">
+                  {AXIS_SUBLABEL[result.axis]}
+                </span>
               </div>
             </div>
             <span
               className={cn(
                 "type-figure shrink-0",
-                result.correct ? "text-priority-gold" : "text-muted-foreground/50"
+                result.correct
+                  ? "text-priority-gold"
+                  : "text-muted-foreground/50"
               )}
             >
               {result.correct ? `+${result.xp}` : "0"}
@@ -146,7 +183,9 @@ export function PayoutScreen() {
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="flex items-baseline gap-1.5">
             <span className="type-figure text-priority-gold">{streak}</span>
-            <span className="type-label text-priority-gold">resolved in a row</span>
+            <span className="type-label text-priority-gold">
+              resolved in a row
+            </span>
           </div>
           <span className="type-label text-muted-foreground">
             {streakToGo} more for {NEXT_STREAK_MILESTONE.label}
@@ -167,7 +206,6 @@ export function PayoutScreen() {
           ))}
         </div>
       </div>
-
     </div>
   )
 }
