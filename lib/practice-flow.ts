@@ -1,5 +1,5 @@
 import type { AxisResult, Axis, PracticeState, ResolvedTrade, ScreenId } from "@/components/providers/practice-provider"
-import { expirationFor, shortPutSpreadFor } from "@/data/mock-options-data"
+import { expirationFor, strategyFor, type StrategyQuote } from "@/data/mock-options-data"
 import { catalystsFor, practiceQuoteFor } from "@/data/mock-practice-data"
 import { formatCurrencyWhole } from "@/lib/format"
 
@@ -159,6 +159,47 @@ const AXIS_XP: Record<Axis, number> = { direction: 20, duration: 20, distance: 2
 const SCRIPTED_GAP_PERCENT = 11.0
 
 /**
+ * How a structure talks about itself when it resolves, and whether it paid.
+ *
+ * All of this used to be hardcoded to a short put spread, so every other
+ * Direction answer produced a resolution describing a trade that was never
+ * made. A bearish customer built a short call spread and was told "floor
+ * breached at 230" with the put spread's max loss; an "outsized move"
+ * customer built a long strangle, which is a debit, and was told "you kept
+ * the $112 credit".
+ *
+ * `edge` and `edgeStrike` are deliberately null for a strangle: it has no
+ * level that has to hold, only a move that has to be big enough.
+ */
+interface StructureVoice {
+  edge: string | null
+  edgeStrike: string | null
+  paid: boolean
+}
+
+function voiceFor(strategy: StrategyQuote, finished: number): StructureVoice {
+  const shorts = strategy.parts.filter((leg) => leg.role === "short")
+  const [low, high] = strategy.breakevens
+  switch (strategy.id) {
+    case "call-spread":
+      return { edge: "Ceiling", edgeStrike: String(shorts[0]?.strike ?? ""), paid: finished <= low }
+    case "iron-condor":
+      return {
+        edge: "Band",
+        edgeStrike: `${low.toFixed(0)}–${high.toFixed(0)}`,
+        paid: finished >= low && finished <= high,
+      }
+    case "long-strangle":
+      return { edge: null, edgeStrike: null, paid: finished <= low || finished >= high }
+    case "long-call-spread":
+      return { edge: "Ceiling", edgeStrike: String(shorts[0]?.strike ?? ""), paid: finished >= low }
+    default:
+      // Short put spread: the chapter's opening structure and its default voice.
+      return { edge: "Floor", edgeStrike: String(shorts[0]?.strike ?? ""), paid: finished >= low }
+  }
+}
+
+/**
  * Deterministic mock scoring for the Resolution screen.
  *
  * Direction is the only axis the player actually chose — the rest are
@@ -176,11 +217,35 @@ const SCRIPTED_GAP_PERCENT = 11.0
  * argument, and the closing card says so out loud rather than pretending
  * a profitable trade was a clean one.
  */
+/**
+ * What the contract did, in the structure's own terms.
+ *
+ * A credit structure keeps or loses a credit against a level that held or
+ * broke. A debit structure has no credit to keep and no level to defend:
+ * it either got far enough to clear what it cost, or it didn't. Saying
+ * "you kept the credit" about a long strangle was the clearest sign this
+ * was written for one structure and applied to four.
+ */
+function lossNoteFor(strategy: StrategyQuote, voice: StructureVoice, paid: boolean): string {
+  const gain = formatCurrencyWhole(strategy.maxGain)
+  const loss = formatCurrencyWhole(strategy.maxLoss)
+
+  if (!strategy.isCredit) {
+    return paid
+      ? `The move was big enough. You cleared the ${loss} debit.`
+      : `The move wasn't big enough. You lost the ${loss} debit.`
+  }
+
+  const where = voice.edgeStrike ? ` at ${voice.edgeStrike}` : ""
+  return paid
+    ? `${voice.edge ?? "It"} held${where}. You kept the ${gain} credit.`
+    : `${voice.edge ?? "It"} breached${where}. Max loss ${loss}.`
+}
+
 export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id"> {
   const quote = practiceQuoteFor(state.symbol)
   const catalyst = catalystsFor(state.symbol)
   const expiration = expirationFor(state.expirationId)
-  const spread = shortPutSpreadFor(quote.price, expiration.daysOut, state.strikeStep)
 
   const trendUp = quote.changePercent >= 0
   // Mirrors direction.tsx's displayed default, and guards against a stale
@@ -196,6 +261,19 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
   const finishedPrice = Number((quote.price * (1 + gapPercent / 100)).toFixed(2))
   const leadEvent = catalyst.events[0]
 
+  /*
+   * The structure the customer is actually holding. `builtStructure` is
+   * what a dial screen recorded; the thesis is the fallback for a session
+   * that predates it.
+   */
+  const strategy = strategyFor(
+    quote.price,
+    expiration.daysOut,
+    state.strikeStep,
+    state.builtStructure ?? thesis
+  )
+  const voice = voiceFor(strategy, finishedPrice)
+
   const axisResults: AxisResult[] = [
     {
       axis: "direction",
@@ -210,7 +288,17 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
       axis: "distance",
       correct: false,
       xp: 0,
-      note: `Implied move was ${catalyst.impliedMovePercent}%. You set the floor at ${spread.sellStrike}. It moved ${Math.abs(gapPercent).toFixed(1)}%.`,
+      /*
+       * The middle clause is dropped for a structure with no level that
+       * has to hold — a strangle wants a big move, so "you set the floor
+       * at X" is meaningless there. Everything else keeps it, which is why
+       * a short put spread still reads exactly as it always has.
+       */
+      note: `Implied move was ${catalyst.impliedMovePercent}%.${
+        voice.edge && voice.edgeStrike
+          ? ` You set the ${voice.edge.toLowerCase()} at ${voice.edgeStrike}.`
+          : ""
+      } It moved ${Math.abs(gapPercent).toFixed(1)}%.`,
     },
     { axis: "volatility", correct: true, xp: AXIS_XP.volatility },
   ]
@@ -219,10 +307,16 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
   const missed = axisResults.filter((r) => !r.correct)
   const xpEarned = correct.reduce((sum, r) => sum + r.xp, 0)
 
-  // The short put spread only loses if the underlying breaks *below* the
-  // short strike, which on this script happens exactly when the customer
-  // called the direction wrong.
-  const floorHeld = directionCorrect
+  /*
+   * Whether the finish actually landed in the structure's profitable
+   * range. This was `directionCorrect`, a proxy that only holds for the
+   * opening short put spread: for that structure, on this script, breaking
+   * below the short strike and calling direction wrong are the same event.
+   * It is false for every other structure — a call spread loses when the
+   * customer was *right* about a rally, and a strangle pays precisely when
+   * the move is large.
+   */
+  const paid = voice.paid
 
   return {
     symbol: state.symbol,
@@ -242,11 +336,9 @@ export function computeResolution(state: PracticeState): Omit<ResolvedTrade, "id
     contractHeadline:
       missed.length === 0
         ? "The contract worked."
-        : floorHeld
+        : paid
           ? "The contract paid. Your read didn't."
           : "The contract needed all four.",
-    lossNote: floorHeld
-      ? `Floor held at ${spread.sellStrike}. You kept the ${formatCurrencyWhole(spread.maxGain)} credit.`
-      : `Floor breached. Max loss ${formatCurrencyWhole(spread.maxLoss)}.`,
+    lossNote: lossNoteFor(strategy, voice, paid),
   }
 }

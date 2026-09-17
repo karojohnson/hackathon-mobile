@@ -98,14 +98,27 @@ const PRIOR_TRADES = 14
 const PRIOR_WINS = 10
 
 export function GraduationScreen() {
-  const { symbol, strikeStep, chosenDirection, expirationId, resolvedTrades } = usePractice()
+  const { symbol, strikeStep, chosenDirection, builtStructure, expirationId, resolvedTrades } = usePractice()
   const quote = practiceQuoteFor(symbol)
   const expiration = expirationFor(expirationId)
   // Same entry point the dial screens use, so the ticket describes the
   // trade in the words the customer just built it in — including picking
   // the structure off their own direction rather than assuming a bullish
   // one. Someone who said "it sells off" graduates on a call spread.
-  const strategy = strategyFor(quote.price, expiration.daysOut, strikeStep, chosenDirection ?? "rallies")
+  /*
+   * The trade they actually built, not the one their Direction answer
+   * implies. Walk the whole chapter and the last thing you built is the
+   * iron condor, so "the same trade, with real money behind it" has to be
+   * that condor — it used to hand back a short put spread, which is half
+   * of it. Take the skip and the last thing you built really was the put
+   * spread, and this still says so.
+   */
+  const strategy = strategyFor(
+    quote.price,
+    expiration.daysOut,
+    strikeStep,
+    builtStructure ?? chosenDirection ?? "rallies"
+  )
 
   const totalTrades = PRIOR_TRADES + resolvedTrades.length
   const totalWins = PRIOR_WINS + resolvedTrades.filter((t) => t.outcome !== "loss").length

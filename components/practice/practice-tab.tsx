@@ -51,7 +51,16 @@ export interface PracticeTabProps {
 
 export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabProps) {
   const practice = usePractice()
-  const { currentScreen, goTo, goBack, unlockAxis, resolveTrade, setExpirationId } = practice
+  const {
+    currentScreen,
+    goTo,
+    goBack,
+    unlockAxis,
+    resolveTrade,
+    setExpirationId,
+    setBuiltStructure,
+    chosenDirection,
+  } = practice
   const ScreenComponent = SCREEN_COMPONENTS[currentScreen]
   const ctas = PRACTICE_FOOTER_CTAS[currentScreen]
   const back = previousScreen(currentScreen)
@@ -67,6 +76,16 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
       setExpirationId(expirations[0].id)
       return
     }
+
+    /*
+     * Record what was built before moving on. The dial screen builds what
+     * Direction asked for; the all-four screen is an iron condor whatever
+     * Direction said. Graduation reads this back, because it is the only
+     * way to tell a customer who walked the whole chapter from one who
+     * took the skip, and those two built different trades.
+     */
+    if (currentScreen === "dial-in") setBuiltStructure(chosenDirection ?? "rallies")
+    if (currentScreen === "dial-in-all-four") setBuiltStructure("flat")
 
     if (currentScreen === "duration-unlock") unlockAxis("duration")
     /*

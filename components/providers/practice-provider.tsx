@@ -84,6 +84,23 @@ export interface PracticeState {
   /** The expiration selected on the Duration screen, id from `expirations`. */
   expirationId: string
   unlockedAxes: Axis[]
+  /**
+   * The structure the customer last actually built on a dial screen, as
+   * opposed to the one their Direction answer implies.
+   *
+   * The two diverge at the top tier: `dial-in-all-four` is an iron condor
+   * whatever Direction said, so a customer who answered "it rallies" ends
+   * the chapter holding a condor. Graduation needs to hand back the trade
+   * they built, and cannot infer it. Counting unlocked axes looks like it
+   * would work and doesn't: "Skip ahead to your record" opens all four
+   * tiers without walking them, so that test would promise a condor to
+   * someone who only ever built a put spread.
+   *
+   * Null until a dial screen is left, which is also what an older
+   * persisted session deserialises to — it then falls back to the thesis,
+   * i.e. the behaviour this replaces.
+   */
+  builtStructure: DirectionThesis | null
   xp: number
   level: number
   streak: number
@@ -107,6 +124,8 @@ interface PracticeContextValue extends PracticeState {
   goBack: () => boolean
   setSymbol: (symbol: string) => void
   setDirection: (thesis: DirectionThesis) => void
+  /** Records what a dial screen just built. See `builtStructure`. */
+  setBuiltStructure: (structure: DirectionThesis) => void
   setStrikeStep: (step: number) => void
   setExpirationId: (id: string) => void
   unlockAxis: (axis: Axis) => void
@@ -141,6 +160,7 @@ const initialState: PracticeState = {
   strikeStep: 2,
   expirationId: "14d",
   unlockedAxes: ["direction"],
+  builtStructure: null,
   xp: 2840,
   level: 7,
   streak: 6,
@@ -240,6 +260,10 @@ export function PracticeProvider({
     setState((prev) => ({ ...prev, chosenDirection: thesis }))
   }, [])
 
+  const setBuiltStructure = React.useCallback((structure: DirectionThesis) => {
+    setState((prev) => ({ ...prev, builtStructure: structure }))
+  }, [])
+
   const setStrikeStep = React.useCallback((step: number) => {
     setState((prev) => ({ ...prev, strikeStep: step }))
   }, [])
@@ -280,6 +304,7 @@ export function PracticeProvider({
       goBack,
       setSymbol,
       setDirection,
+      setBuiltStructure,
       setStrikeStep,
       setExpirationId,
       unlockAxis,
@@ -291,6 +316,7 @@ export function PracticeProvider({
       goBack,
       setSymbol,
       setDirection,
+      setBuiltStructure,
       setStrikeStep,
       setExpirationId,
       unlockAxis,
