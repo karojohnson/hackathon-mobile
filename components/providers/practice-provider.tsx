@@ -93,6 +93,18 @@ export interface PracticeState {
 
 interface PracticeContextValue extends PracticeState {
   goTo: (screen: ScreenId) => void
+  /**
+   * Steps back to whatever screen was actually visited last, returning
+   * false when there is nothing to pop so the caller can fall back to
+   * flow order.
+   *
+   * Flow order alone is wrong the moment the chapter is walked in
+   * anything but a straight line. "Skip ahead to your record" jumps from
+   * Duration to Record, and a back control reading the static order sent
+   * you to the chain, a screen the presenter had just deliberately
+   * skipped.
+   */
+  goBack: () => boolean
   setSymbol: (symbol: string) => void
   setDirection: (thesis: DirectionThesis) => void
   setStrikeStep: (step: number) => void
@@ -191,8 +203,33 @@ export function PracticeProvider({
     }
   }, [state, persist])
 
+  /*
+   * Visited screens, most recent last. A ref rather than part of
+   * `PracticeState` because it is navigation, not progress: it should not
+   * be persisted, and a reload landing with an empty stack simply falls
+   * back to flow order, which is the behaviour this replaces.
+   *
+   * `screenRef` mirrors the current screen so `goTo` can record what it is
+   * leaving without depending on state, which would rebuild the callback
+   * on every navigation.
+   */
+  const historyRef = React.useRef<ScreenId[]>([])
+  const screenRef = React.useRef<ScreenId>(state.currentScreen)
+  React.useEffect(() => {
+    screenRef.current = state.currentScreen
+  }, [state.currentScreen])
+
   const goTo = React.useCallback((screen: ScreenId) => {
+    // Re-selecting the screen you are on is not a step you can go back from.
+    if (screen !== screenRef.current) historyRef.current.push(screenRef.current)
     setState((prev) => ({ ...prev, currentScreen: screen }))
+  }, [])
+
+  const goBack = React.useCallback(() => {
+    const previous = historyRef.current.pop()
+    if (previous === undefined) return false
+    setState((prev) => ({ ...prev, currentScreen: previous }))
+    return true
   }, [])
 
   const setSymbol = React.useCallback((symbol: string) => {
@@ -240,6 +277,7 @@ export function PracticeProvider({
     () => ({
       ...state,
       goTo,
+      goBack,
       setSymbol,
       setDirection,
       setStrikeStep,
@@ -250,6 +288,7 @@ export function PracticeProvider({
     [
       state,
       goTo,
+      goBack,
       setSymbol,
       setDirection,
       setStrikeStep,

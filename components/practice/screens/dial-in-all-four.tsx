@@ -116,6 +116,18 @@ export function DialInAllFourScreen() {
           {condor.sellCallStrike}/{condor.buyCallStrike} call spread ·{" "}
           {formatCurrency(condor.credit)} credit · expires {expiration.label}
         </span>
+        {/*
+          Names the lineage the strikes already carry. Both short legs come
+          off the same `strikeStep` as the earlier screens, so this condor
+          is the floor from the dial screen and the ceiling from the drill,
+          sold together — but the readout above only shows four numbers,
+          and nobody reading it for the first time is going to notice that
+          two of them are their own. Saying it is the difference between a
+          structure that arrives and one that adds up.
+        */}
+        <span className="type-label text-priority-gold">
+          └ your {condor.sellPutStrike} floor and your {condor.sellCallStrike} ceiling, sold together
+        </span>
         <div className="mt-2 flex items-start justify-between gap-2">
           <div className="flex flex-col">
             <span className="type-body-strong text-negative tabular-nums">

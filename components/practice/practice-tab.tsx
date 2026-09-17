@@ -51,7 +51,7 @@ export interface PracticeTabProps {
 
 export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabProps) {
   const practice = usePractice()
-  const { currentScreen, goTo, unlockAxis, resolveTrade, setExpirationId } = practice
+  const { currentScreen, goTo, goBack, unlockAxis, resolveTrade, setExpirationId } = practice
   const ScreenComponent = SCREEN_COMPONENTS[currentScreen]
   const ctas = PRACTICE_FOOTER_CTAS[currentScreen]
   const back = previousScreen(currentScreen)
@@ -104,7 +104,13 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
        * control that walks it, not a dead end you can only escape through
        * the bottom nav.
        */
-      onBack={back ? () => goTo(back) : () => onActiveTabChange(0)}
+      onBack={() => {
+        // Retrace the real path first; flow order is only the fallback for
+        // a fresh load, where there is nothing visited to go back to.
+        if (goBack()) return
+        if (back) goTo(back)
+        else onActiveTabChange(0)
+      }}
       footer={
         ctas.length === 0 ? null : (
           <>

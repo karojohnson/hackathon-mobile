@@ -544,12 +544,18 @@
    * matches the background formula of the surface the button bar itself
    * sits on, so the seam is invisible.
    */
+  /*
+   * Stops scaled to 40% of their original weight (90/65/30 -> 36/26/12):
+   * the fade was strong enough to read as a dark band sitting on the
+   * content rather than as content receding under the CTA. The shape of
+   * the ramp is unchanged, only its depth.
+   */
   .glass-sheet-fade {
     background: linear-gradient(
       to top,
-      color-mix(in oklch, var(--background) 90%, transparent) 0%,
-      color-mix(in oklch, var(--background) 65%, transparent) 30%,
-      color-mix(in oklch, var(--background) 30%, transparent) 65%,
+      color-mix(in oklch, var(--background) 36%, transparent) 0%,
+      color-mix(in oklch, var(--background) 26%, transparent) 30%,
+      color-mix(in oklch, var(--background) 12%, transparent) 65%,
       color-mix(in oklch, var(--background) 0%, transparent) 100%
     );
   }
