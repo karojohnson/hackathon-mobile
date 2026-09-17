@@ -20,6 +20,18 @@ export const PRACTICE_SCREEN_ORDER: ScreenId[] = [
   "graduation",
 ]
 
+/**
+ * The screen before `id` in flow order, or null on the first one.
+ *
+ * Drives the shell's back control. Navigation only: it does not rewind an
+ * unlock or a resolved trade, so stepping back and forward again re-applies
+ * them rather than replaying the reveal.
+ */
+export function previousScreen(id: ScreenId): ScreenId | null {
+  const index = PRACTICE_SCREEN_ORDER.indexOf(id)
+  return index > 0 ? PRACTICE_SCREEN_ORDER[index - 1] : null
+}
+
 export interface PracticeFooterCta {
   label: string
   goTo: ScreenId

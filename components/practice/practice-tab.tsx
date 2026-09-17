@@ -19,7 +19,12 @@ import { RecordScreen } from "@/components/practice/screens/record"
 import { ResolutionScreen } from "@/components/practice/screens/resolution"
 import { usePractice, type ScreenId } from "@/components/providers/practice-provider"
 import { Button } from "@/components/ui/button"
-import { PRACTICE_FOOTER_CTAS, computeResolution, type PracticeFooterCta } from "@/lib/practice-flow"
+import {
+  PRACTICE_FOOTER_CTAS,
+  computeResolution,
+  previousScreen,
+  type PracticeFooterCta,
+} from "@/lib/practice-flow"
 
 const SCREEN_COMPONENTS: Record<ScreenId, React.ComponentType> = {
   "cold-start": ColdStartScreen,
@@ -48,6 +53,7 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
   const { currentScreen, goTo, unlockAxis, resolveTrade } = practice
   const ScreenComponent = SCREEN_COMPONENTS[currentScreen]
   const ctas = PRACTICE_FOOTER_CTAS[currentScreen]
+  const back = previousScreen(currentScreen)
 
   function handleCta(cta: PracticeFooterCta) {
     if (currentScreen === "duration-unlock") unlockAxis("duration")
@@ -60,6 +66,7 @@ export function PracticeTab({ activeTabIndex, onActiveTabChange }: PracticeTabPr
     <PracticeShell
       activeTabIndex={activeTabIndex}
       onActiveTabChange={onActiveTabChange}
+      onBack={back ? () => goTo(back) : undefined}
       footer={
         <>
           {ctas.map((cta) => (
