@@ -102,12 +102,6 @@ export function StrikeDial({
   const max = track[track.length - 1]?.step ?? 5
   const current = track.find((t) => t.step === value) ?? track[0]
 
-  const [minStrike, maxStrike] = xDomain
-  const span = maxStrike - minStrike || 1
-  /** Axis fraction of a price, matching the chart's mapping exactly. */
-  const fractionFor = (price: number) =>
-    Math.min(1, Math.max(0, (price - minStrike) / span))
-
   /** Range edges, as axis fractions, for a given stop. */
   const edgesFor = React.useCallback(
     (stop: TrackStop) => {
@@ -125,22 +119,40 @@ export function StrikeDial({
   const { bands } = profitGeometry(current?.points ?? [], xDomain)
   const edges = edgesFor(current)
 
-  /**
-   * An axis fraction as a CSS offset inside this dial.
-   *
-   * The rail is inset by RAIL_INSET_PX at both ends, so fraction `f` of the
-   * rail is `inset + f * (width - 2 * inset)`. Percentages resolve against
-   * the full width, hence the correction term.
-   */
-  const positionFor = (f: number) =>
-    `calc(${RAIL_INSET_PX}px + ${f * 100}% - ${(f * RAIL_INSET_PX * 2).toFixed(3)}px)`
-
   const rail = React.useRef<HTMLDivElement>(null)
   const [engaged, setEngaged] = React.useState(false)
 
   /**
-   * The stop whose nearest range edge is closest to the pointer. Works for
-   * a one-edged spread and a two-edged condor without knowing which it has.
+   * Edges that actually travel with the stop.
+   *
+   * A structure that wins all the way to one end of the window closes its
+   * band on the window boundary, so `profitGeometry` hands back an edge at
+   * exactly 0 or 1 — and that number is identical for every stop, because
+   * the window is held constant across the whole track.
+   *
+   * Hit-testing against it breaks the dial. Once the pointer is nearer the
+   * shared boundary than any stop's moving breakeven, all five stops tie on
+   * the same gap and the strict `<` below awards it to whichever comes
+   * first in `track`, which is always step 1. Dragging a call spread right
+   * therefore climbed 1..5 and then snapped back to 1 partway across; a put
+   * spread had a dead right half for the same reason. The condor was fine
+   * only because both of its edges move.
+   *
+   * The pinned end is drawn (see the cap below) but is not a handle, so it
+   * has no business being a target. The fallback keeps a stop reachable in
+   * the degenerate case where it has no moving edge at all.
+   */
+  const PINNED = 1e-6
+  function grabbableEdgesFor(stop: TrackStop) {
+    const all = edgesFor(stop)
+    const moving = all.filter((edge) => edge > PINNED && edge < 1 - PINNED)
+    return moving.length > 0 ? moving : all
+  }
+
+  /**
+   * The stop whose nearest moving range edge is closest to the pointer.
+   * Works for a one-edged spread and a two-edged condor without knowing
+   * which it has.
    */
   function stepFromPointer(clientX: number) {
     const box = rail.current?.getBoundingClientRect()
@@ -149,7 +161,7 @@ export function StrikeDial({
     let best = value
     let bestGap = Number.POSITIVE_INFINITY
     for (const stop of track) {
-      for (const edge of edgesFor(stop)) {
+      for (const edge of grabbableEdgesFor(stop)) {
         const gap = Math.abs(edge - at)
         if (gap < bestGap) {
           bestGap = gap
@@ -248,22 +260,6 @@ export function StrikeDial({
         </div>
       </div>
 
-      {/* Only the selected strike, in its own column on the shared axis.
-          All five used to be drawn, which worked when the rail was five
-          equal slots. On a price axis they collide: the condor's window is
-          70 points wide while its strikes span 20, so five labels land on
-          top of each other. The other four strikes are still reachable,
-          and the card below names both legs. */}
-      <div aria-hidden="true" className="relative h-4">
-        {current && (
-          <span
-            style={{ left: positionFor(fractionFor(current.strike)) }}
-            className="type-label absolute top-0 -translate-x-1/2 text-foreground tabular-nums"
-          >
-            {current.strike}
-          </span>
-        )}
-      </div>
     </div>
   )
 }
