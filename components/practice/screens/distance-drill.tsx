@@ -161,11 +161,20 @@ export function DistanceDrillScreen() {
             structure between strikes; it is not asking how wide to make
             it, so both legs shift together and the pills below report
             where they landed. */}
+        {/*
+          Legs, not the profit band. This screen has no chart above it to
+          mirror, and the call spread is a debit structure whose band edge
+          sits on the pinned long leg — on the band model the handle
+          crawled across a tenth of the rail while the ceiling moved twenty
+          points. Marking the legs puts the handle on the ceiling, which is
+          the number this tier is teaching.
+        */}
         <StrikeDial
           track={strategy.track}
           value={strikeStep}
           onChange={setStrikeStep}
           xDomain={strategy.xDomain}
+          marks="legs"
         />
         <LegPills parts={strategy.parts} />
       </div>

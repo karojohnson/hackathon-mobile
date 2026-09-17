@@ -18,6 +18,24 @@ export interface StrikeDialProps {
    * it, which is the whole point of this control.
    */
   xDomain: [number, number]
+  /**
+   * What the handles stand for.
+   *
+   * `band` (the default) puts them on the profit range's edges, mirroring
+   * the green band in the chart directly above. Every screen with a chart
+   * uses it, because the dial is then a 1-D projection of that chart.
+   *
+   * `legs` puts them on the structure's own strikes instead, for a screen
+   * with no chart above it to mirror. It exists because a *debit* spread
+   * breaks the band model: its breakeven is `long strike + debit`, the
+   * long leg is pinned at the money, and pushing the short leg out grows
+   * the debit by almost as much as the strike moves. The band edge creeps
+   * a few points while the strike travels twenty, so the handle barely
+   * moves and the control reads as broken. The strike the dial actually
+   * sets is not a band edge at all there: past it you still profit, you
+   * are simply capped.
+   */
+  marks?: "band" | "legs"
   className?: string
 }
 
@@ -96,11 +114,28 @@ export function StrikeDial({
   value,
   onChange,
   xDomain,
+  marks = "band",
   className,
 }: StrikeDialProps) {
   const min = track[0]?.step ?? 1
   const max = track[track.length - 1]?.step ?? 5
   const current = track.find((t) => t.step === value) ?? track[0]
+
+  const [minStrike, maxStrike] = xDomain
+  const span = maxStrike - minStrike || 1
+  /** Axis fraction of a price, matching the chart's mapping exactly. */
+  const fractionFor = (price: number) =>
+    Math.min(1, Math.max(0, (price - minStrike) / span))
+
+  /**
+   * An axis fraction as a CSS offset inside this dial.
+   *
+   * The rail is inset by RAIL_INSET_PX at both ends, so fraction `f` of the
+   * rail is `inset + f * (width - 2 * inset)`. Percentages resolve against
+   * the full width, hence the correction term.
+   */
+  const positionFor = (f: number) =>
+    `calc(${RAIL_INSET_PX}px + ${f * 100}% - ${(f * RAIL_INSET_PX * 2).toFixed(3)}px)`
 
   /** Range edges, as axis fractions, for a given stop. */
   const edgesFor = React.useCallback(
@@ -117,7 +152,15 @@ export function StrikeDial({
   )
 
   const { bands } = profitGeometry(current?.points ?? [], xDomain)
-  const edges = edgesFor(current)
+  /*
+   * In `legs` mode both legs of the spread are drawn, but only the anchor
+   * moves — the wing is pinned at the money. Sorted so the pair renders
+   * left to right whichever side of the money the structure sits on.
+   */
+  const edges =
+    marks === "legs" && current
+      ? [fractionFor(current.wingStrike), fractionFor(current.strike)].sort((a, b) => a - b)
+      : edgesFor(current)
 
   const rail = React.useRef<HTMLDivElement>(null)
   const [engaged, setEngaged] = React.useState(false)
@@ -144,6 +187,14 @@ export function StrikeDial({
    */
   const PINNED = 1e-6
   function grabbableEdgesFor(stop: TrackStop) {
+    /*
+     * In `legs` mode only the anchor moves between stops; the wing is the
+     * same price at every one. Hit-testing a constant would give every
+     * stop an identical gap and award it to whichever came first in
+     * `track` — the exact fault the boundary filter below exists to stop.
+     * So the anchor is the only target.
+     */
+    if (marks === "legs") return [fractionFor(stop.strike)]
     const all = edgesFor(stop)
     const moving = all.filter((edge) => edge > PINNED && edge < 1 - PINNED)
     return moving.length > 0 ? moving : all
@@ -260,6 +311,25 @@ export function StrikeDial({
         </div>
       </div>
 
+      {/*
+        The strike the dial is setting, under its own handle.
+
+        Only in `legs` mode, where the handle *is* the strike, so the
+        number and the point it names coincide. Under `band` the handle
+        sits on the breakeven and the chart above already labels it, so a
+        strike here would be a second number a few pixels off a different
+        quantity — which is exactly how this read wrong before.
+      */}
+      {marks === "legs" && current && (
+        <div aria-hidden="true" className="relative h-4">
+          <span
+            style={{ left: positionFor(fractionFor(current.strike)) }}
+            className="type-label absolute top-0 -translate-x-1/2 text-foreground tabular-nums"
+          >
+            {current.strike}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
