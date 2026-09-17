@@ -13,15 +13,15 @@ import { transitions } from "@/lib/motion"
  * not their own color: logo-dark.svg has a white wordmark (for dark
  * backgrounds), logo-light.svg has a black wordmark (for light ones).
  *
- * The widths differ because the two lockups carry different amounts of
- * mark: the tastytrade cherry is a big glyph next to its wordmark, while the
- * bites cookie is a small one, so matching the raw widths would leave the
- * bites wordmark reading smaller.
+ * Both lockups render at the same width, so the two chapters launch at
+ * matching scale.
  */
+const SPLASH_LOGO_WIDTH = "w-64"
+
 const BRANDS = {
-  1: { name: "tastytrade", slug: "logo", width: "w-56" },
-  2: { name: "tastybites", slug: "logo-bites", width: "w-64" },
-} satisfies Record<PrototypeId, { name: string; slug: string; width: string }>
+  1: { name: "tastytrade", slug: "logo" },
+  2: { name: "tastybites", slug: "logo-bites" },
+} satisfies Record<PrototypeId, { name: string; slug: string }>
 
 export interface SplashScreenProps {
   /** Which prototype is launching — picks the brand shown. */
@@ -61,7 +61,7 @@ export function SplashScreen({ prototype, logoReady }: SplashScreenProps) {
         src={logoReady ? logoSrc : undefined}
         alt={brand.name}
         className={cn(
-          brand.width,
+          SPLASH_LOGO_WIDTH,
           "transition-opacity duration-200",
           logoReady ? "opacity-100" : "opacity-0"
         )}
