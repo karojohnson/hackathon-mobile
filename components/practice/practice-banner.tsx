@@ -1,5 +1,17 @@
 /**
- * Docked-at-top "this is practice, not a real trade" flag. Sits behind
+ * Locked-to-top "this is practice, not a real trade" flag. Sticky rather
+ * than absolute so it stays put while the screen scrolls under it; it was
+ * absolutely positioned, which meant it scrolled away with the content and
+ * the "simulated" disclaimer left the screen entirely.
+ *
+ * `-top-14` (-56px), not `top-0`: PhoneFrame's scroller carries pt-14 to
+ * clear the status bar, and the shell cancels that with -mt-14 so its canvas
+ * bleeds up behind it. The sticky offset has to cancel it too, or the banner
+ * would park 56px too low once it caught.
+ *
+ * Because it is in normal flow now, its h-24 is what holds content off it —
+ * PracticeShell dropped the pt-24 that used to do that job.
+ * Sits behind
  * the shared `<StatusBar />` (rendered separately by PhoneFrame) rather
  * than duplicating the clock/icons — this is just the info row beneath it.
  * Height (h-24 = 96px) is the 54px status-bar zone (matches StatusBar's own
@@ -18,7 +30,7 @@
  */
 export function PracticeBanner() {
   return (
-    <div className="glass-banner pointer-events-none absolute inset-x-0 top-0 z-30 flex h-24 flex-col">
+    <div className="glass-banner pointer-events-none sticky -top-14 z-30 flex h-24 shrink-0 flex-col">
       <div className="h-13.5 shrink-0" aria-hidden />
       <div className="flex flex-1 items-center justify-between px-4">
         <span className="type-label inline-flex items-center gap-1.5 uppercase text-priority-gold">

@@ -36,14 +36,12 @@ export function PracticeShell({
   onBack,
 }: PracticeShellProps) {
   /*
-   * pt-24 (96px) below = exactly the banner's own height (h-24), so the back
-   * row starts flush under it. The banner is absolutely positioned, so this
-   * padding is the only thing holding content off it: change the banner's
-   * height and this changes too. The 20px of breathing room this padding
-   * used to carry is now the back row's own height instead.
+   * No top padding here: PracticeBanner is sticky and sits in normal flow,
+   * so its own h-24 reserves the space that a pt-24 used to. Keeping both
+   * would double it.
    */
   return (
-    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col pt-24">
+    <div className="glass-sheet -mt-14 relative flex min-h-[calc(100%+3.5rem)] flex-col">
       {/*
         Same accent-blue wash the dashboard runs (see `.dashboard-top-glow`),
         anchored above the banner so it bleeds up behind the status bar and
@@ -56,11 +54,13 @@ export function PracticeShell({
 
       {/*
         Fixed-height row so screen 01 (no back target) reserves the same space
-        as every other screen and nothing below it shifts. Matches Prototype
+        as every other screen and nothing below it shifts. h-12 against a
+        ~24px control centres to 12px of clearance above and below, so the
+        chevron is not crowded against the banner or the content. Matches Prototype
         1's control in app/symbol/[symbol]/page.tsx: same rotated chevron,
         same `type-body` muted label, so the two prototypes read as one app.
       */}
-      <div className="relative flex h-8 shrink-0 items-center px-4">
+      <div className="relative flex h-12 shrink-0 items-center px-4">
         {onBack ? (
           <button
             type="button"
