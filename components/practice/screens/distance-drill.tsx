@@ -1,9 +1,15 @@
 import { cn } from "cn"
 
+import { LegPills } from "@/components/practice/leg-pills"
 import { StrikeDial } from "@/components/practice/strike-dial"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
 import { usePractice } from "@/components/providers/practice-provider"
-import { expirationFor, expirations, shortPutSpreadFor, strategyFor } from "@/data/mock-options-data"
+import {
+  expirationFor,
+  expirations,
+  shortPutSpreadFor,
+  strategyFor,
+} from "@/data/mock-options-data"
 import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { Check, X } from "@/lib/icons"
 
@@ -52,23 +58,28 @@ export function DistanceDrillScreen() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <h1 className="type-title text-foreground">Drill</h1>
-          <span className="type-label text-muted-foreground">Distance tier · 3 of 5</span>
+          <span className="type-label text-muted-foreground">
+            Distance tier · 3 of 5
+          </span>
         </div>
-        <span className="type-label shrink-0 rounded-md bg-priority-gold-surface px-2 py-1 tabular-nums text-priority-gold">
+        <span className="type-label shrink-0 rounded-md bg-priority-gold-surface px-2 py-1 text-priority-gold tabular-nums">
           +15 XP each
         </span>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg bg-priority-blue-surface! p-4">
-        <span className="type-label uppercase tracking-wide text-priority-blue">We think</span>
+        <span className="type-label tracking-wide text-priority-blue uppercase">
+          We think
+        </span>
         <p className="type-body text-foreground">
-          {symbol} drifts up, stays above ${spread.sellStrike.toFixed(0)}, and gets there by {asked.label}.
+          {symbol} drifts up, stays above ${spread.sellStrike.toFixed(0)}, and
+          gets there by {asked.label}.
         </p>
         <div className="flex flex-wrap gap-1.5">
           {TAGS.map((tag) => (
             <span
               key={tag}
-              className="type-label rounded-md bg-surface-glass-sunken px-2 py-0.5 uppercase tracking-wide text-muted-foreground"
+              className="type-label rounded-md bg-surface-glass-sunken px-2 py-0.5 tracking-wide text-muted-foreground uppercase"
             >
               {tag}
             </span>
@@ -79,33 +90,52 @@ export function DistanceDrillScreen() {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">
-          <span className="type-label uppercase tracking-wide text-muted-foreground">What you captured</span>
-          <span className="type-label tabular-nums text-priority-gold">
+          <span className="type-label tracking-wide text-muted-foreground uppercase">
+            What you captured
+          </span>
+          <span className="type-label text-priority-gold tabular-nums">
             {captured} of {checklist.length}
           </span>
         </div>
-        <div className="flex flex-col rounded-lg glass-card px-4">
+        <div className="glass-card flex flex-col rounded-lg px-4">
           {checklist.map((row) => (
-            <div key={row.ask} className="flex items-start gap-2 border-b border-border py-2.5 last:border-b-0">
+            <div
+              key={row.ask}
+              className="flex items-start gap-2 border-b border-border py-2.5 last:border-b-0"
+            >
               {row.ok ? (
                 <Check className="mt-0.5 size-4 shrink-0 text-positive" />
               ) : (
                 <X className="mt-0.5 size-4 shrink-0 text-negative" />
               )}
               <div className="flex min-w-0 flex-col">
-                <span className={cn("type-body", row.ok ? "text-foreground" : "text-foreground")}>{row.ask}</span>
-                <span className="type-label text-muted-foreground">you set: {row.set}</span>
-                {!row.ok && row.miss && <span className="type-label text-negative">{row.miss}</span>}
+                <span
+                  className={cn(
+                    "type-body",
+                    row.ok ? "text-foreground" : "text-foreground"
+                  )}
+                >
+                  {row.ask}
+                </span>
+                <span className="type-label text-muted-foreground">
+                  you set: {row.set}
+                </span>
+                {!row.ok && row.miss && (
+                  <span className="type-label text-negative">{row.miss}</span>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg glass-card p-4">
+      <div className="glass-card flex flex-col gap-3 rounded-lg p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <StructureGlyph shape="put-spread" className="size-5 shrink-0 text-positive" />
+            <StructureGlyph
+              shape="put-spread"
+              className="size-5 shrink-0 text-positive"
+            />
             <span className="type-body-strong text-foreground">Put spread</span>
           </div>
           <span className="type-label text-muted-foreground">{symbol}</span>
@@ -113,14 +143,20 @@ export function DistanceDrillScreen() {
         {/* Both legs, named. A defined-risk structure that only ever shows
             the leg you sold is indistinguishable from a naked one. */}
         <span className="type-label text-muted-foreground">
-          sell the {spread.sellStrike} put, buy the {spread.buyStrike} put · expires {chosen.label}
+          sell the {spread.sellStrike} put, buy the {spread.buyStrike} put ·
+          expires {chosen.label}
         </span>
+        {/* One thumb, one 5-point spread. The dial moves the whole
+            structure between strikes; it is not asking how wide to make
+            it, so both legs shift together and the pills below report
+            where they landed. */}
         <StrikeDial
           track={strategy.track}
           value={strikeStep}
           onChange={setStrikeStep}
-          parts={strategy.parts}
+          xDomain={strategy.xDomain}
         />
+        <LegPills parts={strategy.parts} />
       </div>
     </div>
   )

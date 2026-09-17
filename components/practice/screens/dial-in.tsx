@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/practice/count-up"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { StrikeDial } from "@/components/practice/strike-dial"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
@@ -17,7 +18,14 @@ const THESIS_LABEL = {
 const LOCKED_AXES = ["Duration", "Distance", "Volatility"] as const
 
 export function DialInScreen() {
-  const { symbol, strikeStep, setStrikeStep, chosenDirection, expirationId, unlockedAxes } = usePractice()
+  const {
+    symbol,
+    strikeStep,
+    setStrikeStep,
+    chosenDirection,
+    expirationId,
+    unlockedAxes,
+  } = usePractice()
   const quote = practiceQuoteFor(symbol)
   const price = quote.price
   const expiration = expirationFor(expirationId)
@@ -29,15 +37,19 @@ export function DialInScreen() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col">
           <span className="type-title text-foreground">{symbol}</span>
-          <span className="type-label truncate text-muted-foreground">{quote.name}</span>
+          <span className="type-label truncate text-muted-foreground">
+            {quote.name}
+          </span>
         </div>
         <div className="flex shrink-0 flex-col items-end">
-          <span className="type-body-strong tabular-nums text-foreground">{price.toFixed(2)}</span>
+          <span className="type-body-strong text-foreground tabular-nums">
+            {price.toFixed(2)}
+          </span>
           <span
             className={
               quote.changePercent >= 0
-                ? "type-label tabular-nums text-positive"
-                : "type-label tabular-nums text-negative"
+                ? "type-label text-positive tabular-nums"
+                : "type-label text-negative tabular-nums"
             }
           >
             {quote.changeAbs >= 0 ? "+" : ""}
@@ -46,7 +58,7 @@ export function DialInScreen() {
         </div>
       </div>
 
-      <span className="type-label uppercase tracking-wide text-muted-foreground">
+      <span className="type-label tracking-wide text-muted-foreground uppercase">
         Direction · you said {THESIS_LABEL[thesis]}
       </span>
 
@@ -55,19 +67,23 @@ export function DialInScreen() {
           into a position. */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-1">
-          <span className="type-hero tabular-nums text-foreground">{strategy.pop}</span>
+          <CountUp
+            to={strategy.pop}
+            continuous
+            className="type-hero text-foreground"
+          />
           <span className="type-title text-muted-foreground">%</span>
         </div>
         <span className="type-body text-foreground">{strategy.popLabel}</span>
-        <span className="type-label text-muted-foreground">{strategy.popSublabel}</span>
+        <span className="type-label text-muted-foreground">
+          {strategy.popSublabel}
+        </span>
       </div>
 
       <PayoffChart
         points={strategy.points}
         breakevens={strategy.breakevens}
         xDomain={strategy.xDomain}
-        yDomain={strategy.yDomain}
-        profitZones={strategy.profitZones}
         strikes={strategy.parts.map((leg) => leg.strike)}
         spot={price}
       />
@@ -76,14 +92,19 @@ export function DialInScreen() {
         track={strategy.track}
         value={strikeStep}
         onChange={setStrikeStep}
-        parts={strategy.parts}
+        xDomain={strategy.xDomain}
       />
 
-      <div className="flex flex-col gap-2 rounded-lg glass-card p-4">
+      <div className="glass-card flex flex-col gap-2 rounded-lg p-4">
         <span className="type-label text-muted-foreground">dial it in</span>
         <div className="flex items-center gap-2">
-          <StructureGlyph shape={GLYPH_FOR[strategy.id]} className="size-5 shrink-0 text-positive" />
-          <span className="type-body-strong text-foreground">{strategy.label}</span>
+          <StructureGlyph
+            shape={GLYPH_FOR[strategy.id]}
+            className="size-5 shrink-0 text-positive"
+          />
+          <span className="type-body-strong text-foreground">
+            {strategy.label}
+          </span>
         </div>
         <span className="type-label text-muted-foreground">
           {strategy.legs} · {formatCurrency(Math.abs(strategy.net))}{" "}
@@ -91,22 +112,30 @@ export function DialInScreen() {
         </span>
         <div className="mt-2 flex items-start justify-between gap-2">
           <div className="flex flex-col">
-            <span className="type-body-strong tabular-nums text-negative">
+            <span className="type-body-strong text-negative tabular-nums">
               {formatCurrency(strategy.maxLoss)}
             </span>
-            <span className="type-label text-muted-foreground">Most you can lose</span>
+            <span className="type-label text-muted-foreground">
+              Most you can lose
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="type-body-strong tabular-nums text-positive">
-              {strategy.openEndedGain ? "Uncapped" : formatCurrency(strategy.maxGain)}
+            <span className="type-body-strong text-positive tabular-nums">
+              {strategy.openEndedGain
+                ? "Uncapped"
+                : formatCurrency(strategy.maxGain)}
             </span>
-            <span className="type-label text-muted-foreground">Most you can make</span>
+            <span className="type-label text-muted-foreground">
+              Most you can make
+            </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="type-body-strong tabular-nums text-foreground">
+            <span className="type-body-strong text-foreground tabular-nums">
               {strategy.breakevens.map((b) => b.toFixed(2)).join(" / ")}
             </span>
-            <span className="type-label text-muted-foreground">Break even at</span>
+            <span className="type-label text-muted-foreground">
+              Break even at
+            </span>
           </div>
         </div>
       </div>
@@ -115,7 +144,9 @@ export function DialInScreen() {
           frame keeps them on screen so the customer can see what the dial
           is *not* asking them about yet. */}
       <div className="flex flex-wrap items-center gap-2">
-        {LOCKED_AXES.filter((axis) => !unlockedAxes.includes(axis.toLowerCase() as never)).map((axis) => (
+        {LOCKED_AXES.filter(
+          (axis) => !unlockedAxes.includes(axis.toLowerCase() as never)
+        ).map((axis) => (
           <span
             key={axis}
             className="type-label inline-flex items-center gap-1 rounded-md bg-surface-glass-sunken px-2 py-1 text-muted-foreground/70"

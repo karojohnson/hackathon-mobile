@@ -11,7 +11,7 @@ import { Eye, EyeOff, RotateCcw } from "@/lib/icons"
 import { resetDemo } from "@/lib/reset-demo"
 
 /** Routes that manage their own full-page layout instead of the phone mockup. */
-const BARE_ROUTES = ["/banners", "/practice-screens", "/glow-candidates", "/ember-explorations"]
+const BARE_ROUTES = ["/banners", "/practice-screens", "/glow-candidates", "/ember-explorations", "/dial-lab"]
 
 /**
  * The whole-page stage: the phone mockup and the presenter's control deck

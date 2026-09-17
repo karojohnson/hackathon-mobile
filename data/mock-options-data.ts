@@ -66,7 +66,8 @@ export function expirationFor(id: string): OptionExpiration {
 function volFor(daysOut: number): number {
   let best = expirations[0]
   for (const e of expirations) {
-    if (Math.abs(e.daysOut - daysOut) < Math.abs(best.daysOut - daysOut)) best = e
+    if (Math.abs(e.daysOut - daysOut) < Math.abs(best.daysOut - daysOut))
+      best = e
   }
   return best.impliedVolatility / 100
 }
@@ -87,7 +88,11 @@ function atmStrike(price: number): number {
 function normCdf(x: number): number {
   const t = 1 / (1 + 0.2316419 * Math.abs(x))
   const poly =
-    t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
+    t *
+    (0.31938153 +
+      t *
+        (-0.356563782 +
+          t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
   const cdf = 1 - (poly * Math.exp((-x * x) / 2)) / Math.sqrt(2 * Math.PI)
   return x >= 0 ? cdf : 1 - cdf
 }
@@ -98,7 +103,12 @@ function d1For(price: number, strike: number, daysOut: number): number {
   return (Math.log(price / strike) + 0.5 * vol * vol * t) / (vol * Math.sqrt(t))
 }
 
-function estimatePremium(price: number, strike: number, daysOut: number, type: OptionType): number {
+function estimatePremium(
+  price: number,
+  strike: number,
+  daysOut: number,
+  type: OptionType
+): number {
   const t = Math.max(daysOut, 1) / 365
   const vol = volFor(daysOut)
   const d1 = d1For(price, strike, daysOut)
@@ -111,7 +121,12 @@ function estimatePremium(price: number, strike: number, daysOut: number, type: O
 }
 
 /** Absolute delta, 0–1. Calls use N(d1), puts N(-d1). */
-function absDelta(price: number, strike: number, daysOut: number, type: OptionType): number {
+function absDelta(
+  price: number,
+  strike: number,
+  daysOut: number,
+  type: OptionType
+): number {
   const d1 = d1For(price, strike, daysOut)
   return type === "call" ? normCdf(d1) : normCdf(-d1)
 }
@@ -123,7 +138,9 @@ function absDelta(price: number, strike: number, daysOut: number, type: OptionTy
 function probAbove(price: number, level: number, daysOut: number): number {
   const t = Math.max(daysOut, 1) / 365
   const vol = volFor(daysOut)
-  return normCdf((Math.log(price / level) - 0.5 * vol * vol * t) / (vol * Math.sqrt(t)))
+  return normCdf(
+    (Math.log(price / level) - 0.5 * vol * vol * t) / (vol * Math.sqrt(t))
+  )
 }
 
 /**
@@ -163,18 +180,54 @@ export function strikesFor(
   for (let offset = -span; offset <= span; offset++) {
     const strike = Number((atm + offset * increment).toFixed(2))
     if (strike <= 0) continue
-    strikes.push({ strike, premium: estimatePremium(price, strike, daysOut, type) })
+    strikes.push({
+      strike,
+      premium: estimatePremium(price, strike, daysOut, type),
+    })
   }
   return strikes
 }
 
-export type StrategyId = "put-spread" | "call-spread" | "iron-condor" | "long-strangle"
+export type StrategyId =
+  "put-spread" | "call-spread" | "iron-condor" | "long-strangle"
 export type DirectionThesis = "rallies" | "sellsOff" | "flat" | "outsized"
 
 export interface PayoffPoint {
   strike: number
-  value: number
+  /**
+   * Normalised height in [-1, 1], not a dollar figure. `1` is the top of
+   * the chart's plot band, `0` its zero line, `-1` its floor.
+   *
+   * The payoff diagram is a shape diagram. Mapping maxGain and maxLoss to
+   * heights made the plateau rise and fall as the dial moved, which buried
+   * the thing the dial is teaching: that moving strikes out widens the
+   * profitable range. So the heights are constants per structure (see
+   * `SHAPE`) and the only thing the dial can move is X. The dollar figures
+   * stay exact, underneath the chart.
+   */
+  level: number
 }
+
+/**
+ * The fixed heights each structure is drawn at.
+ *
+ * Hand-picked per structure, never computed. They encode the structure's
+ * character rather than its current numbers: a credit spread's plateau
+ * sits well below its floor because the whole trade is a small credit
+ * against a defined loss, and that stays true at every stop even though
+ * the exact ratio does not. A condor's plateau sits higher because the
+ * credit is collected on both sides. A strangle's floor is shallow and its
+ * wings run to the top, because the loss is capped at the debit and the
+ * upside is not capped at all.
+ *
+ * Deliberately not proportional to the live maxGain/maxLoss. If these were
+ * derived, the dial would move them, and that is the bug this replaced.
+ */
+const SHAPE = {
+  creditSpread: { profit: 0.4, loss: -1 },
+  ironCondor: { profit: 0.62, loss: -1 },
+  longStrangle: { loss: -0.5, profit: 1 },
+} as const
 
 export interface StrategyLeg {
   strike: number
@@ -185,6 +238,13 @@ export interface StrategyLeg {
 
 export interface TrackStop {
   step: number
+  /**
+   * This stop's payoff polyline, so the strike dial can work out where the
+   * profitable range would start and end if you moved here. The dial draws
+   * that range, and it has to agree with the chart to the pixel, so both
+   * read the shape rather than a number derived from it.
+   */
+  points: PayoffPoint[]
   /** The short (or, for a strangle, the bought) strike this step produces. */
   strike: number
   /** Companion strike on the same side, so the dial can show both legs. */
@@ -212,17 +272,18 @@ export interface StrategyQuote {
   popLabel: string
   popSublabel: string
   points: PayoffPoint[]
-  /** Price bands where the structure makes money, for the chart's shaded zone. */
-  profitZones: [number, number][]
   /**
-   * Axis windows, deliberately scanned across every reachable step rather
-   * than fitted to this step's own gain and loss. Holding them constant is
-   * the whole point: it's what makes the payoff shape visibly slide and
-   * flatten as you move the dial instead of being re-normalised back into
-   * an identical picture.
+   * The price window the payoff is drawn in, held constant across every
+   * reachable step rather than fitted to this one. Holding it still is the
+   * whole point: it is what makes the shape visibly slide and widen as you
+   * move the dial instead of being re-normalised back into an identical
+   * picture.
+   *
+   * There is no matching y window. The chart's vertical geometry is fixed
+   * (see `PayoffPoint.level`), so there is nothing here for a dial stop to
+   * rescale.
    */
   xDomain: [number, number]
-  yDomain: [number, number]
   /** Every step the dial can reach, so the track can be labelled with strikes. */
   track: TrackStop[]
 }
@@ -250,12 +311,17 @@ export interface SpreadQuote {
  * sits, so a bigger step means further out: less credit, more room to be
  * wrong. The protective wing is always one strike further out again.
  */
-export function shortPutSpreadFor(price: number, daysOut: number, step: number): SpreadQuote {
+export function shortPutSpreadFor(
+  price: number,
+  daysOut: number,
+  step: number
+): SpreadQuote {
   const increment = strikeIncrement(price)
   const sellStrike = round2(atmStrike(price) - clampStep(step) * increment)
   const buyStrike = round2(sellStrike - increment)
   const credit = round2(
-    estimatePremium(price, sellStrike, daysOut, "put") - estimatePremium(price, buyStrike, daysOut, "put")
+    estimatePremium(price, sellStrike, daysOut, "put") -
+      estimatePremium(price, buyStrike, daysOut, "put")
   )
   const breakeven = round2(sellStrike - credit)
   return {
@@ -270,12 +336,17 @@ export function shortPutSpreadFor(price: number, daysOut: number, step: number):
 }
 
 /** Mirror of `shortPutSpreadFor` for a bearish thesis: sell the call, buy the one above it. */
-export function shortCallSpreadFor(price: number, daysOut: number, step: number): SpreadQuote {
+export function shortCallSpreadFor(
+  price: number,
+  daysOut: number,
+  step: number
+): SpreadQuote {
   const increment = strikeIncrement(price)
   const sellStrike = round2(atmStrike(price) + clampStep(step) * increment)
   const buyStrike = round2(sellStrike + increment)
   const credit = round2(
-    estimatePremium(price, sellStrike, daysOut, "call") - estimatePremium(price, buyStrike, daysOut, "call")
+    estimatePremium(price, sellStrike, daysOut, "call") -
+      estimatePremium(price, buyStrike, daysOut, "call")
   )
   const breakeven = round2(sellStrike + credit)
   return {
@@ -285,7 +356,9 @@ export function shortCallSpreadFor(price: number, daysOut: number, step: number)
     maxGain: round2(credit * 100),
     maxLoss: round2((buyStrike - sellStrike - credit) * 100),
     breakeven,
-    probabilityOfProfit: Math.round((1 - probAbove(price, breakeven, daysOut)) * 100),
+    probabilityOfProfit: Math.round(
+      (1 - probAbove(price, breakeven, daysOut)) * 100
+    ),
   }
 }
 
@@ -303,7 +376,11 @@ export interface IronCondorQuote {
 }
 
 /** Iron condor — both short legs `step` strikes out, a wing one strike beyond each. */
-export function ironCondorFor(price: number, daysOut: number, step: number): IronCondorQuote {
+export function ironCondorFor(
+  price: number,
+  daysOut: number,
+  step: number
+): IronCondorQuote {
   const increment = strikeIncrement(price)
   const atm = atmStrike(price)
   const offset = clampStep(step) * increment
@@ -330,7 +407,9 @@ export function ironCondorFor(price: number, daysOut: number, step: number): Iro
     lowerBreakeven,
     upperBreakeven,
     probabilityOfProfit: Math.round(
-      (probAbove(price, lowerBreakeven, daysOut) - probAbove(price, upperBreakeven, daysOut)) * 100
+      (probAbove(price, lowerBreakeven, daysOut) -
+        probAbove(price, upperBreakeven, daysOut)) *
+        100
     ),
   }
 }
@@ -352,14 +431,19 @@ export interface StrangleQuote {
  * The screen says "chance it pays" rather than "chance this works" for
  * exactly that reason.
  */
-export function longStrangleFor(price: number, daysOut: number, step: number): StrangleQuote {
+export function longStrangleFor(
+  price: number,
+  daysOut: number,
+  step: number
+): StrangleQuote {
   const increment = strikeIncrement(price)
   const atm = atmStrike(price)
   const offset = clampStep(step) * increment
   const putStrike = round2(atm - offset)
   const callStrike = round2(atm + offset)
   const debit = round2(
-    estimatePremium(price, putStrike, daysOut, "put") + estimatePremium(price, callStrike, daysOut, "call")
+    estimatePremium(price, putStrike, daysOut, "put") +
+      estimatePremium(price, callStrike, daysOut, "call")
   )
   const lowerBreakeven = round2(putStrike - debit)
   const upperBreakeven = round2(callStrike + debit)
@@ -371,20 +455,37 @@ export function longStrangleFor(price: number, daysOut: number, step: number): S
     lowerBreakeven,
     upperBreakeven,
     probabilityOfProfit: Math.round(
-      ((1 - probAbove(price, lowerBreakeven, daysOut)) + probAbove(price, upperBreakeven, daysOut)) * 100
+      (1 -
+        probAbove(price, lowerBreakeven, daysOut) +
+        probAbove(price, upperBreakeven, daysOut)) *
+        100
     ),
   }
 }
 
-/** The price window each structure is charted in — constant across every step. */
+/**
+ * The price window each structure is charted in — constant across every
+ * step, and anchored on the underlying's current price rather than on the
+ * nearest strike.
+ *
+ * Anchoring on `price` is what puts the "now" marker at the exact centre of
+ * the symmetric windows, so an iron condor is seen to expand and contract
+ * around the one price the customer is actually looking at. Anchored on the
+ * at-the-money strike it landed a percent or two off centre, which reads as
+ * a rounding error rather than as the rule it is.
+ *
+ * The directional windows stay deliberately lopsided — a short put spread
+ * has nothing to say about the upside, so it spends its axis on the
+ * downside — but they are anchored the same way, so the marker holds still
+ * there too.
+ */
 function windowFor(price: number, thesis: DirectionThesis): [number, number] {
   const increment = strikeIncrement(price)
-  const atm = atmStrike(price)
   const out = (STRIKE_STEP_MAX + 2) * increment
   const near = 2 * increment
-  if (thesis === "rallies") return [round2(atm - out), round2(atm + near)]
-  if (thesis === "sellsOff") return [round2(atm - near), round2(atm + out)]
-  return [round2(atm - out), round2(atm + out)]
+  if (thesis === "rallies") return [round2(price - out), round2(price + near)]
+  if (thesis === "sellsOff") return [round2(price - near), round2(price + out)]
+  return [round2(price - out), round2(price + out)]
 }
 
 interface StrategyCore {
@@ -402,7 +503,6 @@ interface StrategyCore {
   popLabel: string
   popSublabel: string
   points: PayoffPoint[]
-  profitZones: [number, number][]
   /** The short (or bought) strike this step produced, for the dial track. */
   anchorStrike: number
   wingStrike: number
@@ -439,12 +539,11 @@ function coreFor(
       popSublabel: CREDIT_POP_SUBLABEL,
       // Gain on the left, loss on the right — the mirror of the put spread.
       points: [
-        { strike: xDomain[0], value: s.maxGain },
-        { strike: s.sellStrike, value: s.maxGain },
-        { strike: s.buyStrike, value: -s.maxLoss },
-        { strike: xDomain[1], value: -s.maxLoss },
+        { strike: xDomain[0], level: SHAPE.creditSpread.profit },
+        { strike: s.sellStrike, level: SHAPE.creditSpread.profit },
+        { strike: s.buyStrike, level: SHAPE.creditSpread.loss },
+        { strike: xDomain[1], level: SHAPE.creditSpread.loss },
       ],
-      profitZones: [[xDomain[0], s.breakeven]],
       anchorStrike: s.sellStrike,
       wingStrike: s.buyStrike,
     }
@@ -471,16 +570,20 @@ function coreFor(
       pop: c.probabilityOfProfit,
       popLabel: CREDIT_POP_LABEL,
       popSublabel: CREDIT_POP_SUBLABEL,
-      // Tent: loss on both wings, a plateau of gain between the short strikes.
+      /*
+       * Tent: loss on both wings, a plateau of gain between the short
+       * strikes. The plateau and the two floors are fixed heights, so
+       * moving the dial widens and narrows the tent around the current
+       * price without ever making it taller or shorter.
+       */
       points: [
-        { strike: xDomain[0], value: -c.maxLoss },
-        { strike: c.buyPutStrike, value: -c.maxLoss },
-        { strike: c.sellPutStrike, value: c.maxGain },
-        { strike: c.sellCallStrike, value: c.maxGain },
-        { strike: c.buyCallStrike, value: -c.maxLoss },
-        { strike: xDomain[1], value: -c.maxLoss },
+        { strike: xDomain[0], level: SHAPE.ironCondor.loss },
+        { strike: c.buyPutStrike, level: SHAPE.ironCondor.loss },
+        { strike: c.sellPutStrike, level: SHAPE.ironCondor.profit },
+        { strike: c.sellCallStrike, level: SHAPE.ironCondor.profit },
+        { strike: c.buyCallStrike, level: SHAPE.ironCondor.loss },
+        { strike: xDomain[1], level: SHAPE.ironCondor.loss },
       ],
-      profitZones: [[c.lowerBreakeven, c.upperBreakeven]],
       anchorStrike: c.sellPutStrike,
       wingStrike: c.sellCallStrike,
     }
@@ -488,6 +591,7 @@ function coreFor(
 
   if (thesis === "outsized") {
     const s = longStrangleFor(price, daysOut, step)
+    const increment = strikeIncrement(price)
     // Uncapped both ways in theory; chart the payoff out to the window edges.
     const gainAtLowEdge = round2((s.lowerBreakeven - xDomain[0]) * 100)
     const gainAtHighEdge = round2((xDomain[1] - s.upperBreakeven) * 100)
@@ -508,16 +612,29 @@ function coreFor(
       pop: s.probabilityOfProfit,
       popLabel: "Chance it pays",
       popSublabel: "needs a move past either breakeven",
-      // Valley: paying out at both edges, the debit lost between the strikes.
+      /*
+       * Valley: the debit lost between the strikes, paying out beyond
+       * them. A long option has no second strike to set the width of its
+       * transition, so the arm is given one, a single strike increment, to
+       * keep it rigid: the same arm at every stop, translating with the
+       * strike it hangs off. Past the arm the line runs flat along the top
+       * of the plot, which is the chart's ceiling rather than a cap on the
+       * trade — the upside really is open-ended, and the summary below
+       * says so.
+       */
       points: [
-        { strike: xDomain[0], value: gainAtLowEdge },
-        { strike: s.putStrike, value: -s.maxLoss },
-        { strike: s.callStrike, value: -s.maxLoss },
-        { strike: xDomain[1], value: gainAtHighEdge },
-      ],
-      profitZones: [
-        [xDomain[0], s.lowerBreakeven],
-        [s.upperBreakeven, xDomain[1]],
+        { strike: xDomain[0], level: SHAPE.longStrangle.profit },
+        {
+          strike: round2(s.putStrike - increment),
+          level: SHAPE.longStrangle.profit,
+        },
+        { strike: s.putStrike, level: SHAPE.longStrangle.loss },
+        { strike: s.callStrike, level: SHAPE.longStrangle.loss },
+        {
+          strike: round2(s.callStrike + increment),
+          level: SHAPE.longStrangle.profit,
+        },
+        { strike: xDomain[1], level: SHAPE.longStrangle.profit },
       ],
       anchorStrike: s.putStrike,
       wingStrike: s.callStrike,
@@ -544,12 +661,11 @@ function coreFor(
     popSublabel: CREDIT_POP_SUBLABEL,
     // Loss on the left, gain on the right.
     points: [
-      { strike: xDomain[0], value: -s.maxLoss },
-      { strike: s.buyStrike, value: -s.maxLoss },
-      { strike: s.sellStrike, value: s.maxGain },
-      { strike: xDomain[1], value: s.maxGain },
+      { strike: xDomain[0], level: SHAPE.creditSpread.loss },
+      { strike: s.buyStrike, level: SHAPE.creditSpread.loss },
+      { strike: s.sellStrike, level: SHAPE.creditSpread.profit },
+      { strike: xDomain[1], level: SHAPE.creditSpread.profit },
     ],
-    profitZones: [[s.breakeven, xDomain[1]]],
     anchorStrike: s.sellStrike,
     wingStrike: s.buyStrike,
   }
@@ -572,18 +688,17 @@ export function strategyFor(
   const steps: number[] = []
   for (let s = STRIKE_STEP_MIN; s <= STRIKE_STEP_MAX; s++) steps.push(s)
 
-  const everyStep = steps.map((s) => coreFor(price, daysOut, s, thesis, xDomain))
-  const lowestValue = Math.min(...everyStep.flatMap((c) => c.points.map((p) => p.value)))
-  const highestValue = Math.max(...everyStep.flatMap((c) => c.points.map((p) => p.value)))
-  const yDomain: [number, number] = [round2(lowestValue * 1.08), round2(highestValue * 1.08)]
+  const everyStep = steps.map((s) =>
+    coreFor(price, daysOut, s, thesis, xDomain)
+  )
 
   const core = everyStep[clampStep(step) - STRIKE_STEP_MIN]
   return {
     ...core,
     xDomain,
-    yDomain,
     track: steps.map((s, i) => ({
       step: s,
+      points: everyStep[i].points,
       strike: everyStep[i].anchorStrike,
       wingStrike: everyStep[i].wingStrike,
       pop: everyStep[i].pop,

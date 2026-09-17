@@ -1,8 +1,13 @@
+import { CountUp } from "@/components/practice/count-up"
 import { PayoffChart } from "@/components/practice/payoff-chart"
 import { StrikeDial } from "@/components/practice/strike-dial"
 import { StructureGlyph } from "@/components/practice/structure-glyph"
 import { usePractice } from "@/components/providers/practice-provider"
-import { expirationFor, ironCondorFor, strategyFor } from "@/data/mock-options-data"
+import {
+  expirationFor,
+  ironCondorFor,
+  strategyFor,
+} from "@/data/mock-options-data"
 import { practiceQuoteFor } from "@/data/mock-practice-data"
 import { formatCurrency, formatPercent } from "@/lib/format"
 import { Check } from "@/lib/icons"
@@ -33,15 +38,19 @@ export function DialInAllFourScreen() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col">
           <span className="type-title text-foreground">{symbol}</span>
-          <span className="type-label truncate text-muted-foreground">{quote.name}</span>
+          <span className="type-label truncate text-muted-foreground">
+            {quote.name}
+          </span>
         </div>
         <div className="flex shrink-0 flex-col items-end">
-          <span className="type-body-strong tabular-nums text-foreground">{price.toFixed(2)}</span>
+          <span className="type-body-strong text-foreground tabular-nums">
+            {price.toFixed(2)}
+          </span>
           <span
             className={
               quote.changePercent >= 0
-                ? "type-label tabular-nums text-positive"
-                : "type-label tabular-nums text-negative"
+                ? "type-label text-positive tabular-nums"
+                : "type-label text-negative tabular-nums"
             }
           >
             {quote.changeAbs >= 0 ? "+" : ""}
@@ -54,7 +63,7 @@ export function DialInAllFourScreen() {
         {AXES.map((axis) => (
           <span
             key={axis}
-            className="type-label inline-flex items-center gap-1 rounded-md bg-surface-glass-sunken px-2 py-1 uppercase tracking-wide text-muted-foreground"
+            className="type-label inline-flex items-center gap-1 rounded-md bg-surface-glass-sunken px-2 py-1 tracking-wide text-muted-foreground uppercase"
           >
             {axis}
           </span>
@@ -63,19 +72,23 @@ export function DialInAllFourScreen() {
 
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-1">
-          <span className="type-hero tabular-nums text-foreground">{strategy.pop}</span>
+          <CountUp
+            to={strategy.pop}
+            continuous
+            className="type-hero text-foreground"
+          />
           <span className="type-title text-muted-foreground">%</span>
         </div>
         <span className="type-body text-foreground">Chance this works</span>
-        <span className="type-label text-muted-foreground">probability of profit</span>
+        <span className="type-label text-muted-foreground">
+          probability of profit
+        </span>
       </div>
 
       <PayoffChart
         points={strategy.points}
         breakevens={strategy.breakevens}
         xDomain={strategy.xDomain}
-        yDomain={strategy.yDomain}
-        profitZones={strategy.profitZones}
         strikes={strategy.parts.map((leg) => leg.strike)}
         spot={price}
       />
@@ -87,39 +100,57 @@ export function DialInAllFourScreen() {
         track={strategy.track}
         value={strikeStep}
         onChange={setStrikeStep}
-        parts={strategy.parts}
+        xDomain={strategy.xDomain}
       />
 
-      <div className="flex flex-col gap-2 rounded-lg glass-card p-4">
+      <div className="glass-card flex flex-col gap-2 rounded-lg p-4">
         <div className="flex items-center gap-2">
-          <StructureGlyph shape="iron-condor" className="size-5 shrink-0 text-positive" />
+          <StructureGlyph
+            shape="iron-condor"
+            className="size-5 shrink-0 text-positive"
+          />
           <span className="type-body-strong text-foreground">Iron condor</span>
         </div>
         <span className="type-label text-muted-foreground">
-          {condor.buyPutStrike}/{condor.sellPutStrike} put spread + {condor.sellCallStrike}/{condor.buyCallStrike} call
-          spread · {formatCurrency(condor.credit)} credit · expires {expiration.label}
+          {condor.buyPutStrike}/{condor.sellPutStrike} put spread +{" "}
+          {condor.sellCallStrike}/{condor.buyCallStrike} call spread ·{" "}
+          {formatCurrency(condor.credit)} credit · expires {expiration.label}
         </span>
         <div className="mt-2 flex items-start justify-between gap-2">
           <div className="flex flex-col">
-            <span className="type-body-strong tabular-nums text-negative">{formatCurrency(condor.maxLoss)}</span>
-            <span className="type-label text-muted-foreground">Most you can lose</span>
+            <span className="type-body-strong text-negative tabular-nums">
+              {formatCurrency(condor.maxLoss)}
+            </span>
+            <span className="type-label text-muted-foreground">
+              Most you can lose
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="type-body-strong tabular-nums text-positive">{formatCurrency(condor.maxGain)}</span>
-            <span className="type-label text-muted-foreground">Most you can make</span>
+            <span className="type-body-strong text-positive tabular-nums">
+              {formatCurrency(condor.maxGain)}
+            </span>
+            <span className="type-label text-muted-foreground">
+              Most you can make
+            </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="type-body-strong tabular-nums text-foreground">
-              {condor.lowerBreakeven.toFixed(0)}–{condor.upperBreakeven.toFixed(0)}
+            <span className="type-body-strong text-foreground tabular-nums">
+              {condor.lowerBreakeven.toFixed(0)}–
+              {condor.upperBreakeven.toFixed(0)}
             </span>
-            <span className="type-label text-muted-foreground">Profit zone</span>
+            <span className="type-label text-muted-foreground">
+              Profit zone
+            </span>
           </div>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
         {AXES.map((axis) => (
-          <span key={axis} className="type-label inline-flex items-center gap-1.5 text-foreground">
+          <span
+            key={axis}
+            className="type-label inline-flex items-center gap-1.5 text-foreground"
+          >
             <Check className="size-3.5 text-positive" />
             {axis}
           </span>

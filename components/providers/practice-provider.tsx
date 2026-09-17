@@ -109,7 +109,14 @@ const PracticeContext = React.createContext<PracticeContextValue | null>(null)
  * hold a dial field that no longer exists (`dialStop: 70`, then
  * `shortStrikeIndex`/`condorWidthIndex`). Either would hydrate over
  * `strikeStep` as a nonsense value, or leave it absent entirely and send
- * `strategyFor` a NaN step. Bumping the key retires that state.
+ * `strategyFor` a NaN step.
+ *
+ * Deliberately NOT bumped for the centred default below. Bumping would
+ * make every existing session open on the middle stop, but it also throws
+ * away that session's screen, XP and resolved trades, which resets the
+ * prototype mid-demo. A fresh learner gets the centred default from
+ * `initialState`; a returning session keeps where it was. The opening
+ * state of the lesson is not worth someone's place in the flow.
  */
 export const PRACTICE_STORAGE_KEY = "hackathon-practice-state-v4"
 
@@ -149,8 +156,15 @@ export interface PracticeProviderProps {
   persist?: boolean
 }
 
-export function PracticeProvider({ children, seed, persist = true }: PracticeProviderProps) {
-  const [state, setState] = React.useState<PracticeState>(() => ({ ...initialState, ...seed }))
+export function PracticeProvider({
+  children,
+  seed,
+  persist = true,
+}: PracticeProviderProps) {
+  const [state, setState] = React.useState<PracticeState>(() => ({
+    ...initialState,
+    ...seed,
+  }))
 
   React.useEffect(() => {
     if (!persist) return
@@ -199,7 +213,9 @@ export function PracticeProvider({ children, seed, persist = true }: PracticePro
 
   const unlockAxis = React.useCallback((axis: Axis) => {
     setState((prev) =>
-      prev.unlockedAxes.includes(axis) ? prev : { ...prev, unlockedAxes: [...prev.unlockedAxes, axis] }
+      prev.unlockedAxes.includes(axis)
+        ? prev
+        : { ...prev, unlockedAxes: [...prev.unlockedAxes, axis] }
     )
   }, [])
 
@@ -209,7 +225,10 @@ export function PracticeProvider({ children, seed, persist = true }: PracticePro
       const levelsGained = Math.floor(totalXp / XP_PER_LEVEL)
       return {
         ...prev,
-        resolvedTrades: [...prev.resolvedTrades, { ...trade, id: String(prev.resolvedTrades.length) }],
+        resolvedTrades: [
+          ...prev.resolvedTrades,
+          { ...trade, id: String(prev.resolvedTrades.length) },
+        ],
         xp: totalXp % XP_PER_LEVEL,
         level: prev.level + levelsGained,
         streak: trade.outcome === "loss" ? 0 : prev.streak + 1,
@@ -240,7 +259,11 @@ export function PracticeProvider({ children, seed, persist = true }: PracticePro
     ]
   )
 
-  return <PracticeContext.Provider value={value}>{children}</PracticeContext.Provider>
+  return (
+    <PracticeContext.Provider value={value}>
+      {children}
+    </PracticeContext.Provider>
+  )
 }
 
 export function usePractice() {
