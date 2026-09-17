@@ -233,8 +233,6 @@ export function GraduationScreen() {
           </div>
         </motion.div>
       </motion.div>
-
-      <p className="type-label text-center text-muted-foreground">This is a prototype. No real money moves.</p>
     </div>
   )
 }
